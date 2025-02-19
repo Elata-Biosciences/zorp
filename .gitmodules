@@ -1,3 +1,6 @@
 [submodule "zorp-contracts/lib/forge-std"]
 	path = zorp-contracts/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
+[submodule "zorp-contracts/lib/openzeppelin-contracts"]
+	path = zorp-contracts/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
