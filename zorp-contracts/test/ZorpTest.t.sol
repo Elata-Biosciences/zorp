@@ -7,6 +7,7 @@ import { Test } from "forge-std/Test.sol";
 
 import { ZorpFactory } from "../src/ZorpFactory.sol";
 import { Participant, ZorpStudy } from "../src/ZorpStudy.sol";
+import { IZorpStudy } from "../src/IZorpStudy.sol";
 
 contract ZorpTest is Test {
     ZorpFactory factory;
@@ -30,7 +31,7 @@ contract ZorpTest is Test {
         ZORP_STUDY__DATA__GOOD = "CAFEBABE";
     }
 
-    /// @dev Following two function are required to reclaim funds when executing `ZorpStudy.endStudy()`
+    /// @dev Following two function are required to reclaim funds when executing `IZorpStudy.endStudy()`
     receive() external payable {}
     fallback() external payable {}
 
@@ -53,17 +54,17 @@ contract ZorpTest is Test {
         uint256 count = factory.getStudyCount();
         assertEq(count, 1, "There should be exactly one study created");
 
-        assertEq(ZorpStudy(newStudy).encryptionKey(), ZORP_STUDY__ENCRYPTION_KEY, "Failed to retrieve store encryption key");
+        assertEq(IZorpStudy(newStudy).encryptionKey(), ZORP_STUDY__ENCRYPTION_KEY, "Failed to retrieve store encryption key");
         assertTrue(newStudy.balance > 0, "Failed to transfer any funds to study?!");
     }
 
     function test_ZorpStudy_startStudy() public {
         address newStudy = createFundedStudy(ZORP_STUDY__OWNER, ZORP_STUDY__ENCRYPTION_KEY);
 
-        ZorpStudy(newStudy).startStudy();
-        assertEq(ZorpStudy(newStudy).study_status(), ZorpStudy(newStudy).STUDY_STATUS__ACTIVE(), "Failed to set expected study status");
+        IZorpStudy(newStudy).startStudy();
+        assertEq(IZorpStudy(newStudy).study_status(), IZorpStudy(newStudy).STUDY_STATUS__ACTIVE(), "Failed to set expected study status");
 
-        try ZorpStudy(newStudy).startStudy() {
+        try IZorpStudy(newStudy).startStudy() {
             revert("Failed to fail test");
         } catch Error(string memory reason) {
             assertEq(reason, "ZorpStudy: Study was previously activated");
@@ -73,18 +74,18 @@ contract ZorpTest is Test {
     function test_ZorpStudy_endStudy() public {
         address newStudy = createFundedStudy(ZORP_STUDY__OWNER, ZORP_STUDY__ENCRYPTION_KEY);
 
-        try ZorpStudy(newStudy).endStudy() {
+        try IZorpStudy(newStudy).endStudy() {
             revert("Failed to fail test");
         } catch Error(string memory reason) {
             assertEq(reason, "ZorpStudy: Study not active");
         }
 
-        ZorpStudy(newStudy).startStudy();
+        IZorpStudy(newStudy).startStudy();
 
-        ZorpStudy(newStudy).endStudy();
-        assertEq(ZorpStudy(newStudy).study_status(), ZorpStudy(newStudy).STUDY_STATUS__FINISHED(), "Failed to set expected study status");
+        IZorpStudy(newStudy).endStudy();
+        assertEq(IZorpStudy(newStudy).study_status(), IZorpStudy(newStudy).STUDY_STATUS__FINISHED(), "Failed to set expected study status");
 
-        try ZorpStudy(newStudy).endStudy() {
+        try IZorpStudy(newStudy).endStudy() {
             revert("Failed to fail test");
         } catch Error(string memory reason) {
             assertEq(reason, "ZorpStudy: Study not active");
@@ -94,33 +95,33 @@ contract ZorpTest is Test {
     function test_ZorpStudy_submitData() public {
         address newStudy = createFundedStudy(ZORP_STUDY__OWNER, ZORP_STUDY__ENCRYPTION_KEY);
 
-        try ZorpStudy(newStudy).submitData(ZORP_STUDY__DATA__GOOD) {
+        try IZorpStudy(newStudy).submitData(ZORP_STUDY__DATA__GOOD) {
             revert("Failed to fail test");
         } catch Error(string memory reason) {
             assertEq(reason, "ZorpStudy: Study not active");
         }
 
-        ZorpStudy(newStudy).startStudy();
+        IZorpStudy(newStudy).startStudy();
 
-        try ZorpStudy(newStudy).submitData("") {
+        try IZorpStudy(newStudy).submitData("") {
             revert("Failed to fail test");
         } catch Error(string memory reason) {
             assertEq(reason, "ZorpStudy: Invalid IPFS CID");
         }
 
-        ZorpStudy(newStudy).submitData(ZORP_STUDY__DATA__GOOD);
+        IZorpStudy(newStudy).submitData(ZORP_STUDY__DATA__GOOD);
 
-        try ZorpStudy(newStudy).submitData(ZORP_STUDY__DATA__GOOD) {
+        try IZorpStudy(newStudy).submitData(ZORP_STUDY__DATA__GOOD) {
             revert("Failed to fail test");
         } catch Error(string memory reason) {
             assertEq(reason, "ZorpStudy: Invalid status for message sender");
         }
 
-        assertEq(ZorpStudy(newStudy).submissions(), 1, "Failed to increase submission count");
+        assertEq(IZorpStudy(newStudy).submissions(), 1, "Failed to increase submission count");
 
-        uint256 index = ZorpStudy(newStudy).submissions();
+        uint256 index = IZorpStudy(newStudy).submissions();
         // TODO: maybe consider not using a struct?
-        (address stored_account, string memory stored_ipfs_cid) = ZorpStudy(newStudy).participants(index);
+        (address stored_account, string memory stored_ipfs_cid) = IZorpStudy(newStudy).participants(index);
         assertEq(stored_account, address(this), "Failed to retrieve expected participant account");
         assertEq(stored_ipfs_cid, ZORP_STUDY__DATA__GOOD, "Failed to retrieve expected participant IPFS CID");
     }
@@ -128,60 +129,60 @@ contract ZorpTest is Test {
     function test_ZorpStudy_flagInvalidSubmission() public {
         address newStudy = createFundedStudy(ZORP_STUDY__OWNER, ZORP_STUDY__ENCRYPTION_KEY);
 
-        ZorpStudy(newStudy).startStudy();
+        IZorpStudy(newStudy).startStudy();
 
-        try ZorpStudy(newStudy).flagInvalidSubmission(address(this)) {
+        try IZorpStudy(newStudy).flagInvalidSubmission(address(this)) {
             revert("Failed to fail test");
         } catch Error(string memory reason) {
             assertEq(reason, "ZorpStudy: Invalid status for participant");
         }
 
-        ZorpStudy(newStudy).submitData(ZORP_STUDY__DATA__GOOD);
+        IZorpStudy(newStudy).submitData(ZORP_STUDY__DATA__GOOD);
 
-        ZorpStudy(newStudy).flagInvalidSubmission(address(this));
+        IZorpStudy(newStudy).flagInvalidSubmission(address(this));
 
-        try ZorpStudy(newStudy).flagInvalidSubmission(address(this)) {
+        try IZorpStudy(newStudy).flagInvalidSubmission(address(this)) {
             revert("Failed to fail test");
         } catch Error(string memory reason) {
             assertEq(reason, "ZorpStudy: Invalid status for participant");
         }
 
-        try ZorpStudy(newStudy).submitData(ZORP_STUDY__DATA__GOOD) {
+        try IZorpStudy(newStudy).submitData(ZORP_STUDY__DATA__GOOD) {
             revert("Failed to fail test");
         } catch Error(string memory reason) {
             assertEq(reason, "ZorpStudy: Invalid status for message sender");
         }
 
-        ZorpStudy(newStudy).endStudy();
+        IZorpStudy(newStudy).endStudy();
 
-        try ZorpStudy(newStudy).submitData(ZORP_STUDY__DATA__GOOD) {
+        try IZorpStudy(newStudy).submitData(ZORP_STUDY__DATA__GOOD) {
             revert("Failed to fail test");
         } catch Error(string memory reason) {
             assertEq(reason, "ZorpStudy: Study not active");
         }
 
-        assertEq(ZorpStudy(newStudy).invalidated(), 1, "Failed to increase invalidated count");
-        assertEq(ZorpStudy(newStudy).participant_status(address(this)), ZorpStudy(newStudy).PARTICIPANT_STATUS__INVALID(), "Failed to invalidate participant");
+        assertEq(IZorpStudy(newStudy).invalidated(), 1, "Failed to increase invalidated count");
+        assertEq(IZorpStudy(newStudy).participant_status(address(this)), IZorpStudy(newStudy).PARTICIPANT_STATUS__INVALID(), "Failed to invalidate participant");
     }
 
     function test_ZorpStudy_claimReward() public {
         address newStudy = createFundedStudy(ZORP_STUDY__OWNER, ZORP_STUDY__ENCRYPTION_KEY);
 
-        try ZorpStudy(newStudy).claimReward() {
+        try IZorpStudy(newStudy).claimReward() {
             revert("Failed to fail test");
         } catch Error(string memory reason) {
             assertEq(reason, "ZorpStudy: Study not finished");
         }
 
-        ZorpStudy(newStudy).startStudy();
+        IZorpStudy(newStudy).startStudy();
 
-        ZorpStudy(newStudy).submitData(ZORP_STUDY__DATA__GOOD);
+        IZorpStudy(newStudy).submitData(ZORP_STUDY__DATA__GOOD);
 
-        ZorpStudy(newStudy).endStudy();
+        IZorpStudy(newStudy).endStudy();
 
-        ZorpStudy(newStudy).claimReward();
+        IZorpStudy(newStudy).claimReward();
 
-        try ZorpStudy(newStudy).claimReward() {
+        try IZorpStudy(newStudy).claimReward() {
             revert("Failed to fail test");
         } catch Error(string memory reason) {
             assertEq(reason, "ZorpStudy: Invalid status for message sender");
