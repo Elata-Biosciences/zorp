@@ -11,33 +11,54 @@ import { Participant, ZorpStudy } from "../src/ZorpStudy.sol";
 contract ZorpTest is Test {
     ZorpFactory factory;
 
+    address payable immutable ZORP_FACTORY__OWNER;
+
+    address payable immutable ZORP_STUDY__OWNER;
+
+    address payable immutable ZORP_STUDY__PARTICIPANT__GOOD;
+    address payable immutable ZORP_STUDY__PARTICIPANT__BAD;
+
+    string ZORP_STUDY__ENCRYPTION_KEY;
+    string ZORP_STUDY__DATA__GOOD;
+
+    constructor() {
+        ZORP_FACTORY__OWNER = payable(address(this));
+        ZORP_STUDY__OWNER = payable(address(this));
+        ZORP_STUDY__PARTICIPANT__GOOD = payable(address(this));
+        ZORP_STUDY__PARTICIPANT__BAD = payable(address(this));
+        ZORP_STUDY__ENCRYPTION_KEY = "0xDEADBEEF";
+        ZORP_STUDY__DATA__GOOD = "CAFEBABE";
+    }
+
+    /// @dev Following two function are required to reclaim funds when executing `ZorpStudy.endStudy()`
+    receive() external payable {}
+    fallback() external payable {}
+
     function setUp() public {
         // Deploy a fresh factory for each test
-        factory = new ZorpFactory();
+        factory = new ZorpFactory(payable(address(this)));
+        vm.deal(address(this), 1000 ether);
+    }
+
+    function createFundedStudy(address payable initialOwner, string memory encryptionKey) internal returns (address) {
+        return factory.createStudy{value: 1 ether}(initialOwner, encryptionKey);
     }
 
     function testCreateStudy() public {
         // Call createStudy
-        address newStudy = factory.createStudy(
-            address(this),
-            "0xDEADBEEF"
-        );
-        // Check that we got a valid address
+        address newStudy = createFundedStudy(ZORP_STUDY__OWNER, ZORP_STUDY__ENCRYPTION_KEY);
         assertTrue(newStudy != address(0), "Study address should not be zero");
 
         // Optionally check if allStudies array length is 1
         uint256 count = factory.getStudyCount();
         assertEq(count, 1, "There should be exactly one study created");
 
-        string memory encryptionKey = ZorpStudy(newStudy).encryptionKey();
-        assertEq(encryptionKey, "0xDEADBEEF", "Failed to retrieve store encryption key");
+        assertEq(ZorpStudy(newStudy).encryptionKey(), ZORP_STUDY__ENCRYPTION_KEY, "Failed to retrieve store encryption key");
+        assertTrue(newStudy.balance > 0, "Failed to transfer any funds to study?!");
     }
 
     function test_ZorpStudy_startStudy() public {
-        address newStudy = factory.createStudy(
-            address(this),
-            "0xDEADBEEF"
-        );
+        address newStudy = createFundedStudy(ZORP_STUDY__OWNER, ZORP_STUDY__ENCRYPTION_KEY);
 
         ZorpStudy(newStudy).startStudy();
         assertEq(ZorpStudy(newStudy).study_status(), ZorpStudy(newStudy).STUDY_STATUS__ACTIVE(), "Failed to set expected study status");
@@ -50,10 +71,7 @@ contract ZorpTest is Test {
     }
 
     function test_ZorpStudy_endStudy() public {
-        address newStudy = factory.createStudy(
-            address(this),
-            "0xDEADBEEF"
-        );
+        address newStudy = createFundedStudy(ZORP_STUDY__OWNER, ZORP_STUDY__ENCRYPTION_KEY);
 
         try ZorpStudy(newStudy).endStudy() {
             revert("Failed to fail test");
@@ -74,14 +92,9 @@ contract ZorpTest is Test {
     }
 
     function test_ZorpStudy_submitData() public {
-        address newStudy = factory.createStudy(
-            address(this),
-            "0xDEADBEEF"
-        );
+        address newStudy = createFundedStudy(ZORP_STUDY__OWNER, ZORP_STUDY__ENCRYPTION_KEY);
 
-        string memory ipfs_cid = "CAFEBABE";
-
-        try ZorpStudy(newStudy).submitData(ipfs_cid) {
+        try ZorpStudy(newStudy).submitData(ZORP_STUDY__DATA__GOOD) {
             revert("Failed to fail test");
         } catch Error(string memory reason) {
             assertEq(reason, "ZorpStudy: Study not active");
@@ -95,9 +108,9 @@ contract ZorpTest is Test {
             assertEq(reason, "ZorpStudy: Invalid IPFS CID");
         }
 
-        ZorpStudy(newStudy).submitData(ipfs_cid);
+        ZorpStudy(newStudy).submitData(ZORP_STUDY__DATA__GOOD);
 
-        try ZorpStudy(newStudy).submitData(ipfs_cid) {
+        try ZorpStudy(newStudy).submitData(ZORP_STUDY__DATA__GOOD) {
             revert("Failed to fail test");
         } catch Error(string memory reason) {
             assertEq(reason, "ZorpStudy: Invalid status for message sender");
@@ -109,14 +122,11 @@ contract ZorpTest is Test {
         // TODO: maybe consider not using a struct?
         (address stored_account, string memory stored_ipfs_cid) = ZorpStudy(newStudy).participants(index);
         assertEq(stored_account, address(this), "Failed to retrieve expected participant account");
-        assertEq(stored_ipfs_cid, ipfs_cid, "Failed to retrieve expected participant IPFS CID");
+        assertEq(stored_ipfs_cid, ZORP_STUDY__DATA__GOOD, "Failed to retrieve expected participant IPFS CID");
     }
 
     function test_ZorpStudy_flagInvalidSubmission() public {
-        address newStudy = factory.createStudy(
-            address(this),
-            "0xDEADBEEF"
-        );
+        address newStudy = createFundedStudy(ZORP_STUDY__OWNER, ZORP_STUDY__ENCRYPTION_KEY);
 
         ZorpStudy(newStudy).startStudy();
 
@@ -126,8 +136,7 @@ contract ZorpTest is Test {
             assertEq(reason, "ZorpStudy: Invalid status for participant");
         }
 
-        string memory ipfs_cid = "CAFEBABE";
-        ZorpStudy(newStudy).submitData(ipfs_cid);
+        ZorpStudy(newStudy).submitData(ZORP_STUDY__DATA__GOOD);
 
         ZorpStudy(newStudy).flagInvalidSubmission(address(this));
 
@@ -137,7 +146,7 @@ contract ZorpTest is Test {
             assertEq(reason, "ZorpStudy: Invalid status for participant");
         }
 
-        try ZorpStudy(newStudy).submitData(ipfs_cid) {
+        try ZorpStudy(newStudy).submitData(ZORP_STUDY__DATA__GOOD) {
             revert("Failed to fail test");
         } catch Error(string memory reason) {
             assertEq(reason, "ZorpStudy: Invalid status for message sender");
@@ -145,7 +154,7 @@ contract ZorpTest is Test {
 
         ZorpStudy(newStudy).endStudy();
 
-        try ZorpStudy(newStudy).submitData(ipfs_cid) {
+        try ZorpStudy(newStudy).submitData(ZORP_STUDY__DATA__GOOD) {
             revert("Failed to fail test");
         } catch Error(string memory reason) {
             assertEq(reason, "ZorpStudy: Study not active");
@@ -156,6 +165,26 @@ contract ZorpTest is Test {
     }
 
     function test_ZorpStudy_claimReward() public {
-        revert("TODO: This needs implmented then tested");
+        address newStudy = createFundedStudy(ZORP_STUDY__OWNER, ZORP_STUDY__ENCRYPTION_KEY);
+
+        try ZorpStudy(newStudy).claimReward() {
+            revert("Failed to fail test");
+        } catch Error(string memory reason) {
+            assertEq(reason, "ZorpStudy: Study not finished");
+        }
+
+        ZorpStudy(newStudy).startStudy();
+
+        ZorpStudy(newStudy).submitData(ZORP_STUDY__DATA__GOOD);
+
+        ZorpStudy(newStudy).endStudy();
+
+        ZorpStudy(newStudy).claimReward();
+
+        try ZorpStudy(newStudy).claimReward() {
+            revert("Failed to fail test");
+        } catch Error(string memory reason) {
+            assertEq(reason, "ZorpStudy: Invalid status for message sender");
+        }
     }
 }
