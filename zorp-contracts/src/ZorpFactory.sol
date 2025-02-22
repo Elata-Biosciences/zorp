@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "./ZorpStudy.sol";
+import { ZorpStudy } from "./ZorpStudy.sol";
 // or "openzeppelin-contracts/contracts/access/Ownable.sol" if needed
 
 contract ZorpFactory {

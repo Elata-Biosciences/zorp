@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "forge-std/Test.sol";
-import "../src/ZorpFactory.sol";
-import "../src/ZorpStudy.sol";
+import { Test } from "forge-std/Test.sol";
+
+import { ZorpFactory } from "../src/ZorpFactory.sol";
+import { Participant, ZorpStudy } from "../src/ZorpStudy.sol";
 
 contract ZorpTest is Test {
     ZorpFactory factory;
