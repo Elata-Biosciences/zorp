@@ -7,6 +7,7 @@ import { Test } from "forge-std/Test.sol";
 
 import { ZorpFactory } from "../src/ZorpFactory.sol";
 import { IZorpStudy } from "../src/IZorpStudy.sol";
+import { IZorpFactory } from "../src/IZorpFactory.sol";
 
 contract ZorpTest is Test {
     ZorpFactory factory;
@@ -49,8 +50,8 @@ contract ZorpTest is Test {
         address newStudy = createFundedStudy(ZORP_STUDY__OWNER, ZORP_STUDY__ENCRYPTION_KEY);
         assertTrue(newStudy != address(0), "Study address should not be zero");
 
-        // Optionally check if allStudies array length is 1
-        uint256 count = factory.getStudyCount();
+        // Optionally check if studies array length is 1
+        uint256 count = factory.latest_study_index();
         assertEq(count, 1, "There should be exactly one study created");
 
         assertEq(IZorpStudy(newStudy).encryptionKey(), ZORP_STUDY__ENCRYPTION_KEY, "Failed to retrieve store encryption key");
@@ -198,7 +199,7 @@ contract ZorpTest is Test {
     /// - https://github.com/foundry-rs/foundry/issues/7490
     /// - https://github.com/foundry-rs/foundry/issues/8383
     /// - https://github.com/foundry-rs/foundry/issues/9536
-    function test_ZorpStudy_paginateSubmittedData() public {
+    function test_ZorpFactory_paginateSubmittedData() public {
         address newStudy = createFundedStudy(ZORP_STUDY__OWNER, ZORP_STUDY__ENCRYPTION_KEY);
 
         IZorpStudy(newStudy).startStudy();
@@ -206,10 +207,24 @@ contract ZorpTest is Test {
         IZorpStudy(newStudy).submitData(ZORP_STUDY__DATA__GOOD);
 
         uint256 limit = 1;
-        string[] memory data = IZorpStudy(newStudy).paginateSubmittedData(1, limit);
+        string[] memory data = IZorpFactory(address(factory)).paginateSubmittedData(newStudy, 1, limit);
 
         string memory stored_ipfs_cid = data[0];
         assertEq(stored_ipfs_cid, ZORP_STUDY__DATA__GOOD, "Failed to retrieve expected participant IPFS CID");
+
+        // for (uint256 index = 1; index < limit;) {
+        //     assertEq(data[index], "", "Failed to retrieve expected paginated IPFS CID");
+        // }
+    }
+
+    function test_ZorpFactory_paginateStudies() public {
+        address newStudy = createFundedStudy(ZORP_STUDY__OWNER, ZORP_STUDY__ENCRYPTION_KEY);
+
+        uint256 limit = 1;
+        address[] memory data = IZorpFactory(address(factory)).paginateStudies(1, limit);
+
+        address newStudy_address = data[0];
+        assertEq(newStudy_address, newStudy, "Failed to retrieve expected study address");
 
         // for (uint256 index = 1; index < limit;) {
         //     assertEq(data[index], "", "Failed to retrieve expected paginated IPFS CID");

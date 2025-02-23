@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+import { IOwnable } from "./IOwnable.sol";
+
 /// @title Publicly accessible stored states within `ZorpStudy`
 interface IZorpStudy_Storage {
     /* Constants {{{ */
@@ -84,11 +86,9 @@ interface IZorpStudy_Functions {
         /// @custom:throw `ZorpStudy: Failed trasfering balance`
         function endStudy() external payable;
     /* Owner }}} */
-
-    /* Viewable {{{ */
-        function paginateSubmittedData(uint256 start, uint256 limit) external view returns (string[] memory);
-    /* Viewable }}} */
 }
+
+interface IZorpStudy_Inherited is IOwnable {}
 
 /// @title On/Off chain consumers of `ZorpStudy` may wish to use this interface
 ///
@@ -106,4 +106,4 @@ interface IZorpStudy_Functions {
 ///     }
 /// }
 /// ```
-interface IZorpStudy is IZorpStudy_Storage, IZorpStudy_Functions {}
+interface IZorpStudy is IZorpStudy_Storage, IZorpStudy_Functions, IZorpStudy_Inherited {}
