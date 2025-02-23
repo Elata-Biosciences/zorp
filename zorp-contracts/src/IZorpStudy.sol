@@ -84,6 +84,10 @@ interface IZorpStudy_Functions {
         /// @custom:throw `ZorpStudy: Failed trasfering balance`
         function endStudy() external payable;
     /* Owner }}} */
+
+    /* Viewable {{{ */
+        function paginateSubmittedData(uint256 start, uint256 limit) external view returns (string[] memory);
+    /* Viewable }}} */
 }
 
 /// @title On/Off chain consumers of `ZorpStudy` may wish to use this interface

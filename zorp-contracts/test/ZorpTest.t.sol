@@ -191,4 +191,28 @@ contract ZorpTest is Test {
             assertEq(reason, "ZorpStudy: Invalid message sender status");
         }
     }
+
+    /// TODO: Investigate `[FAIL: EvmError: MemoryOOG]` when `data` is of size `>=2`
+    /// Might be a bug with `forge`, and/or friends, or a limitation of language
+    ///
+    /// - https://github.com/foundry-rs/foundry/issues/7490
+    /// - https://github.com/foundry-rs/foundry/issues/8383
+    /// - https://github.com/foundry-rs/foundry/issues/9536
+    function test_ZorpStudy_paginateSubmittedData() public {
+        address newStudy = createFundedStudy(ZORP_STUDY__OWNER, ZORP_STUDY__ENCRYPTION_KEY);
+
+        IZorpStudy(newStudy).startStudy();
+
+        IZorpStudy(newStudy).submitData(ZORP_STUDY__DATA__GOOD);
+
+        uint256 limit = 1;
+        string[] memory data = IZorpStudy(newStudy).paginateSubmittedData(1, limit);
+
+        string memory stored_ipfs_cid = data[0];
+        assertEq(stored_ipfs_cid, ZORP_STUDY__DATA__GOOD, "Failed to retrieve expected participant IPFS CID");
+
+        // for (uint256 index = 1; index < limit;) {
+        //     assertEq(data[index], "", "Failed to retrieve expected paginated IPFS CID");
+        // }
+    }
 }

@@ -106,4 +106,13 @@ contract ZorpStudy is Ownable, ReentrancyGuard {
             require(success, "ZorpStudy: Failed trasfering balance");
         }
     }
+
+    function paginateSubmittedData(uint256 start, uint256 limit) external view returns (string[] memory) {
+        string[] memory results = new string[](limit);
+        for (uint256 i; i < limit;) {
+            results[i] = submitted_data[start++];
+            unchecked { ++i; }
+        }
+        return results;
+    }
 }
