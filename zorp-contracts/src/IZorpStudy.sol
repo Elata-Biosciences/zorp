@@ -38,29 +38,50 @@ interface IZorpStudy_Storage {
         /// See `PARTICIPANT_STATUS__` constants
         function participant_status(address) external view returns (uint256);
 
-        /// See `Participant` data structure
-        function participants(uint256) external view returns (address, string memory);
+        /// @dev Index `0` should always point to `address(0)`
+        function participant_index(address) external view returns (uint256);
+
+        /// @dev Index `0` should always be empty
+        function submitted_data(uint256) external view returns (string memory);
     /* Mutable }}} */
 }
 
 /// @title Executable logic for `ZorpStudy`
 interface IZorpStudy_Functions {
     /* Public {{{ */
+        /// Store `ipfs_cid` in `ZorpStudy.submitted_data`
         ///
+        /// @custom:throw `ZorpStudy: Study not active`
+        /// @custom:throw `ZorpStudy: Invalid IPFS CID`
+        /// @custom:throw `ZorpStudy: Invalid message sender status`
         function submitData(string memory ipfs_cid) external;
 
+        /// Pay `ZorpStudy.participant_payout_amount` to `msg.sender`
         ///
+        /// @custom:throw `ZorpStudy: Study not finished`
+        /// @custom:throw `ZorpStudy: Invalid message sender status`
+        /// @custom:throw `ZorpStudy: Failed participant payout`
         function claimReward() external payable;
     /* Public }}} */
 
     /* Owner {{{ */
+        /// Set `PARTICIPANT_STATUS__INVALID` for address, then delete
+        /// associated storage in `participant_index` and `submitted_data`
         ///
+        /// @custom:throw `ZorpStudy: Study not active`
+        /// @custom:throw `ZorpStudy: Invalid participant status`
         function flagInvalidSubmission(address participant) external payable;
 
+        /// Set `STUDY_STATUS__ACTIVE` in `ZorpStudy.study_status`
         ///
+        /// @custom:throw `ZorpStudy: Study was previously activated`
         function startStudy() external payable;
 
+        /// Set `STUDY_STATUS__FINISHED` in `ZorpStudy.study_status`
         ///
+        /// @custom:throw `ZorpStudy: Study not active`
+        /// @custom:throw `ZorpStudy: Failed trasfering remainder`
+        /// @custom:throw `ZorpStudy: Failed trasfering balance`
         function endStudy() external payable;
     /* Owner }}} */
 }

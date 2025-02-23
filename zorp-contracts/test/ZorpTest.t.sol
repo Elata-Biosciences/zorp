@@ -6,7 +6,6 @@ pragma solidity ^0.8.17;
 import { Test } from "forge-std/Test.sol";
 
 import { ZorpFactory } from "../src/ZorpFactory.sol";
-import { Participant, ZorpStudy } from "../src/ZorpStudy.sol";
 import { IZorpStudy } from "../src/IZorpStudy.sol";
 
 contract ZorpTest is Test {
@@ -114,15 +113,14 @@ contract ZorpTest is Test {
         try IZorpStudy(newStudy).submitData(ZORP_STUDY__DATA__GOOD) {
             revert("Failed to fail test");
         } catch Error(string memory reason) {
-            assertEq(reason, "ZorpStudy: Invalid status for message sender");
+            assertEq(reason, "ZorpStudy: Invalid message sender status");
         }
 
         assertEq(IZorpStudy(newStudy).submissions(), 1, "Failed to increase submission count");
 
         uint256 index = IZorpStudy(newStudy).submissions();
         // TODO: maybe consider not using a struct?
-        (address stored_account, string memory stored_ipfs_cid) = IZorpStudy(newStudy).participants(index);
-        assertEq(stored_account, address(this), "Failed to retrieve expected participant account");
+        string memory stored_ipfs_cid = IZorpStudy(newStudy).submitted_data(index);
         assertEq(stored_ipfs_cid, ZORP_STUDY__DATA__GOOD, "Failed to retrieve expected participant IPFS CID");
     }
 
@@ -131,26 +129,31 @@ contract ZorpTest is Test {
 
         IZorpStudy(newStudy).startStudy();
 
-        try IZorpStudy(newStudy).flagInvalidSubmission(address(this)) {
+        try IZorpStudy(newStudy).flagInvalidSubmission(ZORP_STUDY__PARTICIPANT__BAD) {
             revert("Failed to fail test");
         } catch Error(string memory reason) {
-            assertEq(reason, "ZorpStudy: Invalid status for participant");
+            assertEq(reason, "ZorpStudy: Invalid participant status");
         }
 
         IZorpStudy(newStudy).submitData(ZORP_STUDY__DATA__GOOD);
 
-        IZorpStudy(newStudy).flagInvalidSubmission(address(this));
+        IZorpStudy(newStudy).flagInvalidSubmission(ZORP_STUDY__PARTICIPANT__BAD);
 
-        try IZorpStudy(newStudy).flagInvalidSubmission(address(this)) {
+        uint256 index = IZorpStudy(newStudy).submissions();
+        string memory stored_ipfs_cid = IZorpStudy(newStudy).submitted_data(index);
+        assertEq(stored_ipfs_cid, "", "Failed to clear submitted_data");
+        assertEq(IZorpStudy(newStudy).participant_index(ZORP_STUDY__PARTICIPANT__BAD), 0, "Failed to clear participant_index");
+
+        try IZorpStudy(newStudy).flagInvalidSubmission(ZORP_STUDY__PARTICIPANT__BAD) {
             revert("Failed to fail test");
         } catch Error(string memory reason) {
-            assertEq(reason, "ZorpStudy: Invalid status for participant");
+            assertEq(reason, "ZorpStudy: Invalid participant status");
         }
 
         try IZorpStudy(newStudy).submitData(ZORP_STUDY__DATA__GOOD) {
             revert("Failed to fail test");
         } catch Error(string memory reason) {
-            assertEq(reason, "ZorpStudy: Invalid status for message sender");
+            assertEq(reason, "ZorpStudy: Invalid message sender status");
         }
 
         IZorpStudy(newStudy).endStudy();
@@ -162,7 +165,7 @@ contract ZorpTest is Test {
         }
 
         assertEq(IZorpStudy(newStudy).invalidated(), 1, "Failed to increase invalidated count");
-        assertEq(IZorpStudy(newStudy).participant_status(address(this)), IZorpStudy(newStudy).PARTICIPANT_STATUS__INVALID(), "Failed to invalidate participant");
+        assertEq(IZorpStudy(newStudy).participant_status(ZORP_STUDY__PARTICIPANT__BAD), IZorpStudy(newStudy).PARTICIPANT_STATUS__INVALID(), "Failed to invalidate participant");
     }
 
     function test_ZorpStudy_claimReward() public {
@@ -185,7 +188,7 @@ contract ZorpTest is Test {
         try IZorpStudy(newStudy).claimReward() {
             revert("Failed to fail test");
         } catch Error(string memory reason) {
-            assertEq(reason, "ZorpStudy: Invalid status for message sender");
+            assertEq(reason, "ZorpStudy: Invalid message sender status");
         }
     }
 }

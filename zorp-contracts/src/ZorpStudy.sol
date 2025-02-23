@@ -6,11 +6,6 @@ import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
 import { IZorpStudy_Functions } from "./IZorpStudy.sol";
 
-struct Participant {
-    address account;
-    string ipfs_cid;
-}
-
 /// @title Track state of study and participant data
 /// @author S0AndS0.eth
 /// @custom:link https://www.elata.bio/
@@ -35,7 +30,8 @@ contract ZorpStudy is Ownable, ReentrancyGuard {
     string public encryptionKey;
 
     mapping(address => uint256) public participant_status;
-    mapping(uint256 => Participant) public participants;
+    mapping(address => uint256) public participant_index;
+    mapping(uint256 => string) public submitted_data;
 
     /// @param initialOwner_ owner or admin of study
     /// @param encryptionKey_ pointer to public GPG/PGP key
@@ -59,19 +55,16 @@ contract ZorpStudy is Ownable, ReentrancyGuard {
         // TODO: Investigate IPFS min/max byte lengths
         require(bytes(ipfs_cid).length > 0, "ZorpStudy: Invalid IPFS CID");
 
-        require(participant_status[msg.sender] == PARTICIPANT_STATUS__NA, "ZorpStudy: Invalid status for message sender");
+        require(participant_status[msg.sender] == PARTICIPANT_STATUS__NA, "ZorpStudy: Invalid message sender status");
 
-        Participant memory participant;
-        participant.account = msg.sender;
-        participant.ipfs_cid = ipfs_cid;
-
-        participants[++submissions] = participant;
+        submitted_data[++submissions] = ipfs_cid;
         participant_status[msg.sender] = PARTICIPANT_STATUS__SUBMITTED;
+        participant_index[msg.sender] = submissions;
     }
 
     function claimReward() external payable nonReentrant {
         require(study_status == STUDY_STATUS__FINISHED, "ZorpStudy: Study not finished");
-        require(participant_status[msg.sender] == PARTICIPANT_STATUS__SUBMITTED, "ZorpStudy: Invalid status for message sender");
+        require(participant_status[msg.sender] == PARTICIPANT_STATUS__SUBMITTED, "ZorpStudy: Invalid message sender status");
 
         participant_status[msg.sender] = PARTICIPANT_STATUS__PAID;
 
@@ -79,11 +72,14 @@ contract ZorpStudy is Ownable, ReentrancyGuard {
         require(success, "ZorpStudy: Failed participant payout");
     }
 
-    /// TODO: consider deleting `participant[_index_].ipfs_cid` and `.account` from contract storage
     function flagInvalidSubmission(address participant) external payable onlyOwner {
-        require(study_status == STUDY_STATUS__ACTIVE, "ZorpStudy: Not active");
-        require(participant_status[participant] == PARTICIPANT_STATUS__SUBMITTED, "ZorpStudy: Invalid status for participant");
+        require(study_status == STUDY_STATUS__ACTIVE, "ZorpStudy: Study not active");
+        require(participant_status[participant] == PARTICIPANT_STATUS__SUBMITTED, "ZorpStudy: Invalid participant status");
+
         participant_status[participant] = PARTICIPANT_STATUS__INVALID;
+        delete submitted_data[participant_index[participant]];
+        delete participant_index[participant];
+
         ++invalidated;
     }
 
