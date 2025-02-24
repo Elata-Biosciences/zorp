@@ -21,6 +21,15 @@ https://book.getfoundry.sh/
 $ forge build
 ```
 
+> Note: ABI interface contract information may be found via
+> `out/I<NAME>.sol/I<NAME>.json` naming conventions, ex;
+>
+> - `out/IZorpFactory.sol/out/IZorpFactory.json`
+> - `out/IZorpStudy.sol/out/IZorpStudy.json`
+>
+> ...  These are significantly fewer bytes to serve to third-party clients, and
+> often load/parse faster within off-chain libraries.
+
 ### Test
 
 ```shell
