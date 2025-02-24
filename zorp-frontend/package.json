@@ -10,7 +10,8 @@
     "start": "next start",
     "lint": "next lint",
     "format": "prettier . --write",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "next-telemetry-disable": "next telemetry disable"
   },
   "dependencies": {
     "@rainbow-me/rainbowkit": "^2.2.2",
