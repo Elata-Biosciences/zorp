@@ -22,8 +22,9 @@ import {
  * WalletConnect Project ID
  * @description Required for all dApps using WalletConnect. Get your free projectId at
  * @see https://cloud.walletconnect.com/sign-in
+ * TODO: move this to a config
  */
-const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_ID || '';
+const projectId = 'e28b2de87c7619411e6b06064d734093';
 
 /**
  * RPC Configuration
