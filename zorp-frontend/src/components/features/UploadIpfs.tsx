@@ -1,25 +1,31 @@
 import openpgp from 'openpgp';
+
 import { useEffect, useState } from 'react';
+
 import {
-	// Who else loves doc-rot?
-	// https://github.com/wevm/wagmi/issues/3021
-	// https://github.com/rainbow-me/rainbowkit/discussions/568
-	// - 404 → https://wagmi.sh/docs/hooks/useAccount
-	// - 404 → https://wagmi.sh/docs/hooks/useProvider
-	useProvider,
+	useAccount,
 	useReadContract,
 	useWalletClient,
 	useWriteContract
 } from 'wagmi';
+
 import { verifiedFetch } from '@helia/verified-fetch';
+
 import { WebUploader } from '@irys/web-upload';
 import { WebBaseEth } from '@irys/web-upload-ethereum';
 import { ViemV2Adapter } from '@irys/web-upload-ethereum-viem-v2';
+
+import { CID } from 'multiformats/cid';
+import raw from 'multiformats/codecs/raw';
+import { sha256 } from 'multiformats/hashes/sha2';
+
 import { abi as ZorpStudyABI } from 'abi/IZorpStudy.json';
 
 import type { ChangeEvent } from 'react';
+import type { Digest } from 'multiformats/src/hashes/digest';
 import type { ResolvedRegister } from '@wagmi/core';
 import type { PublicKey, Key } from 'openpgp';
+import type { UploadResponse } from '@irys/upload-core';
 
 /**
  * 0. Get data from `<input>` file upload
@@ -54,8 +60,6 @@ export default function UploadIpfs({
 	 * @see https://1.x.wagmi.sh/core/actions/writeContract
 	 * TODO: maybe notify devs of doc-rot?  Because source says two params are
 	 */
-
-	const irysBalanceThreshold = 0.1;
 
 	const [irysStatus, setIrysStatus] = useState<string>("Not connected");
 
@@ -134,19 +138,15 @@ export default function UploadIpfs({
 		});
 	}, [encryptionKeyCid]);
 
-	const [submitDataIpfsCid, setSubmitDataIpfsCid] = useState<null | string>(null);
+	// const [encryptedSubmitData, setEncryptedSubmitData] = useState<null | string>(null);
+	const [encryptedSubmitData, setEncryptedSubmitData] = useState<null | Uint8Array>(null);
 	const [inputSubmitDataFile, setInputSubmitDataFile] = useState<null | File>(null);
 	useEffect(() => {
 		/**
-		 * @see https://docs.irys.xyz/build/d/guides/monitor-account-balance
 		 * @see https://developer.mozilla.org/en-US/docs/Web/API/File
 		 * @see https://github.com/openpgpjs/openpgpjs?tab=readme-ov-file#encrypt-and-decrypt-uint8array-data-with-a-password
 		 * @see https://github.com/openpgpjs/openpgpjs?tab=readme-ov-file#encrypt-and-decrypt-string-data-with-pgp-keys
 		 */
-		// if (!irysBalance || Math.abs(irysBalance) <= irysBalanceThreshold) {
-		// 	console.warn('Waiting on client for positive irysBalance');
-		// 	return;
-		// }
 		if (!inputSubmitDataFile) {
 			console.warn('Waiting on client for inputSubmitDataFile');
 			return;
@@ -160,7 +160,7 @@ export default function UploadIpfs({
 			return;
 		}
 
-		console.log('Handling input file ->', inputSubmitDataFile.name);
+		console.log('Attempting to encrypt input file ->', inputSubmitDataFile.name);
 
 		inputSubmitDataFile.arrayBuffer().then((buffer) => {
 			console.log('Converting file to OpenPGP message');
@@ -170,17 +170,104 @@ export default function UploadIpfs({
 			return openpgp.encrypt({
 				message,
 				encryptionKeys: [gpgPublicKey, encryptionKey],
+				// TODO: maybe figure out how to make irysUploader happy with
+				//       Uint8Array returned by 'binary' format
+				// format: 'armored',
 				format: 'binary',
 			});
-		}).then((blob) => {
-			throw new Error('TODO: Upload to IPFS');
-			return 'ipfs_cid';
-		}).then((ipfs_cid) => {
-			console.log('Setting submitDataIpfsCid');
-			setSubmitDataIpfsCid(ipfs_cid);
+		}).then((armoredMessage) => {
+			setEncryptedSubmitData(armoredMessage);
 		});
-	}, [inputSubmitDataFile, gpgPublicKey, encryptionKey]);
-	// }, [irysBalance, inputSubmitDataFile, gpgPublicKey, encryptionKey]);
+	}, [encryptedSubmitData, inputSubmitDataFile, gpgPublicKey, encryptionKey]);
+
+	const account = useAccount();
+	const [provider, setProvider] = useState<null | unknown>(null);
+	useEffect(() => {
+		if (!account.isConnected) {
+			console.warn('Waiting on client to connect an account');
+			return;
+		}
+		if (!account.connector?.getProvider) {
+			console.warn('Waiting on client wallet to provide a provider');
+			return;
+		}
+
+		account.connector.getProvider().then((gottenProvider) => {
+			setProvider(gottenProvider);
+		});
+	}, [account, provider]);
+
+	const [irysBalance, setIrysBalance] = useState<null | number>(null);
+	useEffect(() => {
+		/**
+		 * @see https://docs.irys.xyz/build/d/guides/monitor-account-balance
+		 */
+		if (!provider) {
+			console.warn('Waiting on client wallet to provide a provider');
+			return;
+		}
+		console.error('TODO: Find web-way of checking balance');
+		setIrysBalance(0);
+	}, [provider]);
+
+	const irysBalanceThreshold = 0.1;
+	const [ipfsCid, setIpfsCid] = useState<null | string>(null);
+	const [irysReceipt, setIrysReceipt] = useState<null | UploadResponse>(null);
+	useEffect(() => {
+		/**
+		 * @see https://docs.irys.xyz/build/d/guides/monitor-account-balance
+		 * @see https://docs.irys.xyz/build/d/features/ipfs-cid
+		 * @see https://github.com/multiformats/js-multiformats
+		 */
+		if (!encryptedSubmitData) {
+			console.warn('Waiting for encryptedSubmitData');
+			return;
+		}
+		if (!provider) {
+			console.warn('Waiting on client wallet to provide a provider');
+			return;
+		}
+		if (!irysBalance || Math.abs(irysBalance) <= irysBalanceThreshold) {
+			console.warn('Waiting on client to fund Irys');
+			return;
+		}
+
+		// TODO: this wants Uint8Array, which OpenPGP could provide, but
+		//       WebUploader likes strings best according to the TypeScript
+		// TODO: maybe file bug report to multiformats maintainers for the ever so
+		//       inspired type of `type Await<T> = Promise<T> | T` that
+		//       `sha256.digest` is hinted as
+		console.log('Attempting to SHA256 encryptedSubmitData');
+		(sha256.digest(raw.encode(encryptedSubmitData)) as Promise<Digest<number, number>>)
+			.then((hash) => {
+				console.log('Attempting to generate an IPFS compatible CID');
+				const cid = CID.create(1, raw.code, hash);
+
+				const tags = [
+					{ name: 'Content-Type', value: 'application/pgp-encrypted' },
+					{ name: 'IPFS-CID', value: cid.toString() },
+				];
+
+				console.log('Attempting to upload encryptedSubmitData to Irys');
+				WebUploader(WebBaseEth).withProvider(provider).then((irysUploadBuilder) => {
+					// TODO: maybe configure `opts` AKA CreateAndUploadOptions
+					// TODO: maybe investigate why nested promise chaining is required here
+					// TODO: investigate ways to satisfy `sha256.digest` and following
+					//       without duplicating data as large encrypted files could make
+					//       for a bad time
+					return irysUploadBuilder.uploader.uploadData(
+						Buffer.from(encryptedSubmitData),
+						{ tags },
+					).then((uploadResponse) => {
+							console.log('Pinned encrypted data via Irys!', { uploadResponse, cid });
+							setIrysReceipt(uploadResponse);
+							setIpfsCid(cid.toString());
+						});
+				});
+			});
+	}, [encryptedSubmitData, irysBalance, provider]);
+
+	const [submitDataIpfsCid, setSubmitDataIpfsCid] = useState<null | string>(null);
 
 	/**
 	 * @see https://wagmi.sh/react/guides/write-to-contract
@@ -189,7 +276,13 @@ export default function UploadIpfs({
 		config: config.wagmiConfig,
 	});
 	useEffect(() => {
+		if (!submitDataIpfsCid) {
+			console.warn('Waiting for submitDataIpfsCid');
+			return;
+		}
+
 		console.log('Attempting to send submitDataIpfsCid to ZorpStudy.submitData')
+
 		writeContract({
 			abi: ZorpStudyABI,
 			address: config.contracts.ZorpStudy.address,
@@ -226,7 +319,6 @@ export default function UploadIpfs({
 						return;
 					}
 
-					const provider = useProvider();
 				}}>Connect Irys</button>
 				<p>{irysStatus}</p>
 
