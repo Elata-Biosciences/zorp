@@ -32,6 +32,13 @@ yarn dev
 pnpm dev
 ```
 
+> Note; if `Error: The WebCrypto API is not available` errors pop, then it is
+> likely because your browser is not connecting via a secure context!  I.E.
+> over `https://<domain>` or `localhost`
+>
+> For local development within a container, such as those provided by Docker,
+> you will need to setup port forwarding and/or firewall rules.
+
 ### Production Build
 
 #### Build the App for Production
