@@ -1,11 +1,20 @@
-// TODO: investigate why TypeScript no likes '@/lib/utils/openpgpUtils'
-import { openPgpEncrypt } from '../../lib/utils/openpgpUtils';
-
 import openpgp from 'openpgp';
 import { useEffect, useState } from 'react';
-import { useReadContract, useWriteContract } from 'wagmi';
+import {
+	// Who else loves doc-rot?
+	// https://github.com/wevm/wagmi/issues/3021
+	// https://github.com/rainbow-me/rainbowkit/discussions/568
+	// - 404 → https://wagmi.sh/docs/hooks/useAccount
+	// - 404 → https://wagmi.sh/docs/hooks/useProvider
+	useProvider,
+	useReadContract,
+	useWalletClient,
+	useWriteContract
+} from 'wagmi';
 import { verifiedFetch } from '@helia/verified-fetch';
-
+import { WebUploader } from '@irys/web-upload';
+import { WebBaseEth } from '@irys/web-upload-ethereum';
+import { ViemV2Adapter } from '@irys/web-upload-ethereum-viem-v2';
 import { abi as ZorpStudyABI } from 'abi/IZorpStudy.json';
 
 import type { ChangeEvent } from 'react';
@@ -18,6 +27,10 @@ import type { PublicKey, Key } from 'openpgp';
  * 2. Get encryption public key from `ZorpStudy.encryptionKey()`
  * 3. Encrypt file data with OpenPGP JS
  * 4. Upload encrypted file to IPFS (TODO)
+ *    > https://docs.irys.xyz/build/d/guides/monitor-account-balance#javascript
+ *    > https://docs.irys.xyz/build/d/sdk/setup#base-ethereum
+ *   - check Irys balance, and add if insufficient
+ *   - 
  * 5. Write IPFS pointer to blockchain via `ZorpStudy.submitData(ipfs_cid)`
  */
 export default function UploadIpfs({
@@ -41,6 +54,10 @@ export default function UploadIpfs({
 	 * @see https://1.x.wagmi.sh/core/actions/writeContract
 	 * TODO: maybe notify devs of doc-rot?  Because source says two params are
 	 */
+
+	const irysBalanceThreshold = 0.1;
+
+	const [irysStatus, setIrysStatus] = useState<string>("Not connected");
 
 	const [inputGpgPublicKeyFile, setInputGpgPublicKeyFile] = useState<null | File>(null);
 	const [gpgPublicKey, setGpgPublicKey] = useState<null | Key>(null);
@@ -92,7 +109,7 @@ export default function UploadIpfs({
 		typeof config.wagmiConfig,
 		string
 	>({
-		config: config.wagmiConfig,
+		// config: config.wagmiConfig,
 		abi: ZorpStudyABI,
 		address: config.contracts.ZorpStudy.address,
 		functionName: 'encryptionKey',
@@ -121,10 +138,15 @@ export default function UploadIpfs({
 	const [inputSubmitDataFile, setInputSubmitDataFile] = useState<null | File>(null);
 	useEffect(() => {
 		/**
+		 * @see https://docs.irys.xyz/build/d/guides/monitor-account-balance
 		 * @see https://developer.mozilla.org/en-US/docs/Web/API/File
 		 * @see https://github.com/openpgpjs/openpgpjs?tab=readme-ov-file#encrypt-and-decrypt-uint8array-data-with-a-password
 		 * @see https://github.com/openpgpjs/openpgpjs?tab=readme-ov-file#encrypt-and-decrypt-string-data-with-pgp-keys
 		 */
+		// if (!irysBalance || Math.abs(irysBalance) <= irysBalanceThreshold) {
+		// 	console.warn('Waiting on client for positive irysBalance');
+		// 	return;
+		// }
 		if (!inputSubmitDataFile) {
 			console.warn('Waiting on client for inputSubmitDataFile');
 			return;
@@ -158,6 +180,7 @@ export default function UploadIpfs({
 			setSubmitDataIpfsCid(ipfs_cid);
 		});
 	}, [inputSubmitDataFile, gpgPublicKey, encryptionKey]);
+	// }, [irysBalance, inputSubmitDataFile, gpgPublicKey, encryptionKey]);
 
 	/**
 	 * @see https://wagmi.sh/react/guides/write-to-contract
@@ -182,6 +205,32 @@ export default function UploadIpfs({
 		<>
 			<hr />
 			<section>
+				<button onClick={async (event: React.MouseEvent<HTMLButtonElement>) => {
+					/**
+					 * @see https://docs.irys.xyz/build/d/guides/vite
+					 * @see https://github.com/rainbow-me/rainbowkit/discussions/568
+					 * @see https://github.com/wevm/wagmi/issues/3021
+					 */
+					if (typeof window.ethereum === 'undefined') {
+						const message = 'No wallet provider found.';
+						console.error(message);
+						setIrysStatus(message);
+						return;
+					}
+
+					const wallet = useWalletClient();
+					if (!wallet.data?.account.address.length) {
+						const message = 'No wallet address found.';
+						console.error(message);
+						setIrysStatus(message);
+						return;
+					}
+
+					const provider = useProvider();
+				}}>Connect Irys</button>
+				<p>{irysStatus}</p>
+
+				<hr />
 				<label>Your GPG/PGP public key</label>
 				<input
 					type="file"
@@ -191,6 +240,7 @@ export default function UploadIpfs({
 						setInputGpgPublicKeyFile(event.target.files?.item(0) || null);
 					}}
 				/>
+
 				<hr />
 				<label>Data to encrypt and submit</label>
 				<input
@@ -201,7 +251,6 @@ export default function UploadIpfs({
 						setInputSubmitDataFile(event.target.files?.item(0) || null);
 					}}
 				/>
-				<div></div>
 			</section>
 			<hr />
 		</>
