@@ -5,11 +5,12 @@ import { useAccount } from 'wagmi';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
 
 import InputFileToGpgEncryptionKey from '@/components/features/InputFileToGpgEncryptionKey';
-import IrysBalance from '@/components/features/IrysBalance';
+import IrysBalanceGet from '@/components/features/IrysBalanceGet';
 
 import type { Subkey, Key } from 'openpgp';
-import type { WebIrysOpts } from '@/components/features/IrysBalance';
 import type { BigNumber } from 'bignumber.js';
+
+import type { WebIrysOpts } from '@/@types/irys';
 
 export default function ZorpFactoryCreateStudy() {
 	const { address, isConnected } = useAccount();
@@ -44,7 +45,7 @@ export default function ZorpFactoryCreateStudy() {
 			<hr />
 			<InputFileToGpgEncryptionKey setState={setGpgKey} labelText="Public GPG key" />
 			<hr />
-			<IrysBalance setState={setIrysBalance} labelText="Check Irys balance" webIrysOpts={webIrysOpts} address={address} />
+			<IrysBalanceGet setState={setIrysBalance} labelText="Check Irys balance" webIrysOpts={webIrysOpts} address={address} />
 			<hr />
 		</div>
 	);
