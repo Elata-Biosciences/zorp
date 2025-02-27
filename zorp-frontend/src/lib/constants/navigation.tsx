@@ -49,6 +49,11 @@ export const navigation = [
     icon: IoLogoGithub,
   },
   {
+    name: 'ZorpFactory -- CreateStudy',
+    href: '/zorp/factory/create-study',
+    icon: IoLogoGithub,
+  },
+  {
     name: 'GitHub',
     href: 'https://github.com/matteocelani',
     icon: IoLogoGithub,
