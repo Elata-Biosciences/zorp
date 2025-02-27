@@ -113,6 +113,11 @@ export const anvil = /*#__PURE__*/ defineChain({
 		},
 	},
 	contracts: {
+		ZorpFactory: {
+			31337: {
+				address: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
+			},
+		},
 		// ...chainConfig.contracts,
 		// disputeGameFactory: {
 		//   [sourceId]: {
