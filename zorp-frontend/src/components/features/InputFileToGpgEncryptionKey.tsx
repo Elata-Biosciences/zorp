@@ -17,7 +17,10 @@ export default function InputFileToGpgEncryptionKey({
 }: {
 	className?: string;
 	labelText: string;
-	setState: (file: null | (Subkey | Key)) => void;
+	setState: (state: null | {
+		file: File;
+		key: Subkey | Key;
+	}) => void;
 }) {
 	const [message, setMessage] = useState<string>('Info: GPG public encryption key required');
 
@@ -68,7 +71,7 @@ export default function InputFileToGpgEncryptionKey({
 								const message = 'Success: recovered GPG encryption key from file!';
 								console.log('reader.onload -> openpgp.readKey -> key.getEncryptionKey', {message, encryption_key});
 								setMessage(message);
-								setState(encryption_key);
+								setState({file, key: encryption_key});
 							}).catch((error) => {
 								let message = 'Error: ';
 								if ('message' in error) {
