@@ -20,7 +20,7 @@ import type { WebIrysOpts } from '@/@types/irys';
 
 export default function IrysUploadFileGpgKey({
 	className = '',
-	labelText = 'Check Irys balance',
+	labelText = 'Irys upload public GPG encryption key',
 	setState,
 	webIrysOpts,
 	address,
