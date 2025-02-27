@@ -44,7 +44,7 @@ export default function ZorpFactoryCreateStudy() {
 			<hr />
 			<InputFileToGpgEncryptionKey setState={setGpgKey} labelText="Public GPG key" />
 			<hr />
-			<IrysBalance setState={setIrysBalance} labelText="Check Irys balance" webIrysOpts={webIrysOpts} />
+			<IrysBalance setState={setIrysBalance} labelText="Check Irys balance" webIrysOpts={webIrysOpts} address={address} />
 			<hr />
 		</div>
 	);

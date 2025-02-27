@@ -9,8 +9,6 @@ import type { BigNumber } from 'bignumber.js';
 
 /**
  * @see @irys/sdk/build/cjs/common/types.d.ts
- * @see https://github.com/Irys-xyz/provenance-toolkit/blob/master/app/utils/getIrys.ts#L107
- * @see https://github.com/Irys-xyz/provenance-toolkit/blob/master/app/utils/fundAndUpload.ts#L33
  */
 export type WebIrysOpts = {
 	url?: string;
@@ -25,16 +23,22 @@ export type WebIrysOpts = {
 	config?: IrysConfig;
 }
 
+/**
+ * @see https://github.com/Irys-xyz/provenance-toolkit/blob/master/app/utils/getIrys.ts#L107
+ * @see https://github.com/Irys-xyz/provenance-toolkit/blob/master/app/utils/fundAndUpload.ts#L33
+ */
 export default function IrysBalance({
 	className = '',
 	labelText = 'Check Irys balance',
 	setState,
 	webIrysOpts,
+	address,
 }: {
 	className?: string;
 	labelText: string;
 	setState: (balance: null | number | BigNumber) => void;
 	webIrysOpts: WebIrysOpts;
+	address: string | `0x${string}` | undefined;
 }) {
 	const [message, setMessage] = useState<string>('Info: connected wallet/provider required');
 
@@ -50,6 +54,13 @@ export default function IrysBalance({
 
 					console.log('IrysBalance', {event});
 
+					if (!address) {
+						const message = 'Info: waiting for client to connect wallet with an address';
+						console.log('IrysBalance', {message, address});
+						setMessage(message);
+						return;
+					}
+
 					try {
 						new WebIrys(webIrysOpts)
 							.ready()
@@ -57,7 +68,7 @@ export default function IrysBalance({
 								const message = 'Info: attempting Irys get loaded balance';
 								console.log('new WebIrys(webIrysOpts).ready()', {message, webIrys, webIrysOpts});
 								setMessage(message);
-								return webIrys.getLoadedBalance();
+								return webIrys.getBalance(address);
 							}).then((balance) => {
 								const message = `Success: got Irys balance of: ${balance}`;
 								console.log('new WebIrys(webIrysOpts).ready().getLoadedBalance()', {message, balance});
