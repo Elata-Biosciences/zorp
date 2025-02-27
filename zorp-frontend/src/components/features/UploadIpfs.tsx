@@ -16,7 +16,7 @@ import { WebBaseEth } from '@irys/web-upload-ethereum';
 import { ViemV2Adapter } from '@irys/web-upload-ethereum-viem-v2';
 
 import { CID } from 'multiformats/cid';
-import raw from 'multiformats/codecs/raw';
+import * as raw from 'multiformats/codecs/raw';
 import { sha256 } from 'multiformats/hashes/sha2';
 
 import { abi as ZorpStudyABI } from 'abi/IZorpStudy.json';
@@ -124,6 +124,7 @@ export default function UploadIpfs({
 			return;
 		}
 
+		// TODO: investigate if Irys is compatible with this
 		verifiedFetch(encryptionKeyCid).then((response) => {
 			if (!response.ok) {
 				throw new Error('Failed to fetch encryptionKeyText');
@@ -267,32 +268,35 @@ export default function UploadIpfs({
 			});
 	}, [encryptedSubmitData, irysBalance, provider]);
 
-	const [submitDataIpfsCid, setSubmitDataIpfsCid] = useState<null | string>(null);
-
 	/**
 	 * @see https://wagmi.sh/react/guides/write-to-contract
 	 */
-	const { data: writeContractData, writeContract } = useWriteContract({
+	const { data: writeZorpStudySubmitDataData, writeContract } = useWriteContract({
 		config: config.wagmiConfig,
 	});
 	useEffect(() => {
-		if (!submitDataIpfsCid) {
-			console.warn('Waiting for submitDataIpfsCid');
+		if (!irysReceipt) {
+			console.warn('Waiting on irysReceipt');
+			return;
+		}
+		if (!ipfsCid) {
+			console.warn('Waiting on ipfsCid');
 			return;
 		}
 
-		console.log('Attempting to send submitDataIpfsCid to ZorpStudy.submitData')
+		console.log('Attempting to send submitDataIpfsCid to ZorpStudy.submitData');
 
 		writeContract({
 			abi: ZorpStudyABI,
 			address: config.contracts.ZorpStudy.address,
 			functionName: 'submitData',
-			args: [submitDataIpfsCid]
+			args: [ ipfsCid.toString() ],
 		});
-	}, [submitDataIpfsCid]);
+	}, [irysReceipt, ipfsCid]);
+
 	useEffect(() => {
-		console.log('Transaction info ->', writeContractData);
-	}, [writeContractData])
+		console.log('Transaction info ->', writeZorpStudySubmitDataData);
+	}, [writeZorpStudySubmitDataData])
 
 	return (
 		<>
