@@ -25,6 +25,8 @@ import type { Key } from 'openpgp';
 import type { WebIrysOpts } from '@/@types/irys';
 
 export default function ZorpStudySubmitData() {
+	const className = '';
+
 	const { address, connector, isConnected } = useAccount();
 	const [provider, setProvider] = useState<null | unknown>(null);
 
@@ -57,6 +59,10 @@ export default function ZorpStudySubmitData() {
 		token: 'WAT'
 	};
 
+	const [message, setMessage] = useState<string>('Info: connected wallet/provider required');
+	const { data: writeZorpStudySubmitData, writeContractAsync } = useWriteContract({
+		config: config.wagmiConfig,
+	});
 
 	return (
 		<div className="w-full flex flex-col">
@@ -90,12 +96,69 @@ export default function ZorpStudySubmitData() {
 			<hr />
 
 			<hr />
-				<InputFileToEncryptedMessage
-					labelText='Data to encrypt and submit'
-					setState={setEncryptedMessage}
-					gpgKey={gpgKey}
-					encryptionKey={encryptionKey}
-				/>
+
+			<InputFileToEncryptedMessage
+				labelText='Data to encrypt and submit'
+				setState={setEncryptedMessage}
+				gpgKey={gpgKey}
+				encryptionKey={encryptionKey}
+			/>
+
+			<hr />
+
+			<label className={`zorp_study_submit_data zorp_study_submit_data__label ${className}`}>
+				Zorp Factory Create Study
+			</label>
+
+			<button
+				className={`zorp_study_submit_data zorp_study_submit_data__button ${className}`}
+				onClick={(event) => {
+					event.stopPropagation();
+					event.preventDefault();
+
+					console.log('ZorpStudySubmitData', {event});
+
+					if (!isConnected) {
+						const message = 'Warn: waiting on client to connect an account';
+						console.warn('ZorpStudySubmitData', {message});
+						setMessage(message)
+						return;
+					}
+					if (!address?.toString().length) {
+						const message = 'Warn: waiting on client to connect an account with an address';
+						console.warn('ZorpStudySubmitData', {message});
+						setMessage(message)
+						return;
+					}
+					if (!irysUploadData || !irysUploadData.cid || !irysUploadData.receipt) {
+						const message = 'Warn: for Irys upload to report success';
+						console.warn('ZorpStudySubmitData', {message});
+						setMessage(message)
+						return;
+					}
+
+					// TODO: set `chainName` and `sourceId` dynamically or via `.env.<thang>` file
+					// TODO: set ZorpStudy contract address from list of user selected options
+					const chainName = 'anvil';
+					const sourceId = 31337
+					writeContractAsync({
+						abi: ZorpStudyABI,
+						address: config[chainName].contracts.ZorpStudy[sourceId].address,
+						functionName: 'submitData',
+						args: [
+							address.toString(),
+							irysUploadData.cid.toString(),
+						],
+					}).then((writeContractData) => {
+						const message = `Result: transaction hash: ${writeContractData}`;
+						console.log('ZorpStudySubmitData', {message});
+						setMessage(message)
+					});
+				}}
+			>Zorp Factory Create Study</button>
+
+			<span className={`zorp_study_submit_data zorp_study_submit_data__span ${className}`}>{message}</span>
+
 			<hr />
 		</div>
 	);
