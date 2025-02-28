@@ -13,14 +13,14 @@ import * as irysConfig from '@/lib/constants/irysConfig';
 
 import { abi as ZorpStudyABI } from 'abi/IZorpStudy.json';
 
-import type { Subkey, Key } from 'openpgp';
+import type { Key } from 'openpgp';
 
 export default function IrysFetchFileGpgKey({
 	className = '',
 	setState,
 }: {
 	className?: string;
-	setState: (study_encryption_key: null | { response: Response; key: Subkey | Key; }) => void;
+	setState: (study_encryption_key: null | { response: Response; key: Key; }) => void;
 }) {
 	const [messageReadContract, setMessageReadContract] = useState<string>('Info: Waiting for ZorpStudy.encryptionKey() read to return something...');
 	const [messageFetchEncryptionKey, setMessageFetchEncryptionKey] = useState<string>('Info: waiting for fetch of CID ZorpStudy.encryptionKey() to return something...');

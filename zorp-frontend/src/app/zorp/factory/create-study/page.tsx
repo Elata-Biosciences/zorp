@@ -19,7 +19,7 @@ import * as config from '@/lib/constants/wagmiConfig';
 import { abi as ZorpFactoryABI } from 'abi/IZorpFactory.json';
 
 import type { BigNumber } from 'bignumber.js';
-import type { Subkey, Key } from 'openpgp';
+import type { Key } from 'openpgp';
 import type { WebIrysOpts } from '@/@types/irys';
 
 export default function ZorpFactoryCreateStudy() {
@@ -42,7 +42,7 @@ export default function ZorpFactoryCreateStudy() {
 	}, [address, connector, isConnected]);
 
 	// TODO: consider reducing need of keeping bot `Key` and `File` in memory at same time
-	const [gpgKey, setGpgKey] = useState<null | { file: File; key: Subkey | Key; }>(null);
+	const [gpgKey, setGpgKey] = useState<null | { file: File; key: Key; }>(null);
 
 	const [irysBalance, setIrysBalance] = useState<null | number | BigNumber>(null);
 
@@ -59,8 +59,6 @@ export default function ZorpFactoryCreateStudy() {
 	const { data: writeZorpFactoryCreateStudy, writeContractAsync } = useWriteContract({
 		config: config.wagmiConfig,
 	});
-	useEffect(() => {
-	}, []);
 
 	return (
 		<div className="w-full flex flex-col">

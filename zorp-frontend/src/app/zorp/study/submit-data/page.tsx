@@ -21,7 +21,7 @@ import * as config from '@/lib/constants/wagmiConfig';
 import { abi as ZorpStudyABI } from 'abi/IZorpStudy.json';
 
 import type { BigNumber } from 'bignumber.js';
-import type { Subkey, Key } from 'openpgp';
+import type { Key } from 'openpgp';
 import type { WebIrysOpts } from '@/@types/irys';
 
 export default function ZorpStudySubmitData() {
@@ -42,13 +42,13 @@ export default function ZorpStudySubmitData() {
 	}, [address, connector, isConnected]);
 
 	// TODO: consider reducing need of keeping bot `Key` and `File` in memory at same time
-	const [gpgKey, setGpgKey] = useState<null | { file: File; key: Subkey | Key; }>(null);
+	const [gpgKey, setGpgKey] = useState<null | { file: File; key: Key; }>(null);
 
 	const [irysBalance, setIrysBalance] = useState<null | number | BigNumber>(null);
 
 	const [irysUploadData, setIrysUploadData] = useState<null | { receipt: unknown; cid: string; }>(null);
 
-	const [encryptionKey, setEncryptionKey] = useState<null | { response: Response; key: Subkey | Key; }>(null);
+	const [encryptionKey, setEncryptionKey] = useState<null | { response: Response; key: Key; }>(null);
 
 	const [encryptedMessage, setEncryptedMessage] = useState<null | Uint8Array>(null);
 

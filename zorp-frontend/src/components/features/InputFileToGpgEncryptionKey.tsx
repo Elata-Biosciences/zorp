@@ -5,7 +5,7 @@ import * as openpgp from 'openpgp';
 import { useEffect, useState } from 'react';
 
 import type { ChangeEvent } from 'react';
-import type { Subkey, Key } from 'openpgp';
+import type { Key } from 'openpgp';
 
 /**
  * @see https://github.com/openpgpjs/openpgpjs?tab=readme-ov-file#browser-webpack
@@ -19,7 +19,7 @@ export default function InputFileToGpgEncryptionKey({
 	labelText: string;
 	setState: (state: null | {
 		file: File;
-		key: Subkey | Key;
+		key: Key;
 	}) => void;
 }) {
 	const [message, setMessage] = useState<string>('Info: GPG public encryption key required');
@@ -66,7 +66,8 @@ export default function InputFileToGpgEncryptionKey({
 								const message = 'Info: attempting to recover GPG encryption key';
 								console.log('reader.onload -> openpgp.readKey', {message, key});
 								setMessage(message);
-								return key.getEncryptionKey();
+								// TODO: add runtime check to ensure type-hint casting is not a lie
+								return key.getEncryptionKey() as Promise<Key>;
 							}).then((encryption_key) => {
 								const message = 'Success: recovered GPG encryption key from file!';
 								console.log('reader.onload -> openpgp.readKey -> key.getEncryptionKey', {message, encryption_key});
