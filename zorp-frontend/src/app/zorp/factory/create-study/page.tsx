@@ -19,9 +19,7 @@ import * as config from '@/lib/constants/wagmiConfig';
 import { abi as ZorpFactoryABI } from 'abi/IZorpFactory.json';
 
 import type { BigNumber } from 'bignumber.js';
-import type { ResolvedRegister } from '@wagmi/core';
 import type { Subkey, Key } from 'openpgp';
-
 import type { WebIrysOpts } from '@/@types/irys';
 
 export default function ZorpFactoryCreateStudy() {
@@ -135,7 +133,7 @@ export default function ZorpFactoryCreateStudy() {
 						return;
 					}
 
-					// TODO: set `chainName` and `sourceId` dynamically
+					// TODO: set `chainName` and `sourceId` dynamically or via `.env.<thang>` file
 					const chainName = 'anvil';
 					const sourceId = 31337
 					writeContractAsync({
