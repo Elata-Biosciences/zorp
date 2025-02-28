@@ -1,0 +1,150 @@
+on:
+  push:
+    branches:
+      - main
+    # paths:
+    #   - zorp-contracts/src/**/*
+    #   - zorp-contracts/test/**/*
+    #   - zorp-frontend/public/**/*
+    #   - zorp-frontend/src/**/*
+
+  workflow_dispatch:
+
+## Thanks: https://github.com/foundry-rs/foundry/blob/master/.github/workflows/test.yml
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: full
+
+jobs:
+  build-contracts:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Selective checkout of contracts
+        uses: actions/checkout@v4
+        with:
+          # fetch-depth: 2
+          sparse-checkout: |
+            zorp-contracts
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Run tests
+        run: pushd zorp-contracts && forge test -vvv ; popd
+
+      - name: Run snapshot
+        run: pushd zorp-contracts && NO_COLOR=1 forge snapshot >> $GITHUB_STEP_SUMMARY
+
+      - name: Build contracts
+        run: pushd zorp-contracts && forge build ; popd
+
+      - name: Upload contract ABIs
+        uses: actions/upload-artifact@v4
+        id: artifact-zorp-contracts-abis
+        with:
+          compression-level: 9
+          if-no-files-found: error
+          name: zorp-contracts-abis
+          overwrite: true
+          retention: 90
+          path: |
+            zorp-contracts/out/IZorp*
+            zorp-contracts/out/IOwnable.sol
+
+      - name: Share artifact ID
+        run: echo 'Artifact ID -- ${{ steps.zorp-contracts-abis.outputs.id }}'
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    needs: build-contracts
+
+    steps:
+      - name: Selective checkout of frontend
+        uses: actions/checkout@v4
+        with:
+          # fetch-depth: 2
+          sparse-checkout: |
+            zorp-frontend
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          cache-dependency-path: zorp-frontend/package-lock.json
+          cache: 'npm'
+          node-version: 23.x
+
+      - name: Install dependencies
+        run: pushd zorp-frontend && npm install ; popd
+
+      ##
+      # @see: ./zorp-contracts-build-artifacts.yaml
+      #       jobs.steps[].id == 'artifact-zorp-contracts-abis'
+      - name: Download contracts ABIs
+        uses: actions/download-artifact@v4
+        with:
+          name: zorp-contracts-abis
+          path: zorp-contracts/out
+
+      ##
+      # @see https://github.com/nextjs/deploy-github-pages/blob/main/.github/workflows/deploy.yml
+      - name: Configure GitHub Pages
+        id: configure_pages
+        uses: actions/configure-pages@v5.0.0
+
+      - name: Build
+        env:
+          PAGES_BASE_PATH: ${{ steps.configure_pages.outputs.base_path }}
+        run: pushd zorp-frontend && npm run build ; popd
+
+      ##
+      # @see https://nextjs.org/docs/app/building-your-application/deploying/static-exports
+      - name: Upload frontend stuff
+        uses: actions/upload-artifact@v4
+        id: artifact-zorp-frontend
+        with:
+          compression-level: 9
+          if-no-files-found: error
+          name: zorp-frontend
+          overwrite: true
+          retention: 90
+          path: |
+            zorp-frontend/out
+
+      ##
+      # @see https://nextjs.org/docs/pages/building-your-application/deploying/ci-build-caching#github-actions
+      - name: Cache
+        uses: actions/cache@v4.2.2
+        id: cache-frontend-next
+        with:
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+          path: |
+            ~/.npm
+            ${{ github.workspace }}/.next/cache
+
+  ##
+  # @see https://github.com/actions/upload-pages-artifact
+  deploy-github-pages:
+    needs: build-frontend
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/upload-pages-artifact@v4
+
