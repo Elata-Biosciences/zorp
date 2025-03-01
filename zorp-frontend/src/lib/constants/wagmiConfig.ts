@@ -1,4 +1,6 @@
 import '@rainbow-me/rainbowkit/styles.css';
+import { defineChain } from 'viem';
+import { chainConfig } from 'viem/op-stack';
 import { http, fallback } from 'wagmi';
 import { arbitrum, base, mainnet, sepolia } from 'wagmi/chains';
 import { getDefaultConfig, WalletList } from '@rainbow-me/rainbowkit';
@@ -17,9 +19,6 @@ import {
   uniswapWallet,
   walletConnectWallet,
 } from '@rainbow-me/rainbowkit/wallets';
-
-import { defineChain } from 'viem';
-import { chainConfig } from 'viem/op-stack';
 
 /**
  * WalletConnect Project ID

@@ -1,12 +1,9 @@
 'use client';
 
-import * as openpgp from 'openpgp';
-
-import { useQuery } from '@tanstack/react-query';
-
-import { useEffect, useState } from 'react';
-
+import { useState } from 'react';
 import type { ChangeEvent } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import * as openpgp from 'openpgp';
 import type { Key } from 'openpgp';
 
 export default function InputFileToEncryptedMessage({
@@ -52,7 +49,7 @@ export default function InputFileToEncryptedMessage({
 			}
 
 			const message = 'Info: attempting to convert input file to ArrayBuffer';
-			console.log('InputFileToEncryptedMessage', {message});
+			console.warn('InputFileToEncryptedMessage', {message});
 			setMessage(message);
 			inputSubmitDataFile.arrayBuffer()
 				.then((buffer) => {
@@ -60,7 +57,7 @@ export default function InputFileToEncryptedMessage({
 				})
 				.then((createdmessage) => {
 					const message = 'Info: attempting encrypt file with GPG keys';
-					console.log('InputFileToEncryptedMessage', {message});
+					console.warn('InputFileToEncryptedMessage', {message});
 					setMessage(message);
 					return openpgp.encrypt({
 						message: createdmessage,
@@ -73,7 +70,7 @@ export default function InputFileToEncryptedMessage({
 				})
 				.then((encryptedMessage) => {
 					const message = 'Success: encrypted file with provided GPG keys?!';
-					console.log('InputFileToEncryptedMessage', {message});
+					console.warn('InputFileToEncryptedMessage', {message});
 					setMessage(message);
 					setState(encryptedMessage);
 				});

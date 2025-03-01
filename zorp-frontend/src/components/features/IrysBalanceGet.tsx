@@ -1,12 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import { WebIrys } from '@irys/sdk';
-import { useEffect, useState } from 'react';
-
-import type { ChangeEvent } from 'react';
-import type { Network, IrysConfig } from '@irys/sdk/build/cjs/common/types.d.ts';
 import type { BigNumber } from 'bignumber.js';
-
 import type { WebIrysOpts } from '@/@types/irys';
 
 /**
@@ -38,11 +34,11 @@ export default function IrysBalanceGet({
 					event.stopPropagation();
 					event.preventDefault();
 
-					console.log('IrysBalance', {event});
+					console.warn('IrysBalance', {event});
 
 					if (!address) {
 						const message = 'Info: waiting for client to connect wallet with an address';
-						console.log('IrysBalance', {message, address});
+						console.warn('IrysBalance', {message, address});
 						setMessage(message);
 						return;
 					}
@@ -52,12 +48,12 @@ export default function IrysBalanceGet({
 							.ready()
 							.then((webIrys) => {
 								const message = 'Info: attempting Irys get loaded balance';
-								console.log('new WebIrys(webIrysOpts).ready()', {message, webIrys, webIrysOpts});
+								console.warn('new WebIrys(webIrysOpts).ready()', {message, webIrys, webIrysOpts});
 								setMessage(message);
 								return webIrys.getBalance(address);
 							}).then((balance) => {
 								const message = `Success: got Irys balance of: ${balance}`;
-								console.log('new WebIrys(webIrysOpts).ready().getLoadedBalance()', {message, balance});
+								console.warn('new WebIrys(webIrysOpts).ready().getLoadedBalance()', {message, balance});
 								setMessage(message);
 								setState(balance);
 							}).catch((error) => {
@@ -72,12 +68,18 @@ export default function IrysBalanceGet({
 								setMessage(message);
 								setState(null);
 							});
-					} catch (error: any) {
+					} catch (error: unknown) {
 						let message = 'Error: ';
-						if ('message' in error) {
-							message += error.message;
+						if (!!error && typeof error == 'object') {
+							if ('message' in error) {
+								message += error.message;
+							} else if ('toString' in error) {
+								message += error.toString();
+							} else {
+								message += `Novel error detected -> ${error}`;
+							}
 						} else {
-							message += error.toString();
+							message += `Novel error detected -> ${error}`;
 						}
 
 						console.error('new WebIrys(webIrysOpts).ready() ...', {message, error});

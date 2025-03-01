@@ -1,28 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-
-import {
-	useAccount,
-	useReadContract,
-	useWalletClient,
-	useWriteContract
-} from 'wagmi';
-
-import ThemeSwitch from '@/components/features/ThemeSwitch';
-
+import type { BigNumber } from 'bignumber.js';
+import type { Key } from 'openpgp';
+import { useAccount, useWriteContract } from 'wagmi';
+import type { WebIrysOpts } from '@/@types/irys';
+import { abi as ZorpStudyABI } from 'abi/IZorpStudy.json';
+import InputFileToEncryptedMessage from '@/components/features/InputFileToEncryptedMessage';
 import InputFileToGpgEncryptionKey from '@/components/features/InputFileToGpgEncryptionKey';
 import IrysBalanceGet from '@/components/features/IrysBalanceGet';
 import IrysFetchFileGpgKey from '@/components/features/IrysFetchFileGpgKey';
-import InputFileToEncryptedMessage from '@/components/features/InputFileToEncryptedMessage';
-
+import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
-
-import { abi as ZorpStudyABI } from 'abi/IZorpStudy.json';
-
-import type { BigNumber } from 'bignumber.js';
-import type { Key } from 'openpgp';
-import type { WebIrysOpts } from '@/@types/irys';
 
 export default function ZorpStudySubmitData() {
 	const className = '';
@@ -32,14 +21,12 @@ export default function ZorpStudySubmitData() {
 
 	useEffect(() => {
 		if (isConnected && connector) {
-			// eslint-disable-next-line no-console
-			console.log('ZorpStudySubmitData', {isConnected, address});
+			console.warn('ZorpStudySubmitData', {isConnected, address});
 			connector.getProvider().then((gottenProvider) => {
 				setProvider(gottenProvider);
 			});
 		} else {
-			// eslint-disable-next-line no-console
-			console.log('ZorpStudySubmitData -- Not connected');
+			console.warn('ZorpStudySubmitData -- Not connected');
 		}
 	}, [address, connector, isConnected]);
 
@@ -60,7 +47,7 @@ export default function ZorpStudySubmitData() {
 	};
 
 	const [message, setMessage] = useState<string>('Info: connected wallet/provider required');
-	const { data: writeZorpStudySubmitData, writeContractAsync } = useWriteContract({
+	const { data: _writeZorpStudySubmitData, writeContractAsync } = useWriteContract({
 		config: config.wagmiConfig,
 	});
 
@@ -116,7 +103,7 @@ export default function ZorpStudySubmitData() {
 					event.stopPropagation();
 					event.preventDefault();
 
-					console.log('ZorpStudySubmitData', {event});
+					console.warn('ZorpStudySubmitData', {event});
 
 					if (!isConnected) {
 						const message = 'Warn: waiting on client to connect an account';
@@ -151,7 +138,7 @@ export default function ZorpStudySubmitData() {
 						],
 					}).then((writeContractData) => {
 						const message = `Result: transaction hash: ${writeContractData}`;
-						console.log('ZorpStudySubmitData', {message});
+						console.warn('ZorpStudySubmitData', {message});
 						setMessage(message)
 					});
 				}}

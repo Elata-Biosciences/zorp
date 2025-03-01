@@ -10,7 +10,6 @@ export type WebIrysOpts = {
 			rpcUrl?: string;
 			name?: string;
 			provider: object;
-			[key: string]: any;
 	};
 	config?: IrysConfig;
 }

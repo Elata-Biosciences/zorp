@@ -1,26 +1,16 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-
-import {
-	useAccount,
-	useReadContract,
-	useWalletClient,
-	useWriteContract
-} from 'wagmi';
-
-import ThemeSwitch from '@/components/features/ThemeSwitch';
-
+import type { BigNumber } from 'bignumber.js';
+import type { Key } from 'openpgp';
+import { useAccount, useWriteContract } from 'wagmi';
+import type { WebIrysOpts } from '@/@types/irys';
+import { abi as ZorpFactoryABI } from 'abi/IZorpFactory.json';
 import InputFileToGpgEncryptionKey from '@/components/features/InputFileToGpgEncryptionKey';
 import IrysBalanceGet from '@/components/features/IrysBalanceGet';
 import IrysUploadFileGpgKey from '@/components/features/IrysUploadFileGpgKey';
+import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
-
-import { abi as ZorpFactoryABI } from 'abi/IZorpFactory.json';
-
-import type { BigNumber } from 'bignumber.js';
-import type { Key } from 'openpgp';
-import type { WebIrysOpts } from '@/@types/irys';
 
 export default function ZorpFactoryCreateStudy() {
 	const className = '';
@@ -30,14 +20,12 @@ export default function ZorpFactoryCreateStudy() {
 
 	useEffect(() => {
 		if (isConnected && connector) {
-			// eslint-disable-next-line no-console
-			console.log('ZorpFactoryCreateStudy', {isConnected, address});
+			console.warn('ZorpFactoryCreateStudy', {isConnected, address});
 			connector.getProvider().then((gottenProvider) => {
 				setProvider(gottenProvider);
 			});
 		} else {
-			// eslint-disable-next-line no-console
-			console.log('ZorpFactoryCreateStudy -- Not connected');
+			console.warn('ZorpFactoryCreateStudy -- Not connected');
 		}
 	}, [address, connector, isConnected]);
 
@@ -110,7 +98,7 @@ export default function ZorpFactoryCreateStudy() {
 					event.stopPropagation();
 					event.preventDefault();
 
-					console.log('ZorpFactoryCreateStudy', {event});
+					console.warn('ZorpFactoryCreateStudy', {event});
 
 					if (!isConnected) {
 						const message = 'Warn: waiting on client to connect an account';
@@ -144,7 +132,7 @@ export default function ZorpFactoryCreateStudy() {
 						],
 					}).then((writeContractData) => {
 						const message = `Result: transaction hash: ${writeContractData}`;
-						console.log('ZorpFactoryCreateStudy', {message});
+						console.warn('ZorpFactoryCreateStudy', {message});
 						setMessage(message)
 					});
 				}}

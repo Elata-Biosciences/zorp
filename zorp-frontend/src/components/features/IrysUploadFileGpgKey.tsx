@@ -1,28 +1,23 @@
 'use client';
 
-import { WebIrys } from '@irys/sdk';
+import { useState } from 'react';
 import { WebUploader } from '@irys/web-upload';
 import { WebBaseEth } from '@irys/web-upload-ethereum';
-
-import { useEffect, useState } from 'react';
-
+import type { BigNumber } from 'bignumber.js';
 import { CID } from 'multiformats/cid';
 import * as raw from 'multiformats/codecs/raw';
 import { sha256 } from 'multiformats/hashes/sha2';
-
-import type { BigNumber } from 'bignumber.js';
-import type { ChangeEvent } from 'react';
-import type { Network, IrysConfig } from '@irys/sdk/build/cjs/common/types.d.ts';
-import type { Subkey, Key } from 'openpgp';
 import type { Digest } from 'multiformats/src/hashes/digest';
+import type { Subkey, Key } from 'openpgp';
+// import type { Network, IrysConfig } from '@irys/sdk/build/cjs/common/types.d.ts';
 
-import type { WebIrysOpts } from '@/@types/irys';
+// import type { WebIrysOpts } from '@/@types/irys';
 
 export default function IrysUploadFileGpgKey({
 	className = '',
 	labelText = 'Irys upload public GPG encryption key',
 	setState,
-	webIrysOpts,
+	// webIrysOpts,
 	address,
 	provider,
 	gpgKey,
@@ -35,7 +30,7 @@ export default function IrysUploadFileGpgKey({
 		receipt: unknown;
 		cid: string;
 	}) => void;
-	webIrysOpts: WebIrysOpts;
+	// webIrysOpts: WebIrysOpts;
 	address: string | `0x${string}` | undefined;
 	provider: unknown;
 	gpgKey: null | { file: File; key: Subkey | Key; };
@@ -54,53 +49,53 @@ export default function IrysUploadFileGpgKey({
 					event.stopPropagation();
 					event.preventDefault();
 
-					console.log('IrysUploadFileGpgKey', {event});
+					console.warn('IrysUploadFileGpgKey', {event});
 
 					if (!address) {
 						const message = 'Info: waiting for client to connect wallet with an address';
-						console.log('IrysUploadFileGpgKey', {message, address});
+						console.warn('IrysUploadFileGpgKey', {message, address});
 						setMessage(message);
 						return;
 					}
 
 					if (!gpgKey) {
 						const message = 'Info: waiting for client to provide GPG key';
-						console.log('IrysUploadFileGpgKey', {message, address});
+						console.warn('IrysUploadFileGpgKey', {message, address});
 						setMessage(message);
 						return;
 					}
 
 					if (!irysBalance || irysBalance <= irysBalanceThreshold) {
 						const message = 'Info: waiting for client to fund Irys for upload';
-						console.log('IrysUploadFileGpgKey', {message, address});
+						console.warn('IrysUploadFileGpgKey', {message, address});
 						setMessage(message);
 						return;
 					}
 
 					const message = 'Info: attempting to convert GPG key to ArrayBuffer';
-					console.log('IrysUploadFileGpgKey', {message});
+					console.warn('IrysUploadFileGpgKey', {message});
 					setMessage(message);
 					try {
 						gpgKey.file.arrayBuffer().then((buffer) => {
 							const message = 'Info: attempting SHA ArrayBuffer';
-							console.log('IrysUploadFileGpgKey', {message});
+							console.warn('IrysUploadFileGpgKey', {message});
 							setMessage(message);
 							return (sha256.digest(raw.encode(new Uint8Array(buffer))) as Promise<Digest<number, number>>)
 								.then((hash) => {
 									const message = 'Info: attempting generate an IPFS compatible CID';
-									console.log('IrysUploadFileGpgKey', {message});
+									console.warn('IrysUploadFileGpgKey', {message});
 									setMessage(message);
 									return CID.create(1, raw.code, hash);
 								})
 								.then((cid) => {
 									const message = 'Info: attempting to initalize Irys Web Uploader';
-									console.log('IrysUploadFileGpgKey', {message});
+									console.warn('IrysUploadFileGpgKey', {message});
 									setMessage(message);
 
 									WebUploader(WebBaseEth).withProvider(provider)
 										.then((irysUploadBuilder) => {
 											const message = 'Info: attempting to upload GPG key to Irys';
-											console.log('IrysUploadFileGpgKey', {message});
+											console.warn('IrysUploadFileGpgKey', {message});
 											setMessage(message);
 
 											const tags = [
@@ -115,7 +110,7 @@ export default function IrysUploadFileGpgKey({
 											);
 										}).then((receipt) => {
 											const message = 'Success: Uploded GPG key to Irys?!';
-											console.log('IrysUploadFileGpgKey', {message, receipt, cid });
+											console.warn('IrysUploadFileGpgKey', {message, receipt, cid});
 											setMessage(message);
 
 											setState({ receipt, cid: cid.toString() });
@@ -133,12 +128,18 @@ export default function IrysUploadFileGpgKey({
 							setMessage(message);
 							setState(null);
 						});
-					} catch (error: any) {
+					} catch (error: unknown) {
 						let message = 'Error: ';
-						if ('message' in error) {
-							message += error.message;
+						if (!!error && typeof error == 'object') {
+							if ('message' in error) {
+								message += error.message;
+							} else if ('toString' in error) {
+								message += error.toString();
+							} else {
+								message += `Novel error detected -> ${error}`;
+							}
 						} else {
-							message += error.toString();
+							message += `Novel error detected -> ${error}`;
 						}
 
 						console.error('IrysUploadFileGpgKey ...', {message, error});

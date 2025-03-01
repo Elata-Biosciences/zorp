@@ -1,19 +1,13 @@
 'use client';
 
-import * as openpgp from 'openpgp';
-
-import { useQuery } from '@tanstack/react-query';
-
 import { useEffect, useState } from 'react';
-
-import { useReadContract } from 'wagmi';
-
-import * as wagmiConfig from '@/lib/constants/wagmiConfig';
-import * as irysConfig from '@/lib/constants/irysConfig';
-
-import { abi as ZorpStudyABI } from 'abi/IZorpStudy.json';
-
+import { useQuery } from '@tanstack/react-query';
+import * as openpgp from 'openpgp';
 import type { Key } from 'openpgp';
+import { useReadContract } from 'wagmi';
+import { abi as ZorpStudyABI } from 'abi/IZorpStudy.json';
+import * as irysConfig from '@/lib/constants/irysConfig';
+import * as wagmiConfig from '@/lib/constants/wagmiConfig';
 
 export default function IrysFetchFileGpgKey({
 	className = '',
@@ -76,8 +70,8 @@ export default function IrysFetchFileGpgKey({
 
 	return (
 		<>
-			<p>{messageReadContract}</p>
-			<p>{messageFetchEncryptionKey}</p>
+			<p className={`irys_fetch_gpg_key irys_fetch_gpg_key__read_contract ${className}`}>{messageReadContract}</p>
+			<p className={`irys_fetch_gpg_key irys_fetch_gpg_key__fetch_status ${className}`}>{messageFetchEncryptionKey}</p>
 		</>
 	);
 }

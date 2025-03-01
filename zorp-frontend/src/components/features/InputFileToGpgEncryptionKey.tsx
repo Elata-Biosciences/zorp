@@ -1,10 +1,8 @@
 'use client';
 
-import * as openpgp from 'openpgp';
-
-import { useEffect, useState } from 'react';
-
+import { useState } from 'react';
 import type { ChangeEvent } from 'react';
+import * as openpgp from 'openpgp';
 import type { Key } from 'openpgp';
 
 /**
@@ -32,7 +30,7 @@ export default function InputFileToGpgEncryptionKey({
 				onChange={(event: ChangeEvent<HTMLInputElement>) => {
 					event.stopPropagation();
 					event.preventDefault();
-					console.log('InputFileToGpgEncryptionKey', {event});
+					console.warn('InputFileToGpgEncryptionKey', {event});
 
 					if (!event.target.files?.length) {
 						const message = 'Warn: No GPG public encrypt key selected';
@@ -59,18 +57,18 @@ export default function InputFileToGpgEncryptionKey({
 						}
 
 						const message = 'Info: attempting to parse file as GPG key';
-						console.log('reader.onload', {message, event});
+						console.warn('reader.onload', {message, event});
 						setMessage(message);
 						try {
 							openpgp.readKey({ armoredKey: reader.result.toString() }).then((key) => {
 								const message = 'Info: attempting to recover GPG encryption key';
-								console.log('reader.onload -> openpgp.readKey', {message, key});
+								console.warn('reader.onload -> openpgp.readKey', {message, key});
 								setMessage(message);
 								// TODO: add runtime check to ensure type-hint casting is not a lie
 								return key.getEncryptionKey() as Promise<Key>;
 							}).then((encryption_key) => {
 								const message = 'Success: recovered GPG encryption key from file!';
-								console.log('reader.onload -> openpgp.readKey -> key.getEncryptionKey', {message, encryption_key});
+								console.warn('reader.onload -> openpgp.readKey -> key.getEncryptionKey', {message, encryption_key});
 								setMessage(message);
 								setState({file, key: encryption_key});
 							}).catch((error) => {
@@ -85,12 +83,18 @@ export default function InputFileToGpgEncryptionKey({
 								setMessage(message);
 								setState(null);
 							});
-						} catch (error: any) {
+						} catch (error: unknown) {
 							let message = 'Error: ';
-							if ('message' in error) {
-								message += error.message;
+							if (!!error && typeof error == 'object') {
+								if ('message' in error) {
+									message += error.message;
+								} else if ('toString' in error) {
+									message += error.toString();
+								} else {
+									message += `Novel error detected -> ${error}`;
+								}
 							} else {
-								message += error.toString();
+								message += `Novel error detected -> ${error}`;
 							}
 
 							setMessage(message);
