@@ -78,7 +78,6 @@ export default function ZorpFactoryCreateStudy() {
 			<IrysUploadFileGpgKey
 				labelText="Irys upload GPG key file"
 				setState={setIrysUploadData}
-				webIrysOpts={webIrysOpts}
 				address={address}
 				provider={provider}
 				gpgKey={gpgKey}
