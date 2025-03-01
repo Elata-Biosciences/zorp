@@ -144,7 +144,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy to GitHub Pages
+      - name: Upload GitHub Pages artifact
         id: deployment
-        uses: actions/upload-pages-artifact@v4
-
+        uses: actions/upload-pages-artifact@v3.0.1
