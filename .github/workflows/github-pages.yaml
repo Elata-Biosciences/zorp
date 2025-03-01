@@ -147,3 +147,6 @@ jobs:
       - name: Upload GitHub Pages artifact
         id: deployment
         uses: actions/upload-pages-artifact@v3.0.1
+        with:
+          path: zorp-frontend/out
+
