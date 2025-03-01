@@ -51,7 +51,7 @@ jobs:
           if-no-files-found: error
           name: zorp-contracts-abis
           overwrite: true
-          retention: 90
+          retention-days: 90
           path: |
             zorp-contracts/out/IZorp*
             zorp-contracts/out/IOwnable.sol
