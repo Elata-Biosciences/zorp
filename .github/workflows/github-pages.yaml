@@ -104,16 +104,10 @@ jobs:
       ##
       # @see https://nextjs.org/docs/app/building-your-application/deploying/static-exports
       - name: Upload frontend stuff
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-pages-artifact@v3.0.1
         id: artifact-zorp-frontend
         with:
-          compression-level: 9
-          if-no-files-found: error
-          name: zorp-frontend
-          overwrite: true
-          retention: 90
-          path: |
-            zorp-frontend/out
+          path: zorp-frontend/out
 
       ##
       # @see https://nextjs.org/docs/pages/building-your-application/deploying/ci-build-caching#github-actions
@@ -144,9 +138,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Upload GitHub Pages artifact
+      - name: Deploy GitHub Pages site
+        uses: actions/deploy-pages@v4.0.5
         id: deployment
-        uses: actions/upload-pages-artifact@v3.0.1
-        with:
-          path: zorp-frontend/out
 
