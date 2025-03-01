@@ -49,7 +49,7 @@ export const navigation = [
     icon: IoLogoGithub,
   },
   {
-    name: 'ZorpFactory -- CreateStudy',
+    name: 'Zorp Factory -- Create Study',
     href: '/zorp/factory/create-study',
     icon: IoLogoGithub,
   },
