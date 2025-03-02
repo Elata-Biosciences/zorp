@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { BigNumber } from 'bignumber.js';
 import type { Key } from 'openpgp';
 import { useAccount, useWriteContract } from 'wagmi';
@@ -30,7 +30,7 @@ export default function ZorpStudySubmitData() {
 		}
 	}, [address, connector, isConnected]);
 
-	// TODO: consider reducing need of keeping bot `Key` and `File` in memory at same time
+	// TODO: consider reducing need of keeping both `Key` and `File` in memory at same time
 	const [gpgKey, setGpgKey] = useState<null | { file: File; key: Key; }>(null);
 
 	const [irysBalance, setIrysBalance] = useState<null | number | BigNumber>(null);
@@ -47,9 +47,50 @@ export default function ZorpStudySubmitData() {
 	};
 
 	const [message, setMessage] = useState<string>('Info: connected wallet/provider required');
-	const { data: _writeZorpStudySubmitData, writeContractAsync } = useWriteContract({
+	const { writeContractAsync } = useWriteContract({
 		config: config.wagmiConfig,
 	});
+
+	const handleZorpStudySubmitData = useCallback((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+		console.warn('ZorpStudySubmitData', {event});
+
+		if (!isConnected) {
+			const message = 'Warn: waiting on client to connect an account';
+			console.warn('ZorpStudySubmitData', {message});
+			setMessage(message)
+			return;
+		}
+		if (!address?.toString().length) {
+			const message = 'Warn: waiting on client to connect an account with an address';
+			console.warn('ZorpStudySubmitData', {message});
+			setMessage(message)
+			return;
+		}
+		if (!irysUploadData || !irysUploadData.cid || !irysUploadData.receipt) {
+			const message = 'Warn: for Irys upload to report success';
+			console.warn('ZorpStudySubmitData', {message});
+			setMessage(message)
+			return;
+		}
+
+		// TODO: set `chainName` and `sourceId` dynamically or via `.env.<thang>` file
+		// TODO: set ZorpStudy contract address from list of user selected options
+		const chainName = 'anvil';
+		const sourceId = 31337
+		writeContractAsync({
+			abi: ZorpStudyABI,
+			address: config[chainName].contracts.ZorpStudy[sourceId].address,
+			functionName: 'submitData',
+			args: [
+				address.toString(),
+				irysUploadData.cid.toString(),
+			],
+		}).then((writeContractData) => {
+			const message = `Result: transaction hash: ${writeContractData}`;
+			console.warn('ZorpStudySubmitData', {message});
+			setMessage(message)
+		});
+	}, [isConnected, address, irysUploadData]);
 
 	return (
 		<div className="w-full flex flex-col">
@@ -102,45 +143,7 @@ export default function ZorpStudySubmitData() {
 				onClick={(event) => {
 					event.stopPropagation();
 					event.preventDefault();
-
-					console.warn('ZorpStudySubmitData', {event});
-
-					if (!isConnected) {
-						const message = 'Warn: waiting on client to connect an account';
-						console.warn('ZorpStudySubmitData', {message});
-						setMessage(message)
-						return;
-					}
-					if (!address?.toString().length) {
-						const message = 'Warn: waiting on client to connect an account with an address';
-						console.warn('ZorpStudySubmitData', {message});
-						setMessage(message)
-						return;
-					}
-					if (!irysUploadData || !irysUploadData.cid || !irysUploadData.receipt) {
-						const message = 'Warn: for Irys upload to report success';
-						console.warn('ZorpStudySubmitData', {message});
-						setMessage(message)
-						return;
-					}
-
-					// TODO: set `chainName` and `sourceId` dynamically or via `.env.<thang>` file
-					// TODO: set ZorpStudy contract address from list of user selected options
-					const chainName = 'anvil';
-					const sourceId = 31337
-					writeContractAsync({
-						abi: ZorpStudyABI,
-						address: config[chainName].contracts.ZorpStudy[sourceId].address,
-						functionName: 'submitData',
-						args: [
-							address.toString(),
-							irysUploadData.cid.toString(),
-						],
-					}).then((writeContractData) => {
-						const message = `Result: transaction hash: ${writeContractData}`;
-						console.warn('ZorpStudySubmitData', {message});
-						setMessage(message)
-					});
+					handleZorpStudySubmitData(event);
 				}}
 			>Zorp Factory Create Study</button>
 
