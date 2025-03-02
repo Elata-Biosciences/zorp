@@ -19,17 +19,6 @@ export default function ZorpStudySubmitData() {
 	const { address, connector, isConnected } = useAccount();
 	const [provider, setProvider] = useState<null | unknown>(null);
 
-	useEffect(() => {
-		if (isConnected && connector) {
-			console.warn('ZorpStudySubmitData', {isConnected, address});
-			connector.getProvider().then((gottenProvider) => {
-				setProvider(gottenProvider);
-			});
-		} else {
-			console.warn('ZorpStudySubmitData -- Not connected');
-		}
-	}, [address, connector, isConnected]);
-
 	// TODO: consider reducing need of keeping both `Key` and `File` in memory at same time
 	const [gpgKey, setGpgKey] = useState<null | { file: File; key: Key; }>(null);
 
@@ -50,6 +39,17 @@ export default function ZorpStudySubmitData() {
 	const { writeContractAsync } = useWriteContract({
 		config: config.wagmiConfig,
 	});
+
+	useEffect(() => {
+		if (isConnected && connector) {
+			console.warn('ZorpStudySubmitData', {isConnected, address});
+			connector.getProvider().then((gottenProvider) => {
+				setProvider(gottenProvider);
+			});
+		} else {
+			console.warn('ZorpStudySubmitData -- Not connected');
+		}
+	}, [address, connector, isConnected]);
 
 	const handleZorpStudySubmitData = useCallback((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		console.warn('ZorpStudySubmitData', {event});
