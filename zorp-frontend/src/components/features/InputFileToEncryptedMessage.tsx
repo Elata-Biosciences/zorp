@@ -25,7 +25,7 @@ export default function InputFileToEncryptedMessage({
 	const { data: encryptedMessage } = useQuery({
 		enabled: !!inputSubmitDataFile && !!gpgKey && !!gpgKey.key && !!encryptionKey && !!encryptionKey.key,
 		queryKey: ['message_recipients', [gpgKey?.key, encryptionKey?.key]],
-		queryFn: () => {
+		queryFn: async () => {
 			// TODO: investigate why TypeScript and `useQuery` don't sync-up on `enabled`
 			if (!gpgKey?.key) {
 				const message = 'Warn: input GPG encryption key';
@@ -48,32 +48,42 @@ export default function InputFileToEncryptedMessage({
 				return;
 			}
 
-			const message = 'Info: attempting to convert input file to ArrayBuffer';
-			console.warn('InputFileToEncryptedMessage', {message});
-			setMessage(message);
-			inputSubmitDataFile.arrayBuffer()
-				.then((buffer) => {
-					return openpgp.createMessage({ binary: buffer })
-				})
-				.then((createdmessage) => {
-					const message = 'Info: attempting encrypt file with GPG keys';
-					console.warn('InputFileToEncryptedMessage', {message});
-					setMessage(message);
-					return openpgp.encrypt({
-						message: createdmessage,
-						encryptionKeys: [gpgKey.key, encryptionKey.key],
-						// TODO: maybe figure out how to make irysUploader happy with
-						//       Uint8Array returned by 'binary' format
-						// format: 'armored',
-						format: 'binary',
-					});
-				})
-				.then((encryptedMessage) => {
-					const message = 'Success: encrypted file with provided GPG keys?!';
-					console.warn('InputFileToEncryptedMessage', {message});
-					setMessage(message);
-					setState(encryptedMessage);
+			try {
+				const buffer = await inputSubmitDataFile.arrayBuffer();
+
+				const createdmessage = await openpgp.createMessage({ binary: buffer });
+
+				const encryptedMessage = await openpgp.encrypt({
+					message: createdmessage,
+					encryptionKeys: [gpgKey.key, encryptionKey.key],
+					// TODO: maybe figure out how to make irysUploader happy with
+					//       Uint8Array returned by 'binary' format
+					// format: 'armored',
+					format: 'binary',
 				});
+
+				const message = 'Success: encrypted file with provided GPG keys?!';
+				console.warn('InputFileToEncryptedMessage', {message});
+				setMessage(message);
+				setState(encryptedMessage);
+			} catch (error: unknown) {
+				let message = 'Error: ';
+				if (!!error && typeof error == 'object') {
+					if ('message' in error) {
+						message += error.message;
+					} else if ('toString' in error) {
+						message += error.toString();
+					} else {
+						message += `Novel error detected -> ${error}`;
+					}
+				} else {
+					message += `Novel error detected -> ${error}`;
+				}
+
+				console.error('InputFileToEncryptedMessage', {message, error});
+				setMessage(message);
+				setState(null);
+			}
 		},
 	});
 
