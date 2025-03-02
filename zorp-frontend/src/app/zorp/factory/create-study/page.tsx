@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { BigNumber } from 'bignumber.js';
 import type { Key } from 'openpgp';
 import { useAccount, useWriteContract } from 'wagmi';
@@ -17,17 +17,6 @@ export default function ZorpFactoryCreateStudy() {
 
 	const { address, connector, isConnected } = useAccount();
 	const [provider, setProvider] = useState<null | unknown>(null);
-
-	useEffect(() => {
-		if (isConnected && connector) {
-			console.warn('ZorpFactoryCreateStudy', {isConnected, address});
-			connector.getProvider().then((gottenProvider) => {
-				setProvider(gottenProvider);
-			});
-		} else {
-			console.warn('ZorpFactoryCreateStudy -- Not connected');
-		}
-	}, [address, connector, isConnected]);
 
 	// TODO: consider reducing need of keeping bot `Key` and `File` in memory at same time
 	const [gpgKey, setGpgKey] = useState<null | { file: File; key: Key; }>(null);
@@ -47,6 +36,58 @@ export default function ZorpFactoryCreateStudy() {
 	const { data: writeZorpFactoryCreateStudy, writeContractAsync } = useWriteContract({
 		config: config.wagmiConfig,
 	});
+
+	useEffect(() => {
+		if (isConnected && connector) {
+			console.warn('ZorpFactoryCreateStudy', {isConnected, address});
+			connector.getProvider().then((gottenProvider) => {
+				setProvider(gottenProvider);
+			});
+		} else {
+			console.warn('ZorpFactoryCreateStudy -- Not connected');
+		}
+	}, [address, connector, isConnected]);
+
+	const handleZorpFactoryCreateStudy = useCallback((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+		console.warn('ZorpFactoryCreateStudy', {event});
+
+		if (!isConnected) {
+			const message = 'Warn: waiting on client to connect an account';
+			console.warn('ZorpFactoryCreateStudy', {message});
+			setMessage(message)
+			return;
+		}
+		if (!address?.toString().length) {
+			const message = 'Warn: waiting on client to connect an account with an address';
+			console.warn('ZorpFactoryCreateStudy', {message});
+			setMessage(message)
+			return;
+		}
+		if (!irysUploadData || !irysUploadData.cid || !irysUploadData.receipt) {
+			const message = 'Warn: for Irys upload to report success';
+			console.warn('ZorpFactoryCreateStudy', {message});
+			setMessage(message)
+			return;
+		}
+
+		// TODO: set `chainName` and `sourceId` dynamically or via `.env.<thang>` file
+		const chainName = 'anvil';
+		const sourceId = 31337
+		writeContractAsync({
+			abi: ZorpFactoryABI,
+			address: config[chainName].contracts.ZorpFactory[sourceId].address,
+			functionName: 'createStudy',
+			args: [
+				address.toString(),
+				irysUploadData.cid.toString(),
+			],
+		}).then((writeContractData) => {
+			const message = `Result: transaction hash: ${writeContractData}`;
+			console.warn('ZorpFactoryCreateStudy', {message});
+			setMessage(message)
+		});
+
+	}, [isConnected, address, irysUploadData]);
 
 	return (
 		<div className="w-full flex flex-col">
@@ -96,44 +137,7 @@ export default function ZorpFactoryCreateStudy() {
 				onClick={(event) => {
 					event.stopPropagation();
 					event.preventDefault();
-
-					console.warn('ZorpFactoryCreateStudy', {event});
-
-					if (!isConnected) {
-						const message = 'Warn: waiting on client to connect an account';
-						console.warn('ZorpFactoryCreateStudy', {message});
-						setMessage(message)
-						return;
-					}
-					if (!address?.toString().length) {
-						const message = 'Warn: waiting on client to connect an account with an address';
-						console.warn('ZorpFactoryCreateStudy', {message});
-						setMessage(message)
-						return;
-					}
-					if (!irysUploadData || !irysUploadData.cid || !irysUploadData.receipt) {
-						const message = 'Warn: for Irys upload to report success';
-						console.warn('ZorpFactoryCreateStudy', {message});
-						setMessage(message)
-						return;
-					}
-
-					// TODO: set `chainName` and `sourceId` dynamically or via `.env.<thang>` file
-					const chainName = 'anvil';
-					const sourceId = 31337
-					writeContractAsync({
-						abi: ZorpFactoryABI,
-						address: config[chainName].contracts.ZorpFactory[sourceId].address,
-						functionName: 'createStudy',
-						args: [
-							address.toString(),
-							irysUploadData.cid.toString(),
-						],
-					}).then((writeContractData) => {
-						const message = `Result: transaction hash: ${writeContractData}`;
-						console.warn('ZorpFactoryCreateStudy', {message});
-						setMessage(message)
-					});
+					handleZorpFactoryCreateStudy(event);
 				}}
 			>Zorp Factory Create Study</button>
 
