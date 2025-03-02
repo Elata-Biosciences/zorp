@@ -38,25 +38,24 @@ export default function IrysFetchFileGpgKey({
 	const { data: encryptionKey } = useQuery({
 		enabled: !!cid?.length,
 		queryKey: ['cid', cid],
-		queryFn: () => {
+		queryFn: async () => {
 			const url = `${irysConfig.gatewayUrl.irys}/${cid}`;
 			setMessageFetchEncryptionKey(`Info: attempting to download key from ${url}`);
-			return fetch(url).then((response) => {
+
+			const response = await fetch(url).then((response) => {
 				if (!response.ok) {
 					setMessageFetchEncryptionKey(`Error: failed to download key from ${url}`);
 					console.error('IrysUploadFileGpgKey', {response});
 					throw new Error(`Response not okay, status code: ${response.status}`);
 				}
-				return response.text()
-					.then((text) => {
-						setMessageFetchEncryptionKey('Info: attempting to convert fetched data to OpenPGP key');
-						return openpgp.readKey({ armoredKey: text });
-					})
-					.then((key) => {
-						setMessageFetchEncryptionKey('Success: fetched and recovered encryption key for study!');
-						setState({ response, key });
-					});
+				return response;
 			});
+
+			const text = await response.text();
+
+			const key = await openpgp.readKey({ armoredKey: text });
+			setMessageFetchEncryptionKey('Success: fetched and recovered encryption key for study!');
+			setState({ response, key });
 		},
 	});
 
