@@ -4,10 +4,10 @@
 
 Foundry consists of:
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
+- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
+- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
+- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
 
 ## Documentation
 
@@ -17,8 +17,8 @@ https://book.getfoundry.sh/
 
 ### Build
 
-```shell
-$ forge build
+```bash
+forge build
 ```
 
 > Note: ABI interface contract information may be found via
@@ -27,37 +27,37 @@ $ forge build
 > - `out/IZorpFactory.sol/out/IZorpFactory.json`
 > - `out/IZorpStudy.sol/out/IZorpStudy.json`
 >
-> ...  These are significantly fewer bytes to serve to third-party clients, and
-> often load/parse faster within off-chain libraries.
+> ...  These often are significantly fewer bytes to serve to third-party
+> clients, and often load/parse faster within off-chain libraries.
 
 ### Test
 
-```shell
-$ forge test
+```bash
+forge test
 ```
 
 ### Format
 
-```shell
-$ forge fmt
+```bash
+forge fmt
 ```
 
 ### Gas Snapshots
 
-```shell
-$ forge snapshot
+```bash
+forge snapshot
 ```
 
 ### Anvil
 
-```shell
-$ anvil
+```bash
+anvil
 ```
 
 ### Deploy
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
+```bash
+forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
 ```
 
 ### Mock
@@ -108,8 +108,8 @@ Transaction hash: 0x0eab52efa60b06c9e0a56a0c1c816b755ec75d7cca16635d2f929e40874f
 
 Syntax;
 
-```shell
-$ cast <subcommand>
+```
+cast <subcommand>
 ```
 
 Provided a local dev-net is running, such as via `anvil`, try getting contract
@@ -130,10 +130,10 @@ cast call "${_zorp_factory_address}" "owner()" --rpc-url "${_test_net_url}"
 
 ### Help
 
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
+```bash
+forge --help
+anvil --help
+cast --help
 ```
 
 
