@@ -3,6 +3,9 @@ const fs = require('fs');
 const process = require('process');
 const path = require('path');
 
+/**
+ * @see https://nextjs.org/docs/pages/building-your-application/deploying#static-html-export
+ */
 /** @type {import('next').NextConfig} */
 const nextConfigDefaults = {
   reactStrictMode: true,
@@ -17,10 +20,11 @@ const nextConfigDefaults = {
  * @param {NextConfig} config
  *
  * @see https://nextjs.org/docs/pages/api-reference/config/next-config-js
+ * @see https://github.com/nextjs/deploy-github-pages/blob/main/next.config.ts
  */
 async function hook(phase, { nextConfigCustom }) {
 	const nextConfig = merge({}, nextConfigDefaults, nextConfigCustom);
-	console.log('next.config.js -- hook(phase, { nextConfigCustom }) ->', { phase, nextConfigCustom, nextConfig });
+	console.log('START -- next.config.js -- hook(phase, { nextConfigCustom }) ->', { phase, nextConfigCustom, nextConfig });
 
 	// Copy select ABIs from `../zorp-contracts/out/` to `public/assets/abi/`
 	//
@@ -47,6 +51,18 @@ async function hook(phase, { nextConfigCustom }) {
 		fs.copyFileSync(abiPathSource, abiPathDest);
 	}
 
+	// Detect if deploying to GitHub Pages
+	/** @type {string|undefined} */
+	const PAGES_BASE_PATH = process.env.PAGES_BASE_PATH;
+	if (!!PAGES_BASE_PATH && PAGES_BASE_PATH.length) {
+		console.warn('Assuming deployment to GitHub Pages');
+		merge(nextConfig, {
+			output: 'export',
+			basePath: PAGES_BASE_PATH,
+		});
+	}
+
+	console.log('END -- next.config.js -- hook(phase, { nextConfigCustom }) ->', { phase, nextConfigCustom, nextConfig });
 	return nextConfig;
 }
 
