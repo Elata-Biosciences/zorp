@@ -9,7 +9,7 @@ import { IZorpStudy_Functions } from "./IZorpStudy.sol";
 /// @title Track state of study and participant data
 /// @author S0AndS0.eth
 /// @custom:link https://www.elata.bio/
-contract ZorpStudy is Ownable, ReentrancyGuard {
+contract ZorpStudy is IZorpStudy_Functions, Ownable, ReentrancyGuard {
     uint256 public constant PARTICIPANT_STATUS__NA = 0;
     uint256 public constant PARTICIPANT_STATUS__SUBMITTED = 1;
     uint256 public constant PARTICIPANT_STATUS__PAID = 2;
@@ -49,6 +49,7 @@ contract ZorpStudy is Ownable, ReentrancyGuard {
         creator = msg.sender;
     }
 
+    /// @inheritdoc IZorpStudy_Functions
     function submitData(string memory ipfs_cid) external {
         require(study_status == STUDY_STATUS__ACTIVE, "ZorpStudy: Study not active");
 
@@ -62,6 +63,7 @@ contract ZorpStudy is Ownable, ReentrancyGuard {
         participant_index[msg.sender] = submissions;
     }
 
+    /// @inheritdoc IZorpStudy_Functions
     function claimReward() external payable nonReentrant {
         require(study_status == STUDY_STATUS__FINISHED, "ZorpStudy: Study not finished");
         require(participant_status[msg.sender] == PARTICIPANT_STATUS__SUBMITTED, "ZorpStudy: Invalid message sender status");
@@ -72,6 +74,7 @@ contract ZorpStudy is Ownable, ReentrancyGuard {
         require(success, "ZorpStudy: Failed participant payout");
     }
 
+    /// @inheritdoc IZorpStudy_Functions
     function flagInvalidSubmission(address participant) external payable onlyOwner {
         require(study_status == STUDY_STATUS__ACTIVE, "ZorpStudy: Study not active");
         require(participant_status[participant] == PARTICIPANT_STATUS__SUBMITTED, "ZorpStudy: Invalid participant status");
@@ -83,11 +86,13 @@ contract ZorpStudy is Ownable, ReentrancyGuard {
         ++invalidated;
     }
 
+    /// @inheritdoc IZorpStudy_Functions
     function startStudy() external payable onlyOwner {
         require(study_status == STUDY_STATUS__NA, "ZorpStudy: Study was previously activated");
         study_status = STUDY_STATUS__ACTIVE;
     }
 
+    /// @inheritdoc IZorpStudy_Functions
     function endStudy() external payable onlyOwner nonReentrant {
         require(study_status == STUDY_STATUS__ACTIVE, "ZorpStudy: Study not active");
         study_status = STUDY_STATUS__FINISHED;
