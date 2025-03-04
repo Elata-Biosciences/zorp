@@ -15,6 +15,57 @@ interface IZorpFactory_Storage {
         /// address factory = <ADDRESS_OF_ZORP_FACTORY>;
         /// uint256 version = IZorpFactory(factory).VERSION();
         /// ```
+        ///
+        /// ## Off-chain example with cast
+        ///
+        /// ```bash
+        /// zorp_factory_address="0x5FbDB2315678afecb367f032d93F642f64180aa3";
+        ///
+        /// cast call "${zorp_factory_address}" \
+        ///     --rpc-url 127.0.0.1:8545 \
+        ///     'VERSION()(uint256)'
+        /// ```
+        ///
+        /// ## Off-chain example with wagmi
+        ///
+        /// ```tsx
+        /// 'use client';
+        ///
+        /// import { useId, useState } from 'react';
+        /// import { useReadContract } from 'wagmi';
+        /// import { abi as zorpFactoryAbi } from 'abi/IZorpFactory.json';
+        ///
+        /// export default function ZorpFactoryReadVersion() {
+        ///   const addressFactoryAnvil = '0x5FbDB2315678afecb367f032d93F642f64180aa3'
+        ///   const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
+        ///   const addressFactoryId = useId();
+        ///
+        ///   const { data: version, isFetching, isSuccess } = useReadContract({
+        ///     address: addressFactory,
+        ///     abi: zorpFactoryAbi,
+        ///     functionName: 'VERSION',
+        ///     args: [],
+        ///     query: {
+        ///       enabled: addressFactory.length === addressFactoryAnvil.length
+        ///             && addressFactory.startsWith('0x'),
+        ///     },
+        ///   });
+        ///
+        ///   return (
+        ///     <>
+        ///       <label htmlFor={addressFactoryId}>ZORP Factory Address:</label>
+        ///       <input
+        ///         id={addressFactoryId}
+        ///         value={addressFactory}
+        ///         onChange={(event) => {
+        ///           setAddressFactory(event.target.value as `0x${string}`);
+        ///         }}
+        ///       />
+        ///       <span>ZorpFactory version: {version as string}</span>
+        ///     </>
+        ///   );
+        /// }
+        /// ```
         function VERSION() external view returns (uint256);
     /* Constants }}} */
 
@@ -34,6 +85,58 @@ interface IZorpFactory_Storage {
         /// uint256 last_index = IZorpFactory(factory).latest_study_index();
         /// require(last_index > 0, "No studies have been created with this ZorpFactory instance");
         /// ```
+        ///
+        /// ## Off-chain example with cast
+        ///
+        /// ```bash
+        /// zorp_factory_address="0x5FbDB2315678afecb367f032d93F642f64180aa3";
+        ///
+        /// cast call "${zorp_factory_address}" \
+        ///     --rpc-url 127.0.0.1:8545 \
+        ///     'latest_study_index()(uint256)'
+        /// ```
+        ///
+        /// ## Off-chain example with wagmi
+        ///
+        /// ```tsx
+        /// 'use client';
+        ///
+        /// import { useId, useState } from 'react';
+        /// import { useReadContract } from 'wagmi';
+        /// import { abi as zorpFactoryAbi } from 'abi/IZorpFactory.json';
+        ///
+        /// export default function ZorpFactoryReadLatestStudyIndex() {
+        ///   const addressFactoryAnvil = '0x5FbDB2315678afecb367f032d93F642f64180aa3'
+        ///   const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
+        ///   const addressFactoryId = useId();
+        ///
+        ///   const { data: latest_study_index, isFetching, isSuccess } = useReadContract({
+        ///     address: addressFactory,
+        ///     abi: zorpFactoryAbi,
+        ///     functionName: 'latest_study_index',
+        ///     args: [],
+        ///     query: {
+        ///       enabled: addressFactory.length === addressFactoryAnvil.length
+        ///             && addressFactory.startsWith('0x'),
+        ///     },
+        ///   });
+        ///
+        ///   return (
+        ///     <>
+        ///       <label htmlFor={addressFactoryId}>ZORP Factory Address:</label>
+        ///       <input
+        ///         id={addressFactoryId}
+        ///         value={addressFactory}
+        ///         onChange={(event) => {
+        ///           setAddressFactory(event.target.value as `0x${string}`);
+        ///         }}
+        ///         disabled={isFetching}
+        ///       />
+        ///       <span>ZorpFactory latest study index: {latest_study_index as string}</span>
+        ///     </>
+        ///   );
+        /// }
+        /// ```
         function latest_study_index() external view returns (uint256);
 
         /// @notice Mapping of `ZorpStudy` contract addresses that this factory has created
@@ -48,6 +151,80 @@ interface IZorpFactory_Storage {
         /// uint256 last_index = IZorpFactory(factory).latest_study_index();
         /// address ref_last_study = IZorpFactory(factory).studies(last_index);
         /// ```
+        ///
+        /// ## Off-chain example with cast
+        ///
+        /// ```bash
+        /// zorp_factory_address="0x5FbDB2315678afecb367f032d93F642f64180aa3";
+        /// zorp_factory_study_index="41";
+        ///
+        /// cast call "${zorp_factory_address}" \
+        ///     --rpc-url 127.0.0.1:8545 \
+        ///     'studies(uint256)(address)' \
+        ///         "${zorp_factory_study_index}"
+        /// ```
+        ///
+        /// ## Off-chain example with wagmi
+        ///
+        /// ```tsx
+        /// 'use client';
+        ///
+        /// import { useId, useState } from 'react';
+        /// import { useReadContract } from 'wagmi';
+        /// import { abi as zorpFactoryAbi } from 'abi/IZorpFactory.json';
+        ///
+        /// export default function ZorpFactoryReadStudyAddress() {
+        ///   const addressFactoryAnvil = '0x5FbDB2315678afecb367f032d93F642f64180aa3'
+        ///   const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
+        ///   const [studyIndex, setStudyIndex] = useState<number>(1);
+        ///   const addressFactoryId = useId();
+        ///   const addressFactoryStudyIndexId = useId();
+        ///
+        ///   const { data: studyAddress, isFetching, isSuccess } = useReadContract({
+        ///     address: addressFactory,
+        ///     abi: zorpFactoryAbi,
+        ///     functionName: 'studies',
+        ///     args: [studyIndex],
+        ///     query: {
+        ///       enabled: addressFactory.length === addressFactoryAnvil.length
+        ///             && addressFactory.startsWith('0x')
+        ///             && !Number.isNaN(studyIndex)
+        ///             && studyIndex > 0,
+        ///     },
+        ///   });
+        ///
+        ///   return (
+        ///     <>
+        ///       <label htmlFor={addressFactoryId}>ZORP Factory Address:</label>
+        ///       <input
+        ///         id={addressFactoryId}
+        ///         value={addressFactory}
+        ///         onChange={(event) => {
+        ///           setAddressFactory(event.target.value as `0x${string}`);
+        ///         }}
+        ///         disabled={isFetching}
+        ///       />
+        ///
+        ///       <label htmlFor={addressFactoryStudyIndexId}>ZORP Study index:</label>
+        ///       <input
+        ///         id={addressFactoryStudyIndexId}
+        ///         value={studyIndex}
+        ///         onChange={(event) => {
+        ///           const value = Number.parseInt(event.target.value);
+        ///           if (Number.isNaN(value) || value < 1) {
+        ///             console.error('Input value was not an intager greater than 1');
+        ///             return;
+        ///           }
+        ///           setStudyIndex(value);
+        ///         }}
+        ///         disabled={isFetching}
+        ///       />
+        ///
+        ///       <span>ZorpFactory study address: {studyAddress as `0x${string}`}</span>
+        ///     </>
+        ///   );
+        /// }
+        /// ```
         function studies(uint256 index) external view returns (address);
     /* Mutable }}} */
 }
@@ -59,6 +236,8 @@ interface IZorpFactory_Functions {
         /// @param initialOwner Address of owner for study, I.E. the account allowed to execute functions like; `.flagInvalidSubmission(address)`, `.startStudy()`, and `.endStudy()`
         /// @param encryptionKey pointer to public GPG/PGP key
         /// @return Address of new `ZorpStudy` contract
+        ///
+        /// @custom:throws "ZorpStudy: Invalid message value"
         ///
         /// @dev see `./IZorpStudy.sol`
         /// @dev see `./ZorpStudy.sol` → `constructor`
@@ -76,8 +255,6 @@ interface IZorpFactory_Functions {
         /// address newStudy = IZorpFactory(factory).createStudy{value: 1 ether}(initialOwner, encryptionKey);
         /// /* ... Make use of `IZorpStudy(newStudy)` features ... */
         /// ```
-        ///
-        /// @custom:throws "ZorpStudy: Invalid message value"
         function createStudy(address payable initialOwner, string memory encryptionKey) external payable returns (address);
     /* Public }}} */
 
@@ -85,6 +262,8 @@ interface IZorpFactory_Functions {
         /// @notice Restricted to `IZorpFactory.owner()`
         /// @param to Address that should be paid from this contract with the native currency used by Blockchain
         /// @param amount Native currency for Blockchain to transfer from this contract to recipient
+        ///
+        /// @custom:throws "ZorpFactory: Failed withdraw"
         ///
         /// ## On-chain example
         ///
@@ -97,7 +276,97 @@ interface IZorpFactory_Functions {
         /// IZorpFactory(factory).withdraw(to, amount);
         /// ```
         ///
-        /// @custom:throws "ZorpFactory: Failed withdraw"
+        /// ## Off-chain example with cast
+        ///
+        /// ```bash
+        /// zorp_factory_address="0x5FbDB2315678afecb367f032d93F642f64180aa3";
+        /// zorp_factory_to="0xd6c12888363B422e72647FB95c97fE007C8a7870";
+        /// zorp_factory_amount="1";
+        ///
+        /// cast call "${zorp_factory_address}" \
+        ///     --rpc-url 127.0.0.1:8545 \
+        ///     'withdraw(uint256)(address)' \
+        ///         "${zorp_factory_study_index}" \
+        ///         "${zorp_factory_study_index}"
+        /// ```
+        ///
+        /// ## Off-chain example with wagmi
+        ///
+        /// ```tsx
+        /// 'use client';
+        ///
+        /// import { useId, useState } from 'react';
+        /// import { useAccount, useReadContract } from 'wagmi';
+        /// import { abi as zorpFactoryAbi } from 'abi/IZorpFactory.json';
+        ///
+        /// export default function ZorpFactoryWriteWithdraw() {
+        ///   const addressFactoryAnvil = '0x5FbDB2315678afecb367f032d93F642f64180aa3'
+        ///   const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
+        ///   const [addressTo, setAddressTo] = useState<`0x${string}` | null>(null);
+        ///   const [ammount, setAmmount] = useState<number>(0);
+        ///   const addressFactoryId = useId();
+        ///   const addressToId = useId();
+        ///   const ammountId = useId();
+        ///   const { isConnected } = useAccount();
+        ///
+        ///   const { data: receipt, isFetching, isSuccess } = useReadContract({
+        ///     address: addressFactory,
+        ///     abi: zorpFactoryAbi,
+        ///     functionName: 'withdraw',
+        ///     args: [addressTo, ammount],
+        ///     query: {
+        ///       enabled: addressFactory.length === addressFactoryAnvil.length
+        ///             && addressFactory.startsWith('0x')
+        ///             && !!addressTo
+        ///             && addressTo.length === addressFactoryAnvil.length
+        ///             && addressTo.startsWith('0x')
+        ///             && !Number.isNaN(ammount)
+        ///             && ammount > 0,
+        ///     },
+        ///   });
+        ///
+        ///   return (
+        ///     <>
+        ///       <label htmlFor={addressFactoryId}>ZORP Factory Address:</label>
+        ///       <input
+        ///         id={addressFactoryId}
+        ///         value={addressFactory}
+        ///         onChange={(event) => {
+        ///           setAddressFactory(event.target.value as `0x${string}`);
+        ///         }}
+        ///         disabled={isFetching}
+        ///       />
+        ///
+        ///       <label htmlFor={addressToId}>ZORP Factory withdraw address:</label>
+        ///       <input
+        ///         id={addressToId}
+        ///         value={addressTo}
+        ///         onChange={(event) => {
+        ///           setAddressTo(event.target.value as `0x${string}`);
+        ///         }}
+        ///         disabled={isFetching}
+        ///       />
+        ///
+        ///       <label htmlFor={ammountId}>ZORP Factory withdraw amount:</label>
+        ///       <input
+        ///         id={ammountId}
+        ///         value={ammount}
+        ///         onChange={(event) => {
+        ///           const value = Number.parseInt(event.target.value);
+        ///           if (Number.isNaN(value) || value < 1) {
+        ///             console.error('Input value was not an intager greater than 1');
+        ///             return;
+        ///           }
+        ///           setAmmount(value);
+        ///         }}
+        ///         disabled={isFetching}
+        ///       />
+        ///
+        ///       <span>ZorpFactory withdraw receipt: {receipt as string}</span>
+        ///     </>
+        ///   );
+        /// }
+        /// ```
         function withdraw(address payable to, uint256 amount) external payable;
     /* Owner }}} */
 
@@ -111,10 +380,10 @@ interface IZorpFactory_Functions {
         /// ## Off-chain example with cast
         ///
         /// ```bash
-        /// zorp_factory_address = "0x...DEADBEEF";
-        /// zorp_study_address = "0x...BOBATEA";
-        /// zorp_study_start = 68;
-        /// zorp_study_limit = 419;
+        /// zorp_factory_address="0x5FbDB2315678afecb367f032d93F642f64180aa3";
+        /// zorp_study_address="0x...BOBATEA";
+        /// zorp_study_start=68;
+        /// zorp_study_limit=419;
         ///
         /// cast call "${zorp_factory_address}" \
         ///     --rpc-url 127.0.0.1:8545 \
@@ -160,9 +429,9 @@ interface IZorpFactory_Functions {
         /// ## Off-chain example with cast
         ///
         /// ```bash
-        /// zorp_factory_address = "0x...DEADBEEF";
-        /// zorp_factory_start = 68;
-        /// zorp_factory_limit = 419;
+        /// zorp_factory_address="0x5FbDB2315678afecb367f032d93F642f64180aa3";
+        /// zorp_factory_start=68;
+        /// zorp_factory_limit=419;
         ///
         /// cast call "${zorp_factory_address}" \
         ///     --rpc-url 127.0.0.1:8545 \
