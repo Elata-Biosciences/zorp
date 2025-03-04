@@ -32,7 +32,7 @@ export default function IrysFetchFileGpgKey({
 		config: wagmiConfig.wagmiConfig,
 		abi: ZorpStudyABI,
 		address: wagmiConfig[chainName].contracts.ZorpStudy[sourceId].address,
-		functionName: 'encryptionKey',
+		functionName: 'encryption_key',
 	});
 
 	const { data: encryptionKey } = useQuery({

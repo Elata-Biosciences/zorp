@@ -27,23 +27,23 @@ contract ZorpStudy is Ownable, ReentrancyGuard {
     uint256 public study_status;
     uint256 public participant_payout_amount;
 
-    string public encryptionKey;
+    string public encryption_key;
 
     mapping(address => uint256) public participant_status;
     mapping(address => uint256) public participant_index;
     mapping(uint256 => string) public submitted_data;
 
     /// @param initialOwner_ owner or admin of study
-    /// @param encryptionKey_ pointer to public GPG/PGP key
+    /// @param encryption_key_ pointer to public GPG/PGP key
     constructor(
         address payable initialOwner_,
-        string memory encryptionKey_
+        string memory encryption_key_
     ) payable Ownable(initialOwner_) {
         require(msg.value > 0, "ZorpStudy: Invalid message value");
         // TODO: consider setting a constant minimum
 
         // Future: accept constructor args (e.g. merkleRoot, externalNullifier).
-        encryptionKey = encryptionKey_;
+        encryption_key = encryption_key_;
 
         // TODO: consider checking sender has similar interface as `ZorpFactory` smart contract
         creator = msg.sender;

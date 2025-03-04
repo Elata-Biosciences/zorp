@@ -35,7 +35,7 @@ interface IZorpStudy_Storage {
         function participant_payout_amount() external view returns (uint256);
 
         /// Pointer to GPG/PGP public key that submissions are to be encrypted with
-        function encryptionKey() external view returns (string memory);
+        function encryption_key() external view returns (string memory);
 
         /// See `PARTICIPANT_STATUS__` constants
         function participant_status(address) external view returns (uint256);

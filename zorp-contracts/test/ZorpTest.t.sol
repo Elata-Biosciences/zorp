@@ -41,8 +41,8 @@ contract ZorpTest is Test {
         vm.deal(address(this), 1000 ether);
     }
 
-    function createFundedStudy(address payable initialOwner, string memory encryptionKey) internal returns (address) {
-        return factory.createStudy{value: 1 ether}(initialOwner, encryptionKey);
+    function createFundedStudy(address payable initialOwner, string memory encryption_key) internal returns (address) {
+        return factory.createStudy{value: 1 ether}(initialOwner, encryption_key);
     }
 
     function testCreateStudy() public {
@@ -54,7 +54,7 @@ contract ZorpTest is Test {
         uint256 count = factory.latest_study_index();
         assertEq(count, 1, "There should be exactly one study created");
 
-        assertEq(IZorpStudy(newStudy).encryptionKey(), ZORP_STUDY__ENCRYPTION_KEY, "Failed to retrieve store encryption key");
+        assertEq(IZorpStudy(newStudy).encryption_key(), ZORP_STUDY__ENCRYPTION_KEY, "Failed to retrieve store encryption key");
         assertTrue(newStudy.balance > 0, "Failed to transfer any funds to study?!");
     }
 
