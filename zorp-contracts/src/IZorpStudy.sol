@@ -157,6 +157,45 @@ interface IZorpStudy_Storage {
         /// ## Off-chain example with wagmi
         ///
         /// ```tsx
+        /// 'use client';
+        ///
+        /// import { useId, useState } from 'react';
+        /// import { useReadContract } from 'wagmi';
+        /// import { abi as zorpStudyAbi } from 'abi/IZorpStudy.json';
+        ///
+        /// export default function ZorpStudyReadCreator() {
+        ///   const addressStudyAnvil = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'
+        ///   const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
+        ///
+        ///   const addressStudyId = useId();
+        ///
+        ///   const { data: creator, isFetching } = useReadContract({
+        ///     address: addressStudy,
+        ///     abi: zorpStudyAbi,
+        ///     functionName: 'creator',
+        ///     args: [],
+        ///     query: {
+        ///       enabled: addressStudy.length === addressStudyAnvil.length
+        ///             && addressStudy.startsWith('0x'),
+        ///     },
+        ///   });
+        ///
+        ///   return (
+        ///     <>
+        ///       <label htmlFor={addressStudyId}>ZORP Study Address:</label>
+        ///       <input
+        ///         id={addressStudyId}
+        ///         value={addressStudy}
+        ///         onChange={(event) => {
+        ///           setAddressStudy(event.target.value as `0x${string}`);
+        ///         }}
+        ///         disabled={isFetching}
+        ///       />
+        ///
+        ///       <span>ZorpStudy creator address: {creator as `0x${string}`}</span>
+        ///     </>
+        ///   );
+        /// }
         /// ```
         function creator() external view returns (address);
     /* Immutable }}} */
@@ -180,6 +219,45 @@ interface IZorpStudy_Storage {
         /// ## Off-chain example with wagmi
         ///
         /// ```tsx
+        /// 'use client';
+        ///
+        /// import { useId, useState } from 'react';
+        /// import { useReadContract } from 'wagmi';
+        /// import { abi as zorpStudyAbi } from 'abi/IZorpStudy.json';
+        ///
+        /// export default function ZorpStudyReadSubmissions() {
+        ///   const addressStudyAnvil = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'
+        ///   const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
+        ///
+        ///   const addressStudyId = useId();
+        ///
+        ///   const { data: submissions, isFetching } = useReadContract({
+        ///     address: addressStudy,
+        ///     abi: zorpStudyAbi,
+        ///     functionName: 'submissions',
+        ///     args: [],
+        ///     query: {
+        ///       enabled: addressStudy.length === addressStudyAnvil.length
+        ///             && addressStudy.startsWith('0x'),
+        ///     },
+        ///   });
+        ///
+        ///   return (
+        ///     <>
+        ///       <label htmlFor={addressStudyId}>ZORP Study Address:</label>
+        ///       <input
+        ///         id={addressStudyId}
+        ///         value={addressStudy}
+        ///         onChange={(event) => {
+        ///           setAddressStudy(event.target.value as `0x${string}`);
+        ///         }}
+        ///         disabled={isFetching}
+        ///       />
+        ///
+        ///       <span>ZorpStudy submissions count: {submissions as string}</span>
+        ///     </>
+        ///   );
+        /// }
         /// ```
         function submissions() external view returns (uint256);
 
@@ -201,6 +279,45 @@ interface IZorpStudy_Storage {
         /// ## Off-chain example with wagmi
         ///
         /// ```tsx
+        /// 'use client';
+        ///
+        /// import { useId, useState } from 'react';
+        /// import { useReadContract } from 'wagmi';
+        /// import { abi as zorpStudyAbi } from 'abi/IZorpStudy.json';
+        ///
+        /// export default function ZorpStudyReadInvalidated() {
+        ///   const addressStudyAnvil = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'
+        ///   const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
+        ///
+        ///   const addressStudyId = useId();
+        ///
+        ///   const { data: invalidated, isFetching } = useReadContract({
+        ///     address: addressStudy,
+        ///     abi: zorpStudyAbi,
+        ///     functionName: 'invalidated',
+        ///     args: [],
+        ///     query: {
+        ///       enabled: addressStudy.length === addressStudyAnvil.length
+        ///             && addressStudy.startsWith('0x'),
+        ///     },
+        ///   });
+        ///
+        ///   return (
+        ///     <>
+        ///       <label htmlFor={addressStudyId}>ZORP Study Address:</label>
+        ///       <input
+        ///         id={addressStudyId}
+        ///         value={addressStudy}
+        ///         onChange={(event) => {
+        ///           setAddressStudy(event.target.value as `0x${string}`);
+        ///         }}
+        ///         disabled={isFetching}
+        ///       />
+        ///
+        ///       <span>ZorpStudy invalidated count: {invalidated as string}</span>
+        ///     </>
+        ///   );
+        /// }
         /// ```
         function invalidated() external view returns (uint256);
 
@@ -222,6 +339,45 @@ interface IZorpStudy_Storage {
         /// ## Off-chain example with wagmi
         ///
         /// ```tsx
+        /// 'use client';
+        ///
+        /// import { useId, useState } from 'react';
+        /// import { useReadContract } from 'wagmi';
+        /// import { abi as zorpStudyAbi } from 'abi/IZorpStudy.json';
+        ///
+        /// export default function ZorpStudyReadStudyStatus() {
+        ///   const addressStudyAnvil = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'
+        ///   const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
+        ///
+        ///   const addressStudyId = useId();
+        ///
+        ///   const { data: study_status, isFetching } = useReadContract({
+        ///     address: addressStudy,
+        ///     abi: zorpStudyAbi,
+        ///     functionName: 'study_status',
+        ///     args: [],
+        ///     query: {
+        ///       enabled: addressStudy.length === addressStudyAnvil.length
+        ///             && addressStudy.startsWith('0x'),
+        ///     },
+        ///   });
+        ///
+        ///   return (
+        ///     <>
+        ///       <label htmlFor={addressStudyId}>ZORP Study Address:</label>
+        ///       <input
+        ///         id={addressStudyId}
+        ///         value={addressStudy}
+        ///         onChange={(event) => {
+        ///           setAddressStudy(event.target.value as `0x${string}`);
+        ///         }}
+        ///         disabled={isFetching}
+        ///       />
+        ///
+        ///       <span>ZorpStudy status: {study_status as string}</span>
+        ///     </>
+        ///   );
+        /// }
         /// ```
         function study_status() external view returns (uint256);
 
@@ -255,6 +411,45 @@ interface IZorpStudy_Storage {
         /// ## Off-chain example with wagmi
         ///
         /// ```tsx
+        /// 'use client';
+        ///
+        /// import { useId, useState } from 'react';
+        /// import { useReadContract } from 'wagmi';
+        /// import { abi as zorpStudyAbi } from 'abi/IZorpStudy.json';
+        ///
+        /// export default function ZorpStudyReadParticipantPayoutAmount() {
+        ///   const addressStudyAnvil = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'
+        ///   const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
+        ///
+        ///   const addressStudyId = useId();
+        ///
+        ///   const { data: participant_payout_amount, isFetching } = useReadContract({
+        ///     address: addressStudy,
+        ///     abi: zorpStudyAbi,
+        ///     functionName: 'participant_payout_amount',
+        ///     args: [],
+        ///     query: {
+        ///       enabled: addressStudy.length === addressStudyAnvil.length
+        ///             && addressStudy.startsWith('0x'),
+        ///     },
+        ///   });
+        ///
+        ///   return (
+        ///     <>
+        ///       <label htmlFor={addressStudyId}>ZORP Study Address:</label>
+        ///       <input
+        ///         id={addressStudyId}
+        ///         value={addressStudy}
+        ///         onChange={(event) => {
+        ///           setAddressStudy(event.target.value as `0x${string}`);
+        ///         }}
+        ///         disabled={isFetching}
+        ///       />
+        ///
+        ///       <span>ZorpStudy per-participant payout: {participant_payout_amount as string}</span>
+        ///     </>
+        ///   );
+        /// }
         /// ```
         function participant_payout_amount() external view returns (uint256);
 
@@ -274,7 +469,45 @@ interface IZorpStudy_Storage {
         /// ## Off-chain example with wagmi
         ///
         /// ```tsx
-        /// /* see `.submitData(string)` */
+        /// 'use client';
+        ///
+        /// import { useId, useState } from 'react';
+        /// import { useReadContract } from 'wagmi';
+        /// import { abi as zorpStudyAbi } from 'abi/IZorpStudy.json';
+        ///
+        /// export default function ZorpStudyReadEncryptionKeyCid() {
+        ///   const addressStudyAnvil = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'
+        ///   const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
+        ///
+        ///   const addressStudyId = useId();
+        ///
+        ///   const { data: encryption_key_cid, isFetching } = useReadContract({
+        ///     address: addressStudy,
+        ///     abi: zorpStudyAbi,
+        ///     functionName: 'encryption_key',
+        ///     args: [],
+        ///     query: {
+        ///       enabled: addressStudy.length === addressStudyAnvil.length
+        ///             && addressStudy.startsWith('0x'),
+        ///     },
+        ///   });
+        ///
+        ///   return (
+        ///     <>
+        ///       <label htmlFor={addressStudyId}>ZORP Study Address:</label>
+        ///       <input
+        ///         id={addressStudyId}
+        ///         value={addressStudy}
+        ///         onChange={(event) => {
+        ///           setAddressStudy(event.target.value as `0x${string}`);
+        ///         }}
+        ///         disabled={isFetching}
+        ///       />
+        ///
+        ///       <span>ZorpStudy encryption key CID: {encryption_key_cid as string}</span>
+        ///     </>
+        ///   );
+        /// }
         /// ```
         function encryption_key() external view returns (string memory);
 
@@ -299,6 +532,59 @@ interface IZorpStudy_Storage {
         /// ## Off-chain example with wagmi
         ///
         /// ```tsx
+        /// 'use client';
+        ///
+        /// import { useId, useState } from 'react';
+        /// import { useReadContract } from 'wagmi';
+        /// import { abi as zorpStudyAbi } from 'abi/IZorpStudy.json';
+        ///
+        /// export default function ZorpStudyReadParticipantStatus() {
+        ///   const addressStudyAnvil = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'
+        ///   const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
+        ///   const [addressParticipant, setAddressParticipant] = useState<`0x${string}`>('0x70997970C51812dc3A010C7d01b50e0d17dc79C8');
+        ///
+        ///   const addressStudyId = useId();
+        ///   const addressParticipantId = useId();
+        ///
+        ///   const { data: participant_status, isFetching } = useReadContract({
+        ///     address: addressStudy,
+        ///     abi: zorpStudyAbi,
+        ///     functionName: 'participant_status',
+        ///     args: [addressParticipant],
+        ///     query: {
+        ///       enabled: addressStudy.length === addressStudyAnvil.length
+        ///             && addressStudy.startsWith('0x')
+        ///             && addressParticipant.length === addressStudyAnvil.length
+        ///             && addressParticipant.startsWith('0x'),
+        ///     },
+        ///   });
+        ///
+        ///   return (
+        ///     <>
+        ///       <label htmlFor={addressStudyId}>ZORP Study Address:</label>
+        ///       <input
+        ///         id={addressStudyId}
+        ///         value={addressStudy}
+        ///         onChange={(event) => {
+        ///           setAddressStudy(event.target.value as `0x${string}`);
+        ///         }}
+        ///         disabled={isFetching}
+        ///       />
+        ///
+        ///       <label htmlFor={addressParticipantId}>ZORP Participant Address:</label>
+        ///       <input
+        ///         id={addressParticipantId}
+        ///         value={addressParticipant}
+        ///         onChange={(event) => {
+        ///           setAddressParticipant(event.target.value as `0x${string}`);
+        ///         }}
+        ///         disabled={isFetching}
+        ///       />
+        ///
+        ///       <span>ZorpStudy participant status: {participant_status as string}</span>
+        ///     </>
+        ///   );
+        /// }
         /// ```
         function participant_status(address participant) external view returns (uint256);
 
@@ -324,6 +610,59 @@ interface IZorpStudy_Storage {
         /// ## Off-chain example with wagmi
         ///
         /// ```tsx
+        /// 'use client';
+        ///
+        /// import { useId, useState } from 'react';
+        /// import { useReadContract } from 'wagmi';
+        /// import { abi as zorpStudyAbi } from 'abi/IZorpStudy.json';
+        ///
+        /// export default function ZorpStudyReadParticipantIndex() {
+        ///   const addressStudyAnvil = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'
+        ///   const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
+        ///   const [addressParticipant, setAddressParticipant] = useState<`0x${string}`>('0x70997970C51812dc3A010C7d01b50e0d17dc79C8');
+        ///
+        ///   const addressStudyId = useId();
+        ///   const addressParticipantId = useId();
+        ///
+        ///   const { data: participant_index, isFetching } = useReadContract({
+        ///     address: addressStudy,
+        ///     abi: zorpStudyAbi,
+        ///     functionName: 'participant_index',
+        ///     args: [addressParticipant],
+        ///     query: {
+        ///       enabled: addressStudy.length === addressStudyAnvil.length
+        ///             && addressStudy.startsWith('0x')
+        ///             && addressParticipant.length === addressStudyAnvil.length
+        ///             && addressParticipant.startsWith('0x'),
+        ///     },
+        ///   });
+        ///
+        ///   return (
+        ///     <>
+        ///       <label htmlFor={addressStudyId}>ZORP Study Address:</label>
+        ///       <input
+        ///         id={addressStudyId}
+        ///         value={addressStudy}
+        ///         onChange={(event) => {
+        ///           setAddressStudy(event.target.value as `0x${string}`);
+        ///         }}
+        ///         disabled={isFetching}
+        ///       />
+        ///
+        ///       <label htmlFor={addressParticipantId}>ZORP Participant Address:</label>
+        ///       <input
+        ///         id={addressParticipantId}
+        ///         value={addressParticipant}
+        ///         onChange={(event) => {
+        ///           setAddressParticipant(event.target.value as `0x${string}`);
+        ///         }}
+        ///         disabled={isFetching}
+        ///       />
+        ///
+        ///       <span>ZorpStudy participant index: {participant_index as string}</span>
+        ///     </>
+        ///   );
+        /// }
         /// ```
         function participant_index(address participant) external view returns (uint256);
 
@@ -348,6 +687,65 @@ interface IZorpStudy_Storage {
         /// ## Off-chain example with wagmi
         ///
         /// ```tsx
+        /// 'use client';
+        ///
+        /// import { useId, useState } from 'react';
+        /// import { useReadContract } from 'wagmi';
+        /// import { abi as zorpStudyAbi } from 'abi/IZorpStudy.json';
+        ///
+        /// export default function ZorpStudyReadSubmittedData() {
+        ///   const addressStudyAnvil = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'
+        ///   const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
+        ///   const [index, setIndex] = useState<number>(0);
+        ///
+        ///   const addressStudyId = useId();
+        ///   const indexId = useId();
+        ///
+        ///   const { data: submitted_data, isFetching } = useReadContract({
+        ///     address: addressStudy,
+        ///     abi: zorpStudyAbi,
+        ///     functionName: 'submitted_data',
+        ///     args: [index],
+        ///     query: {
+        ///       enabled: addressStudy.length === addressStudyAnvil.length
+        ///             && addressStudy.startsWith('0x')
+        ///             && !!index
+        ///             && index > 0
+        ///     },
+        ///   });
+        ///   console.warn({ submitted_data });
+        ///
+        ///   return (
+        ///     <>
+        ///       <label htmlFor={addressStudyId}>ZORP Study Address:</label>
+        ///       <input
+        ///         id={addressStudyId}
+        ///         value={addressStudy}
+        ///         onChange={(event) => {
+        ///           setAddressStudy(event.target.value as `0x${string}`);
+        ///         }}
+        ///         disabled={isFetching}
+        ///       />
+        ///
+        ///       <label htmlFor={indexId}>ZORP data index:</label>
+        ///       <input
+        ///         id={indexId}
+        ///         value={index}
+        ///         onChange={(event) => {
+        ///           const value = Number.parseInt(event.target.value);
+        ///           if (!isNaN(value)) {
+        ///             setIndex(value);
+        ///           }
+        ///         }}
+        ///         disabled={isFetching}
+        ///       />
+        ///
+        ///       <span>ZorpStudy data CID: {
+        ///         !!(submitted_data as string).length ? submitted_data as string : 'null'
+        ///       }</span>
+        ///     </>
+        ///   );
+        /// }
         /// ```
         function submitted_data(uint256 index) external view returns (string memory);
     /* Mutable }}} */
