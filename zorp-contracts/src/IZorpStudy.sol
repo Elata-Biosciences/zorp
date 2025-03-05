@@ -589,7 +589,7 @@ interface IZorpStudy_Storage {
         function participant_status(address participant) external view returns (uint256);
 
         /// @notice Maybe get an index for given participant
-        /// @param participant
+        /// @param participant Address of possible `ZorpStudy` participant
         /// @return Index pointing into `submitted_data` mapping
         ///
         /// @dev Index `0` should always point to nonexistent participant(s)
@@ -667,7 +667,7 @@ interface IZorpStudy_Storage {
         function participant_index(address participant) external view returns (uint256);
 
         /// @notice Get submitted data for given participant address
-        /// @param index
+        /// @param index Key into mapping to attempt getting data from
         /// @return IPFS CID string
         ///
         /// @dev Index `0` should always be empty string
