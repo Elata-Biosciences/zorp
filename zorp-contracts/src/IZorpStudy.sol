@@ -713,7 +713,6 @@ interface IZorpStudy_Storage {
         ///             && index > 0
         ///     },
         ///   });
-        ///   console.warn({ submitted_data });
         ///
         ///   return (
         ///     <>
@@ -741,7 +740,7 @@ interface IZorpStudy_Storage {
         ///       />
         ///
         ///       <span>ZorpStudy data CID: {
-        ///         !!(submitted_data as string).length ? submitted_data as string : 'null'
+        ///         !!(submitted_data as string)?.length ? submitted_data as string : 'null'
         ///       }</span>
         ///     </>
         ///   );
