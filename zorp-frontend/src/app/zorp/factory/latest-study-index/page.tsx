@@ -9,7 +9,7 @@ export default function ZorpFactoryReadLatestStudyIndex() {
   const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
   const addressFactoryId = useId();
 
-  const { data: latest_study_index, isFetching, isSuccess } = useReadContract({
+  const { data: latest_study_index, isFetching } = useReadContract({
     address: addressFactory,
     abi: zorpFactoryAbi,
     functionName: 'latest_study_index',

@@ -855,10 +855,9 @@ interface IZorpStudy_Functions {
         /// import { useAccount, useReadContract, useWriteContract } from 'wagmi';
         /// import { abi as zorpStudyAbi } from 'abi/IZorpStudy.json';
         ///
-        /// export default function ZorpStudyReadParticipantStatus() {
+        /// export default function ZorpStudyWriteClaimReward() {
         ///   const addressStudyAnvil = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'
         ///   const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
-        ///   const [addressParticipant, setAddressParticipant] = useState<`0x${string}`>('0x70997970C51812dc3A010C7d01b50e0d17dc79C8');
         ///   const [isFetching, setIsFetching] = useState<boolean>(false);
         ///   const [receipt, setReceipt] = useState<string>('... pending');
         ///
@@ -875,9 +874,7 @@ interface IZorpStudy_Functions {
         ///     query: {
         ///       enabled: isConnected
         ///             && addressStudy.length === addressStudyAnvil.length
-        ///             && addressStudy.startsWith('0x')
-        ///             && addressParticipant.length === addressStudyAnvil.length
-        ///             && addressParticipant.startsWith('0x'),
+        ///             && addressStudy.startsWith('0x'),
         ///     },
         ///   });
         ///

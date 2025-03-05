@@ -58,7 +58,7 @@ export default function IrysBalanceGet({
 			setMessage(message);
 			setState(null);
 		}
-	}, [address]);
+	}, [ address, message, setState, webIrysOpts ]);
 
 	return (
 		<>

@@ -87,7 +87,7 @@ export default function ZorpFactoryCreateStudy() {
 			setMessage(message)
 		});
 
-	}, [isConnected, address, irysUploadData]);
+	}, [isConnected, address, irysUploadData, writeContractAsync]);
 
 	return (
 		<div className="w-full flex flex-col">

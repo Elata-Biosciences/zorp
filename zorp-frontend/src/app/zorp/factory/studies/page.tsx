@@ -11,7 +11,7 @@ export default function ZorpFactoryReadStudyAddress() {
 	const addressFactoryId = useId();
 	const addressFactoryStudyIndexId = useId();
 
-	const { data: studyAddress, isFetching, isSuccess } = useReadContract({
+	const { data: studyAddress, isFetching } = useReadContract({
 		address: addressFactory,
 		abi: zorpFactoryAbi,
 		functionName: 'studies',

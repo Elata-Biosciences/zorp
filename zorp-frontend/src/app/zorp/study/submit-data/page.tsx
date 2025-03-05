@@ -90,7 +90,7 @@ export default function ZorpStudySubmitData() {
 			console.warn('ZorpStudySubmitData', {message});
 			setMessage(message)
 		});
-	}, [isConnected, address, irysUploadData]);
+	}, [isConnected, address, irysUploadData, writeContractAsync]);
 
 	return (
 		<div className="w-full flex flex-col">

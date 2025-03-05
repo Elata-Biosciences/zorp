@@ -9,7 +9,7 @@ export default function ZorpFactoryReadVersion() {
 	const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
 	const addressFactoryId = useId();
 
-	const { data: version, isFetching, isSuccess } = useReadContract({
+	const { data: version, isFetching } = useReadContract({
 		address: addressFactory,
 		abi: zorpFactoryAbi,
 		functionName: 'VERSION',
@@ -29,6 +29,7 @@ export default function ZorpFactoryReadVersion() {
 				onChange={(event) => {
 					setAddressFactory(event.target.value as `0x${string}`);
 				}}
+				disabled={isFetching}
 			/>
 			<span>ZorpFactory version: {version as string}</span>
 		</>

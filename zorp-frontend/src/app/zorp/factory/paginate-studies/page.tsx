@@ -15,7 +15,7 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 	const startId = useId();
 	const limitId = useId();
 
-	const { data: studyAddresses, isFetching, isSuccess, refetch } = useReadContract({
+	const { data: studyAddresses, isFetching, refetch } = useReadContract({
 		address: addressFactory,
 		abi: zorpFactoryAbi,
 		functionName: 'paginateStudies',

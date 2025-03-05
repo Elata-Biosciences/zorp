@@ -23,7 +23,7 @@ interface IZorpFactory_Storage {
         ///
         /// cast call "${zorp_factory_address}" \
         ///     --rpc-url 127.0.0.1:8545 \
-        ///     'VERSION()(uint256)'
+        ///     'VERSION()(uint256)';
         /// ```
         ///
         /// ## Off-chain example with wagmi
@@ -40,7 +40,7 @@ interface IZorpFactory_Storage {
         ///   const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
         ///   const addressFactoryId = useId();
         ///
-        ///   const { data: version, isFetching, isSuccess } = useReadContract({
+        ///   const { data: version, isFetching } = useReadContract({
         ///     address: addressFactory,
         ///     abi: zorpFactoryAbi,
         ///     functionName: 'VERSION',
@@ -60,6 +60,7 @@ interface IZorpFactory_Storage {
         ///         onChange={(event) => {
         ///           setAddressFactory(event.target.value as `0x${string}`);
         ///         }}
+        ///         disabled={isFetching}
         ///       />
         ///       <span>ZorpFactory version: {version as string}</span>
         ///     </>
@@ -93,7 +94,7 @@ interface IZorpFactory_Storage {
         ///
         /// cast call "${zorp_factory_address}" \
         ///     --rpc-url 127.0.0.1:8545 \
-        ///     'latest_study_index()(uint256)'
+        ///     'latest_study_index()(uint256)';
         /// ```
         ///
         /// ## Off-chain example with wagmi
@@ -110,7 +111,7 @@ interface IZorpFactory_Storage {
         ///   const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
         ///   const addressFactoryId = useId();
         ///
-        ///   const { data: latest_study_index, isFetching, isSuccess } = useReadContract({
+        ///   const { data: latest_study_index, isFetching } = useReadContract({
         ///     address: addressFactory,
         ///     abi: zorpFactoryAbi,
         ///     functionName: 'latest_study_index',
@@ -180,7 +181,7 @@ interface IZorpFactory_Storage {
         ///   const addressFactoryId = useId();
         ///   const addressFactoryStudyIndexId = useId();
         ///
-        ///   const { data: studyAddress, isFetching, isSuccess } = useReadContract({
+        ///   const { data: studyAddress, isFetching } = useReadContract({
         ///     address: addressFactory,
         ///     abi: zorpFactoryAbi,
         ///     functionName: 'studies',
