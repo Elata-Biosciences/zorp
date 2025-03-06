@@ -37,16 +37,16 @@ _study_initialOwners=(
 	'0xF4eF5E0f51dA631Ea5fCc7AB2Cb1F98503f571C3'
 )
 
-## 
+##
 # Publish `ZorpFactory` to Anvil and return contract address
 ZorpFactory_constructor() {
 	local -a _args=(
-		create 
+		create
 		--broadcast
 		--rpc-url "${_test_net_url}"
 		--private-key "${_test_private_key0}"
 		src/ZorpFactory.sol:ZorpFactory
-		--constructor-args "${_initialOwner}" 
+		--constructor-args "${_initialOwner}"
 	);
 
 	pushd "${__G_DIR__}/zorp-contracts" 1>/dev/null 2>&1;
@@ -129,6 +129,41 @@ ZorpFactory_createStudy() {
 	cast "${_args[@]}";
 }
 
+##
+# Publish `ZorpStudy` to Anvil and return contract address
+ZorpStudy_constructor() {
+	local -a _args=(
+		create
+		--broadcast
+		--rpc-url "${_test_net_url}"
+		--private-key "${_test_private_key0}"
+		src/ZorpStudy.sol:ZorpStudy
+		--value "1ether"
+		--constructor-args "${_initialOwner}" "${_encryptionKey}"
+	);
+
+	pushd "${__G_DIR__}/zorp-contracts" 1>/dev/null 2>&1;
+
+	if ((__VERBOSE__)); then
+		printf >&2 'ZorpStudy_publish command --->\nforge %s\n<--- ZorpStudy_publish command\n' "${_args[*]}";
+	fi
+
+	local _result;
+	_result="$( forge "${_args[@]}" )";
+	popd 1>/dev/null 2>&1;
+
+	if ((__VERBOSE__)); then
+		printf >&2 'ZorpStudy_publish result --->\n%s\n<--- ZorpStudy_publish result\n' "${_result:?Undefined result}";
+	fi
+
+	awk '{
+		if ($0 ~ "Deployed to:") {
+			print $3;
+			exit 0;
+		}
+	}' <<<"${_result}";
+}
+
 ## Do the thangs
 _zorp_factory_address="$( ZorpFactory_constructor )";
 printf >&2 '_zorp_factory_address -> %s\n' "${_zorp_factory_address}"
@@ -143,4 +178,7 @@ done
 
 _zorp_studies="$( ZorpFactory_paginateStudies "${_zorp_factory_address}" )";
 printf >&2 '_zorp_studies -> %s\n' "${_zorp_studies}"
+
+_zorp_study_address="$( ZorpStudy_constructor )";
+printf >&2 '_zorp_study_address -> %s\n' "${_zorp_study_address}"
 
