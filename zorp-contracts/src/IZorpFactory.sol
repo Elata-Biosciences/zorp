@@ -68,9 +68,138 @@ interface IZorpFactory_Storage {
         /// }
         /// ```
         function VERSION() external view returns (uint256);
+
+        /// @notice Placeholder for when future revision of `ZorpFactory` points to an instance it should supersede
+        /// @return Get contract address to previous ZorpFactory instance
+        /// @dev see `IZorpFactory_Storage.ref_factory_next()` provides one-half of doubly linked-list functionality
+        ///
+        /// ## On-chain example
+        ///
+        /// ```solidity
+        /// address factory = <ADDRESS_OF_ZORP_FACTORY>;
+        /// address previous_factory = IZorpFactory(factory).ref_factory_previous();
+        /// ```
+        ///
+        /// ## Off-chain example with cast
+        ///
+        /// ```bash
+        /// zorp_factory_address="0x5FbDB2315678afecb367f032d93F642f64180aa3";
+        ///
+        /// cast call "${zorp_factory_address}" \
+        ///     --rpc-url 127.0.0.1:8545 \
+        ///     'ref_factory_previous()(address)';
+        /// ```
+        ///
+        /// ## Off-chain example with wagmi
+        ///
+        /// ```tsx
+        /// 'use client';
+        ///
+        /// import { useId, useState } from 'react';
+        /// import { useReadContract } from 'wagmi';
+        /// import { abi as zorpFactoryAbi } from 'abi/IZorpFactory.json';
+        ///
+        /// export default function ZorpFactoryReadRefFactoryPrevious() {
+        ///   const addressFactoryAnvil = '0x5FbDB2315678afecb367f032d93F642f64180aa3'
+        ///   const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
+        ///   const addressFactoryId = useId();
+        ///
+        ///   const { data: ref_factory_previous, isFetching } = useReadContract({
+        ///     address: addressFactory,
+        ///     abi: zorpFactoryAbi,
+        ///     functionName: 'ref_factory_previous',
+        ///     args: [],
+        ///     query: {
+        ///       enabled: addressFactory.length === addressFactoryAnvil.length
+        ///             && addressFactory.startsWith('0x'),
+        ///     },
+        ///   });
+        ///
+        ///   return (
+        ///     <>
+        ///       <label htmlFor={addressFactoryId}>ZORP Factory Address:</label>
+        ///       <input
+        ///         id={addressFactoryId}
+        ///         value={addressFactory}
+        ///         onChange={(event) => {
+        ///           setAddressFactory(event.target.value as `0x${string}`);
+        ///         }}
+        ///         disabled={isFetching}
+        ///       />
+        ///       <span>ZorpFactory previous address: {ref_factory_previous as string}</span>
+        ///     </>
+        ///   );
+        /// }
+        /// ```
+        function ref_factory_previous() external view returns (address);
     /* Constants }}} */
 
     /* Immutable {{{ */
+        /// @notice When future revision of `ZorpFactory` is published this function will provide a pointer to that contract's address
+        /// @return Get contract address to next ZorpFactory instance
+        /// @dev see `IZorpFactory_Storage.ref_factory_previous()` provides one-half of doubly linked-list functionality
+        /// @dev see `IZorpFactory_Functions.setRefFactoryNext(address)`
+        ///
+        /// ## On-chain example
+        ///
+        /// ```solidity
+        /// address factory = <ADDRESS_OF_ZORP_FACTORY>;
+        /// address ref_next_factory = IZorpFactory(factory).ref_factory_next();
+        /// require(ref_next_factory != address(0), "There is a new ZorpFactory instance available");
+        /// ```
+        ///
+        /// ## Off-chain example with cast
+        ///
+        /// ```bash
+        /// zorp_factory_address="0x5FbDB2315678afecb367f032d93F642f64180aa3";
+        ///
+        /// cast call "${zorp_factory_address}" \
+        ///     --rpc-url 127.0.0.1:8545 \
+        ///     'ref_factory_next()(address)';
+        /// ```
+        ///
+        /// ## Off-chain example with wagmi
+        ///
+        /// ```tsx
+        /// 'use client';
+        ///
+        /// import { useId, useState } from 'react';
+        /// import { useReadContract } from 'wagmi';
+        /// import { abi as zorpFactoryAbi } from 'abi/IZorpFactory.json';
+        ///
+        /// export default function ZorpFactoryReadRefFactoryNext() {
+        ///   const addressFactoryAnvil = '0x5FbDB2315678afecb367f032d93F642f64180aa3'
+        ///   const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
+        ///   const addressFactoryId = useId();
+        ///
+        ///   const { data: ref_factory_next, isFetching } = useReadContract({
+        ///     address: addressFactory,
+        ///     abi: zorpFactoryAbi,
+        ///     functionName: 'ref_factory_next',
+        ///     args: [],
+        ///     query: {
+        ///       enabled: addressFactory.length === addressFactoryAnvil.length
+        ///             && addressFactory.startsWith('0x'),
+        ///     },
+        ///   });
+        ///
+        ///   return (
+        ///     <>
+        ///       <label htmlFor={addressFactoryId}>ZORP Factory Address:</label>
+        ///       <input
+        ///         id={addressFactoryId}
+        ///         value={addressFactory}
+        ///         onChange={(event) => {
+        ///           setAddressFactory(event.target.value as `0x${string}`);
+        ///         }}
+        ///         disabled={isFetching}
+        ///       />
+        ///       <span>ZorpFactory next address: {ref_factory_next as string}</span>
+        ///     </>
+        ///   );
+        /// }
+        /// ```
+        function ref_factory_next() external view returns (address);
     /* Immutable }}} */
 
     /* Mutable {{{ */
@@ -260,7 +389,23 @@ interface IZorpFactory_Functions {
     /* Public }}} */
 
     /* Owner {{{ */
-        /// @notice Restricted to `IZorpFactory.owner()`
+        /// @notice Restricted to `IZorpFactory.owner()` and may be written to **only** once
+        /// @param ref Address of new `ZorpFactory` instance that may contain more features, bug fixes, etc.
+        ///
+        /// @custom:throws "ZorpFactory: next factory reference already set"
+        ///
+        /// ## On-chain example
+        ///
+        /// ```solidity
+        /// address factory = <ADDRESS_OF_ZORP_FACTORY>;
+        ///
+        /// address payable ref = <ADDRESS_TO_NEW_FACTORY_CONTRACT>;
+        ///
+        /// IZorpFactory(factory).setRefFactoryNext(ref);
+        /// ```
+        function setRefFactoryNext(address ref) external payable;
+
+        /// @notice Restricted to `IZorpFactory.owner()` allows for withdrawing funds from contract
         /// @param to Address that should be paid from this contract with the native currency used by Blockchain
         /// @param amount Native currency for Blockchain to transfer from this contract to recipient
         ///

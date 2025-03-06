@@ -23,6 +23,12 @@ contract ZorpFactory is Ownable, ReentrancyGuard, IZorpFactory_Functions {
     /// @dev see `IZorpFactory_Storage.studies()`
     mapping(uint256 => address) public studies;
 
+    /// @dev see `IZorpFactory_Storage.ref_factory_previous()`
+    address public constant ref_factory_previous = address(0);
+
+    /// @dev see `IZorpFactory_Storage.ref_factory_next()`
+    address public ref_factory_next;
+
     event StudyCreated(address indexed studyAddress);
 
     constructor (address payable initialOwner_) Ownable(initialOwner_) {}
@@ -42,6 +48,12 @@ contract ZorpFactory is Ownable, ReentrancyGuard, IZorpFactory_Functions {
         studies[++latest_study_index] = newStudy;
         emit StudyCreated(newStudy);
         return newStudy;
+    }
+
+    /// @inheritdoc IZorpFactory_Functions
+    function setRefFactoryNext(address ref) external payable onlyOwner {
+        require(ref_factory_next == address(0), "ZorpFactory: next factory reference already set");
+        ref_factory_next = ref;
     }
 
     /// @inheritdoc IZorpFactory_Functions
