@@ -2,36 +2,57 @@
 
 import { useId, useState } from 'react';
 import { useReadContract } from 'wagmi';
-import { abi as zorpFactoryAbi } from 'abi/IZorpFactory.json';
+import { useContracts } from '@/contexts/Contracts';
+import ThemeSwitch from '@/components/features/ThemeSwitch';
+import * as config from '@/lib/constants/wagmiConfig';
 
 export default function ZorpFactoryReadLatestStudyIndex() {
-  const addressFactoryAnvil = '0x5FbDB2315678afecb367f032d93F642f64180aa3'
-  const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
-  const addressFactoryId = useId();
+	const addressFactoryAnvil = config.anvil.contracts.ZorpFactory[31337].address;
 
-  const { data: latest_study_index, isFetching } = useReadContract({
-    address: addressFactory,
-    abi: zorpFactoryAbi,
-    functionName: 'latest_study_index',
-    args: [],
-    query: {
-      enabled: addressFactory.length === addressFactoryAnvil.length
-            && addressFactory.startsWith('0x'),
-    },
-  });
+	const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
 
-  return (
-    <>
-      <label htmlFor={addressFactoryId}>ZORP Factory Address:</label>
-      <input
-        id={addressFactoryId}
-        value={addressFactory}
-        onChange={(event) => {
-          setAddressFactory(event.target.value as `0x${string}`);
-        }}
-        disabled={isFetching}
-      />
-      <span>ZorpFactory latest study index: {latest_study_index as string}</span>
-    </>
-  );
+	const addressFactoryId = useId();
+
+	const { ZorpFactory } = useContracts();
+
+	const enabled: boolean = !!ZorpFactory?.abi
+												&& !!Object.keys(ZorpFactory.abi).length
+												&& !!ZorpFactory?.address.length
+												&& addressFactory.length === addressFactoryAnvil.length
+												&& addressFactory.startsWith('0x');
+
+	const { data: latest_study_index, isFetching } = useReadContract({
+		abi: (ZorpFactory as NonNullable<typeof ZorpFactory>).abi,
+		address: (ZorpFactory as NonNullable<typeof ZorpFactory>).address,
+		functionName: 'latest_study_index',
+		args: [],
+		query: {
+			enabled,
+		},
+	});
+
+	return (
+		<div className="w-full flex flex-col">
+			<h1 className="flex flex-col sm:flex-row justify-center items-center text-4xl font-bold">
+				Zorp Factory -- Latest study index
+			</h1>
+			<div className="flex justify-center mt-8">
+				<ThemeSwitch />
+			</div>
+
+			<hr />
+			<section>
+				<label htmlFor={addressFactoryId}>ZORP Factory Address:</label>
+				<input
+					id={addressFactoryId}
+					value={addressFactory}
+					onChange={(event) => {
+						setAddressFactory(event.target.value as `0x${string}`);
+					}}
+					disabled={isFetching}
+				/>
+			</section>
+			<span>ZorpFactory latest study index: {latest_study_index as string}</span>
+		</div>
+	);
 }

@@ -2,31 +2,46 @@
 
 import { useId, useState } from 'react';
 import { useReadContract } from 'wagmi';
-import { abi as zorpStudyAbi } from 'abi/IZorpStudy.json';
+import { useContracts } from '@/contexts/Contracts';
+import ThemeSwitch from '@/components/features/ThemeSwitch';
+import * as config from '@/lib/constants/wagmiConfig';
 
 export default function ZorpStudyReadSubmittedData() {
-	const addressStudyAnvil = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'
+	const addressStudyAnvil = config.anvil.contracts.ZorpStudy[31337].address;
+
 	const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
 	const [index, setIndex] = useState<number>(0);
 
 	const addressStudyId = useId();
 	const indexId = useId();
 
+	const { ZorpStudy } = useContracts();
+
 	const { data: submitted_data, isFetching } = useReadContract({
-		address: addressStudy,
-		abi: zorpStudyAbi,
+		abi: (ZorpStudy as NonNullable<typeof ZorpStudy>).abi,
+		address: (ZorpStudy as NonNullable<typeof ZorpStudy>).address,
 		functionName: 'submitted_data',
 		args: [index],
 		query: {
 			enabled: addressStudy.length === addressStudyAnvil.length
 						&& addressStudy.startsWith('0x')
+						&& !!ZorpStudy?.abi
+						&& !!Object.keys(ZorpStudy.abi).length
+						&& !!ZorpStudy?.address.length
 						&& !!index
 						&& index > 0
 		},
 	});
 
 	return (
-		<>
+		<div className="w-full flex flex-col">
+			<h1 className="flex flex-col sm:flex-row justify-center items-center text-4xl font-bold">
+				Zorp Study -- Submitted data
+			</h1>
+			<div className="flex justify-center mt-8">
+				<ThemeSwitch />
+			</div>
+
 			<label htmlFor={addressStudyId}>ZORP Study Address:</label>
 			<input
 				id={addressStudyId}
@@ -53,6 +68,6 @@ export default function ZorpStudyReadSubmittedData() {
 			<span>ZorpStudy data CID: {
 				!!(submitted_data as string)?.length ? submitted_data as string : 'null'
 			}</span>
-		</>
+		</div>
 	);
 }

@@ -2,10 +2,13 @@
 
 import { useId, useState } from 'react';
 import { useAccount, useReadContract, useWriteContract } from 'wagmi';
-import { abi as zorpStudyAbi } from 'abi/IZorpStudy.json';
+import { useContracts } from '@/contexts/Contracts';
+import ThemeSwitch from '@/components/features/ThemeSwitch';
+import * as config from '@/lib/constants/wagmiConfig';
 
 export default function ZorpStudyWriteStartStudy() {
-	const addressStudyAnvil = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'
+	const addressStudyAnvil = config.anvil.contracts.ZorpStudy[31337].address;
+
 	const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
 	const [isFetching, setIsFetching] = useState<boolean>(false);
 	const [receipt, setReceipt] = useState<string>('... pending');
@@ -15,28 +18,31 @@ export default function ZorpStudyWriteStartStudy() {
 	const { address, isConnected } = useAccount();
 	const { writeContractAsync } = useWriteContract();
 
+	const { ZorpStudy } = useContracts();
+
 	const assertsClient = {
 		isAddressStudySet: addressStudy.length === addressStudyAnvil.length && addressStudy.startsWith('0x'),
 		isAddressWalletSet: !!address && address.length === addressStudyAnvil.length && address.startsWith('0x'),
+		isContractStudySet: !!ZorpStudy?.abi && !!Object.keys(ZorpStudy.abi).length && !!ZorpStudy?.address.length,
 	};
 
 	const { data: owner, isFetching: isFetchingOwner } = useReadContract({
-		address: addressStudy,
-		abi: zorpStudyAbi,
+		abi: (ZorpStudy as NonNullable<typeof ZorpStudy>).abi,
+		address: (ZorpStudy as NonNullable<typeof ZorpStudy>).address,
 		functionName: 'owner',
 		args: [],
 		query: {
-			enabled: assertsClient.isAddressStudySet,
+			enabled: assertsClient.isAddressStudySet && assertsClient.isContractStudySet,
 		},
 	});
 
 	const { data: study_status, isFetching: isFetchingStudyStatus } = useReadContract({
-		address: addressStudy,
-		abi: zorpStudyAbi,
+		abi: (ZorpStudy as NonNullable<typeof ZorpStudy>).abi,
+		address: (ZorpStudy as NonNullable<typeof ZorpStudy>).address,
 		functionName: 'study_status',
 		args: [],
 		query: {
-			enabled: assertsClient.isAddressStudySet,
+			enabled: assertsClient.isAddressStudySet && assertsClient.isContractStudySet,
 		},
 	});
 
@@ -56,12 +62,20 @@ export default function ZorpStudyWriteStartStudy() {
 	const enabled = isConnected
 								&& assertsClient.isAddressStudySet
 								&& assertsClient.isAddressWalletSet
+								&& assertsClient.isContractStudySet
 								&& assertsBlockchain.isAddressOwnerSet
 								&& assertsBlockchain.isStudyOwner
 								&& assertsBlockchain.isStudyInactive;
 
 	return (
-		<>
+		<div className="w-full flex flex-col">
+			<h1 className="flex flex-col sm:flex-row justify-center items-center text-4xl font-bold">
+				Zorp Study -- Start
+			</h1>
+			<div className="flex justify-center mt-8">
+				<ThemeSwitch />
+			</div>
+
 			<label htmlFor={addressStudyId}>ZORP Study Address:</label>
 			<input
 				id={addressStudyId}
@@ -88,8 +102,8 @@ export default function ZorpStudyWriteStartStudy() {
 
 					setIsFetching(true);
 					writeContractAsync({
-						address: addressStudy,
-						abi: zorpStudyAbi,
+						abi: (ZorpStudy as NonNullable<typeof ZorpStudy>).abi,
+						address: (ZorpStudy as NonNullable<typeof ZorpStudy>).address,
 						functionName: 'startStudy',
 						args: [],
 					}).then((response) => {
@@ -109,6 +123,6 @@ export default function ZorpStudyWriteStartStudy() {
 			>Start {enabled ? 'Available' : 'unavailable'}</button>
 
 			<span>ZorpStudy start receipt: {receipt}</span>
-		</>
+		</div>
 	);
 }

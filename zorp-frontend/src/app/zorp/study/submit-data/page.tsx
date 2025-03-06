@@ -1,23 +1,20 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import type { BigNumber } from 'bignumber.js';
 import type { Key } from 'openpgp';
 import { useAccount, useWriteContract } from 'wagmi';
-import type { WebIrysOpts } from '@/@types/irys';
-import { abi as ZorpStudyABI } from 'abi/IZorpStudy.json';
+import { useContracts } from '@/contexts/Contracts';
 import InputFileToEncryptedMessage from '@/components/features/InputFileToEncryptedMessage';
 import InputFileToGpgEncryptionKey from '@/components/features/InputFileToGpgEncryptionKey';
 import IrysBalanceGet from '@/components/features/IrysBalanceGet';
 import IrysFetchFileGpgKey from '@/components/features/IrysFetchFileGpgKey';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
+// import type { WebIrysOpts } from '@/@types/irys';
 
 export default function ZorpStudySubmitData() {
 	const className = '';
-
-	const { address, connector, isConnected } = useAccount();
-	const [provider, setProvider] = useState<null | unknown>(null);
 
 	// TODO: consider reducing need of keeping both `Key` and `File` in memory at same time
 	const [gpgKey, setGpgKey] = useState<null | { file: File; key: Key; }>(null);
@@ -30,30 +27,15 @@ export default function ZorpStudySubmitData() {
 
 	const [encryptedMessage, setEncryptedMessage] = useState<null | Uint8Array>(null);
 
-	const irysBalanceThreshold = 0.1;
-	const webIrysOpts: WebIrysOpts = {
-		token: 'WAT'
-	};
-
 	const [message, setMessage] = useState<string>('Info: connected wallet/provider required');
 	const { writeContractAsync } = useWriteContract({
 		config: config.wagmiConfig,
 	});
 
-	useEffect(() => {
-		if (isConnected && connector) {
-			console.warn('ZorpStudySubmitData', {isConnected, address});
-			connector.getProvider().then((gottenProvider) => {
-				setProvider(gottenProvider);
-			});
-		} else {
-			console.warn('ZorpStudySubmitData -- Not connected');
-		}
-	}, [address, connector, isConnected]);
+	const { address, isConnected } = useAccount();
+	const { ZorpStudy } = useContracts();
 
-	const handleZorpStudySubmitData = useCallback((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-		console.warn('ZorpStudySubmitData', {event});
-
+	const handleZorpStudySubmitData = useCallback(() => {
 		if (!isConnected) {
 			const message = 'Warn: waiting on client to connect an account';
 			console.warn('ZorpStudySubmitData', {message});
@@ -72,14 +54,16 @@ export default function ZorpStudySubmitData() {
 			setMessage(message)
 			return;
 		}
+		if (!ZorpStudy?.abi || !Object.keys(ZorpStudy.abi).length || !ZorpStudy?.address.length) {
+			const message = 'Error: no contracts found for current chain';
+			console.error('ZorpStudySubmitData', {message});
+			setMessage(message)
+			return;
+		}
 
-		// TODO: set `chainName` and `sourceId` dynamically or via `.env.<thang>` file
-		// TODO: set ZorpStudy contract address from list of user selected options
-		const chainName = 'anvil';
-		const sourceId = 31337
 		writeContractAsync({
-			abi: ZorpStudyABI,
-			address: config[chainName].contracts.ZorpStudy[sourceId].address,
+			abi: ZorpStudy.abi,
+			address: ZorpStudy.address,
 			functionName: 'submitData',
 			args: [
 				address.toString(),
@@ -90,7 +74,7 @@ export default function ZorpStudySubmitData() {
 			console.warn('ZorpStudySubmitData', {message});
 			setMessage(message)
 		});
-	}, [isConnected, address, irysUploadData, writeContractAsync]);
+	}, [isConnected, address, irysUploadData, writeContractAsync, ZorpStudy]);
 
 	return (
 		<div className="w-full flex flex-col">
@@ -113,15 +97,11 @@ export default function ZorpStudySubmitData() {
 			<IrysBalanceGet
 				labelText="Check Irys balance"
 				setState={setIrysBalance}
-				webIrysOpts={webIrysOpts}
-				address={address}
 			/>
 
 			<hr />
 
 			<IrysFetchFileGpgKey setState={setEncryptionKey} />
-
-			<hr />
 
 			<hr />
 
@@ -143,7 +123,8 @@ export default function ZorpStudySubmitData() {
 				onClick={(event) => {
 					event.stopPropagation();
 					event.preventDefault();
-					handleZorpStudySubmitData(event);
+					console.warn('ZorpStudySubmitData', {event});
+					handleZorpStudySubmitData();
 				}}
 			>Zorp Factory Create Study</button>
 

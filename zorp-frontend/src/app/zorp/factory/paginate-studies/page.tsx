@@ -2,7 +2,8 @@
 
 import { useId, useState } from 'react';
 import { useReadContract } from 'wagmi';
-import { abi as zorpFactoryAbi } from 'abi/IZorpFactory.json';
+import { useContracts } from '@/contexts/Contracts';
+import ThemeSwitch from '@/components/features/ThemeSwitch';
 
 export default function ZorpFactoryReadPaginateSubmittedData() {
 	const addressFactoryAnvil = '0x5FbDB2315678afecb367f032d93F642f64180aa3'
@@ -11,13 +12,14 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 	const [limit, setLimit] = useState<number>(10);
 
 	const addressFactoryId = useId();
-	const addressStudyId = useId();
 	const startId = useId();
 	const limitId = useId();
 
+	const { ZorpFactory } = useContracts();
+
 	const { data: studyAddresses, isFetching, refetch } = useReadContract({
-		address: addressFactory,
-		abi: zorpFactoryAbi,
+		abi: (ZorpFactory as NonNullable<typeof ZorpFactory>).abi,
+		address: (ZorpFactory as NonNullable<typeof ZorpFactory>).address,
 		functionName: 'paginateStudies',
 		args: [start, limit],
 		query: {
@@ -26,7 +28,15 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 	});
 
 	return (
-		<>
+		<div className="w-full flex flex-col">
+			<h1 className="flex flex-col sm:flex-row justify-center items-center text-4xl font-bold">
+				Zorp Factory -- Paginate studies
+			</h1>
+			<div className="flex justify-center mt-8">
+				<ThemeSwitch />
+			</div>
+
+			<hr />
 			<label htmlFor={addressFactoryId}>ZORP Factory Address:</label>
 			<input
 				id={addressFactoryId}
@@ -70,12 +80,16 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 				onClick={(event) => {
 					event.preventDefault();
 					event.stopPropagation();
-					const enabled = !isFetching
-												&& addressFactory.length === addressFactoryAnvil.length
-												&& addressFactory.startsWith('0x');
+					const enabled: boolean = !isFetching
+																&& !!ZorpFactory?.abi
+																&& !!Object.keys(ZorpFactory.abi).length
+																&& !!ZorpFactory?.address.length
+																&& addressFactory.length === addressFactoryAnvil.length
+																&& addressFactory.startsWith('0x');
 
 					if (!enabled) {
 						console.warn('Missing required input(s) ->', {
+							ZorpFactory,
 							addressFactory,
 							start,
 							limit,
@@ -96,7 +110,7 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 					}) }
 				</ul>
 			</section>
-		</>
+		</div>
 	);
 }
 

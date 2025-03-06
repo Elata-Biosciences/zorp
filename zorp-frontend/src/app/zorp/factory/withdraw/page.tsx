@@ -2,23 +2,38 @@
 
 import { useId, useState } from 'react';
 import { useAccount, useWriteContract } from 'wagmi';
-import { abi as zorpFactoryAbi } from 'abi/IZorpFactory.json';
+import { useContracts } from '@/contexts/Contracts';
+import ThemeSwitch from '@/components/features/ThemeSwitch';
+import * as config from '@/lib/constants/wagmiConfig';
 
 export default function ZorpFactoryWriteWithdraw() {
-	const addressFactoryAnvil = '0x5FbDB2315678afecb367f032d93F642f64180aa3'
+	const addressFactoryAnvil = config.anvil.contracts.ZorpFactory[31337].address;
+
 	const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
 	const [addressTo, setAddressTo] = useState<`0x${string}` | undefined>(undefined);
 	const [ammount, setAmmount] = useState<number>(0);
 	const [isFetching, setIsFetching] = useState<boolean>(false);
 	const [receipt, setReceipt] = useState<string>('... pending');
+
 	const addressFactoryId = useId();
 	const addressToId = useId();
 	const ammountId = useId();
+
 	const { isConnected } = useAccount();
+
 	const { writeContractAsync } = useWriteContract();
 
+	const { ZorpFactory } = useContracts();
+
 	return (
-		<>
+		<div className="w-full flex flex-col">
+			<h1 className="flex flex-col sm:flex-row justify-center items-center text-4xl font-bold">
+				Zorp Factory -- Withdraw
+			</h1>
+			<div className="flex justify-center mt-8">
+				<ThemeSwitch />
+			</div>
+
 			<label htmlFor={addressFactoryId}>ZORP Factory Address:</label>
 			<input
 				id={addressFactoryId}
@@ -59,14 +74,17 @@ export default function ZorpFactoryWriteWithdraw() {
 					event.preventDefault();
 					event.stopPropagation();
 
-					const enabled = isConnected
-												&& addressFactory.length === addressFactoryAnvil.length
-												&& addressFactory.startsWith('0x')
-												&& !!addressTo
-												&& addressTo.length === addressFactoryAnvil.length
-												&& addressTo.startsWith('0x')
-												&& !Number.isNaN(ammount)
-												&& ammount > 0;
+					const enabled: boolean = isConnected
+																&& !!ZorpFactory?.abi
+																&& !!Object.keys(ZorpFactory.abi).length
+																&& !!ZorpFactory?.address.length
+																&& addressFactory.length === addressFactoryAnvil.length
+																&& addressFactory.startsWith('0x')
+																&& !!addressTo
+																&& addressTo.length === addressFactoryAnvil.length
+																&& addressTo.startsWith('0x')
+																&& !Number.isNaN(ammount)
+																&& ammount > 0;
 
 					if (!enabled) {
 						console.warn('Missing required state', { addressFactory, addressTo, ammount });
@@ -75,8 +93,8 @@ export default function ZorpFactoryWriteWithdraw() {
 
 					setIsFetching(true);
 					writeContractAsync({
-						address: addressFactory,
-						abi: zorpFactoryAbi,
+						abi: (ZorpFactory as NonNullable<typeof ZorpFactory>).abi,
+						address: (ZorpFactory as NonNullable<typeof ZorpFactory>).address,
 						functionName: 'withdraw',
 						args: [addressTo, ammount],
 					}).then((response) => {
@@ -95,7 +113,7 @@ export default function ZorpFactoryWriteWithdraw() {
 			>Withdraw</button>
 
 			<span>ZorpFactory withdraw receipt: {receipt}</span>
-		</>
+		</div>
 	);
 }
 
