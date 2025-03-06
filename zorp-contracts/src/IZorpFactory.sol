@@ -291,7 +291,7 @@ interface IZorpFactory_Storage {
         /// cast call "${zorp_factory_address}" \
         ///     --rpc-url 127.0.0.1:8545 \
         ///     'studies(uint256)(address)' \
-        ///         "${zorp_factory_study_index}"
+        ///         "${zorp_factory_study_index}";
         /// ```
         ///
         /// ## Off-chain example with wagmi
@@ -433,7 +433,7 @@ interface IZorpFactory_Functions {
         ///     --rpc-url 127.0.0.1:8545 \
         ///     'withdraw(uint256)(address)' \
         ///         "${zorp_factory_study_index}" \
-        ///         "${zorp_factory_study_index}"
+        ///         "${zorp_factory_study_index}";
         /// ```
         ///
         /// ## Off-chain example with wagmi
@@ -554,7 +554,7 @@ interface IZorpFactory_Functions {
         ///
         /// ```bash
         /// zorp_factory_address="0x5FbDB2315678afecb367f032d93F642f64180aa3";
-        /// zorp_study_address="0x...BOBATEA";
+        /// zorp_study_address="0xa16E02E87b7454126E5E10d957A927A7F5B5d2be";
         /// zorp_study_start=68;
         /// zorp_study_limit=419;
         ///
@@ -563,34 +563,13 @@ interface IZorpFactory_Functions {
         ///     'paginateSubmittedData(address,uint256,uint256)(string[])' \
         ///         "${zorp_study_address}" \
         ///         "${zorp_study_start}" \
-        ///         "${zorp_study_limit}"
+        ///         "${zorp_study_limit}";
         /// ```
         ///
         /// ## Off-chain example with wagmi
         ///
         /// ```tsx
-        /// 'use client';
-        ///
-        /// import { useState } from 'react';
-        /// import { useReadContract } from 'wagmi';
-        /// import { abi as zorpFactoryConfig } from 'abi/IZorpFactory.json';
-        ///
-        /// export default function ZorpFactoryReadSubmittedDataCIDs() {
-        ///   const [address, setAddress] = useState<string[]>();
-        ///   const [start, setStart] = useState<number>(1);
-        ///   const [limit, setLimit] = useState<number>();
-        ///
-        ///   const { data: cids, isFetching, isSuccess } = useReadContract({
-        ///     ...zorpFactoryConfig,
-        ///     functionName: 'paginateSubmittedData',
-        ///     args: [address, start, limit],
-        ///     query: {
-        ///       enabled: !!address?.length && !!start && !!limit,
-        ///     },
-        ///   });
-        ///
-        ///   // ...
-        /// }
+        /// /* see: f915d9b:zorp-frontend/src/app/zorp/factory/paginate-submitted-data/page.tsx */
         /// ```
         function paginateSubmittedData(address study, uint256 start, uint256 limit) external view returns (string[] memory);
 
@@ -610,7 +589,7 @@ interface IZorpFactory_Functions {
         ///     --rpc-url 127.0.0.1:8545 \
         ///     'paginateStudies(uint256,uint256)(address[])' \
         ///         "${zorp_factory_start}" \
-        ///         "${zorp_factory_limit}"
+        ///         "${zorp_factory_limit}";
         /// ```
         ///
         /// ## Off-chain example with wagmi
@@ -633,7 +612,7 @@ interface IZorpFactory_Functions {
         ///   const startId = useId();
         ///   const limitId = useId();
         ///
-        ///   const { data: studyAddresses, isFetching, isSuccess, refetch } = useReadContract({
+        ///   const { data: studyAddresses, isFetching, refetch } = useReadContract({
         ///     address: addressFactory,
         ///     abi: zorpFactoryAbi,
         ///     functionName: 'paginateStudies',
