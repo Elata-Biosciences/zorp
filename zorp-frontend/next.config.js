@@ -54,25 +54,25 @@ async function hook(phase, { nextConfigCustom }) {
 	// Results in `../zorp-contracts/out/IZorpFactory.sol/IZorpFactory.json`
 	//            `public/assets/abi/IZorpFactory.json`
 	//            integration
-	// const abiOutDir = path.join(process.cwd(), 'public', 'assets', 'abi');
-	// if (!fs.existsSync(abiOutDir)) {
-	// 	fs.mkdirSync(abiOutDir, { recursive: true });
-	// }
-	// const abiNames = [ 'IZorpFactory', 'IZorpStudy' ];
-	// for (const abiName of abiNames) {
-	// 	const abiPathSource = path.join(path.dirname(process.cwd()), 'zorp-contracts', 'out', `${abiName}.sol`, `${abiName}.json`);
-	// 	const abiPathDest = path.join(abiOutDir, `${abiName}.json`);
+	const abiOutDir = path.join(process.cwd(), 'public', 'assets', 'abi');
+	if (!fs.existsSync(abiOutDir)) {
+		fs.mkdirSync(abiOutDir, { recursive: true });
+	}
+	const abiNames = [ 'IZorpFactory', 'IZorpStudy' ];
+	for (const abiName of abiNames) {
+		const abiPathSource = path.join(path.dirname(process.cwd()), 'zorp-contracts', 'out', `${abiName}.sol`, `${abiName}.json`);
+		const abiPathDest = path.join(abiOutDir, `${abiName}.json`);
 
-	// 	if (!fs.existsSync(abiPathSource)) {
-	// 		throw new Error(`Missing: ${abiPathSource}\n\tDid you forget -> forge build`);
-	// 	}
-	// 	if (fs.existsSync(abiPathDest)) {
-	// 		console.warn(`Output ABI file already exists ->`, {abiPathDest});
-	// 		continue;
-	// 	}
+		if (!fs.existsSync(abiPathSource)) {
+			throw new Error(`Missing: ${abiPathSource}\n\tDid you forget -> forge build`);
+		}
+		if (fs.existsSync(abiPathDest)) {
+			console.warn(`Output ABI file already exists ->`, {abiPathDest});
+			continue;
+		}
 
-	// 	fs.copyFileSync(abiPathSource, abiPathDest);
-	// }
+		fs.copyFileSync(abiPathSource, abiPathDest);
+	}
 
 	// Detect if deploying to GitHub Pages
 	/** @type {string|undefined} */

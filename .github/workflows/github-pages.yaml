@@ -78,6 +78,13 @@ jobs:
           cache: 'npm'
           node-version: 23.x
 
+      ##
+      # Note: I don't like having to reinstall this in a separate `jobs` to
+      # satisfy an NPM dev-dependency, so the `zorp-frontend/next.config.js`
+      # may need more edits to remove this funkiness
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
       - name: Install dependencies
         run: pushd zorp-frontend && npm install ; popd
 
