@@ -6,6 +6,7 @@ import * as openpgp from 'openpgp';
 import type { Key } from 'openpgp';
 import { useReadContract } from 'wagmi';
 import { abi as ZorpStudyABI } from 'abi/IZorpStudy.json';
+import { useContracts } from '@/contexts/Contracts';
 import * as irysConfig from '@/lib/constants/irysConfig';
 import * as wagmiConfig from '@/lib/constants/wagmiConfig';
 
@@ -35,7 +36,7 @@ export default function IrysFetchFileGpgKey({
 		functionName: 'encryption_key',
 	});
 
-	const { data: encryptionKey } = useQuery({
+	useQuery({
 		enabled: !!cid?.length,
 		queryKey: ['cid', cid],
 		queryFn: async () => {
