@@ -6,4 +6,9 @@ remappings = [
     "@openzeppelin/=lib/openzeppelin-contracts/"
 ]
 
+[rpc_endpoints]
+anvil = "http://localhost:8545"
+
+# always_use_create_2_factory = true
+
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
