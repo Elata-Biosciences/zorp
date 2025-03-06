@@ -57,7 +57,7 @@ type ProvidersProps = {
 };
 
 export function ContractsProvider({ children }: ProvidersProps) {
-	const { chain, chainId, isConnected } = useAccount();
+	const { chain, chainId } = useAccount();
 	const [contracts, setContracts] = useState(contractsAnvil);
 
 	useEffect(() => {
@@ -66,7 +66,7 @@ export function ContractsProvider({ children }: ProvidersProps) {
 			isChainIdDefined: !!chainId?.toString().length,
 		};
 		if (!Object.values(assertsClient).every(assert => assert)) {
-			console.warn('ContractsProvider -- Waiting on all assertsClient to be true ->', {assertsClient, isConnected, chain, chainId});
+			console.info('ContractsProvider -- Waiting on all assertsClient to be true ->', {assertsClient, chain, chainId});
 			return;
 		}
 
@@ -98,7 +98,8 @@ export function ContractsProvider({ children }: ProvidersProps) {
 		}
 
 		setContracts(updatedContracts);
-	}, [ chain, chainId, isConnected ]);
+		console.info('ContractsProvider -- Finished updating contrac data ->', {assertsClient, chain, chainId, updatedContracts});
+	}, [ chain, chainId ]);
 
 	return (
 		<ContractsContext.Provider value={contracts}>
