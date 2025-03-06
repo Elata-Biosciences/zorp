@@ -4,9 +4,10 @@ import { useId, useState } from 'react';
 import { useReadContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
+import * as config from '@/lib/constants/wagmiConfig';
 
 export default function ZorpFactoryReadStudyAddress() {
-	const addressFactoryAnvil = '0x5FbDB2315678afecb367f032d93F642f64180aa3'
+	const addressFactoryAnvil = config.anvil.contracts.ZorpFactory[31337].address;
 
 	const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
 	const [studyIndex, setStudyIndex] = useState<number>(1);
@@ -25,8 +26,8 @@ export default function ZorpFactoryReadStudyAddress() {
 												&& studyIndex > 0
 
 	const { data: studyAddress, isFetching } = useReadContract({
-		abi: (ZorpFactory as NonNullable<typeof ZorpFactory>).abi,
-		address: (ZorpFactory as NonNullable<typeof ZorpFactory>).address,
+		abi: ZorpFactory.abi,
+		address: ZorpFactory.address,
 		functionName: 'studies',
 		args: [studyIndex],
 		query: {

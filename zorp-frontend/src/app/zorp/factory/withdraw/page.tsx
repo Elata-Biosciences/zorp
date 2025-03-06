@@ -93,8 +93,8 @@ export default function ZorpFactoryWriteWithdraw() {
 
 					setIsFetching(true);
 					writeContractAsync({
-						abi: (ZorpFactory as NonNullable<typeof ZorpFactory>).abi,
-						address: (ZorpFactory as NonNullable<typeof ZorpFactory>).address,
+						abi: ZorpFactory.abi,
+						address: ZorpFactory.address,
 						functionName: 'withdraw',
 						args: [addressTo, ammount],
 					}).then((response) => {

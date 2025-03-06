@@ -29,8 +29,8 @@ export default function ZorpStudyWriteFlagInvalidSubmission() {
 	};
 
 	const { data: owner, isFetching: isFetchingOwner } = useReadContract({
-		abi: (ZorpStudy as NonNullable<typeof ZorpStudy>).abi,
-		address: (ZorpStudy as NonNullable<typeof ZorpStudy>).address,
+		abi: ZorpStudy.abi,
+		address: ZorpStudy.address,
 		functionName: 'owner',
 		args: [],
 		query: {
@@ -39,8 +39,8 @@ export default function ZorpStudyWriteFlagInvalidSubmission() {
 	});
 
 	const { data: participant_status, isFetching: isFetchingParticipantStatus } = useReadContract({
-		abi: (ZorpStudy as NonNullable<typeof ZorpStudy>).abi,
-		address: (ZorpStudy as NonNullable<typeof ZorpStudy>).address,
+		abi: ZorpStudy.abi,
+		address: ZorpStudy.address,
 		functionName: 'participant_status',
 		args: [addressParticipant],
 		query: {
@@ -52,8 +52,8 @@ export default function ZorpStudyWriteFlagInvalidSubmission() {
 	});
 
 	const { data: study_status, isFetching: isFetchingStudyStatus } = useReadContract({
-		abi: (ZorpStudy as NonNullable<typeof ZorpStudy>).abi,
-		address: (ZorpStudy as NonNullable<typeof ZorpStudy>).address,
+		abi: ZorpStudy.abi,
+		address: ZorpStudy.address,
 		functionName: 'study_status',
 		args: [],
 		query: {
@@ -130,8 +130,8 @@ export default function ZorpStudyWriteFlagInvalidSubmission() {
 
 					setIsFetching(true);
 					writeContractAsync({
-						abi: (ZorpStudy as NonNullable<typeof ZorpStudy>).abi,
-						address: (ZorpStudy as NonNullable<typeof ZorpStudy>).address,
+						abi: ZorpStudy.abi,
+						address: ZorpStudy.address,
 						functionName: 'flagInvalidSubmission',
 						args: [addressParticipant],
 					}).then((response) => {

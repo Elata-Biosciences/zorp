@@ -30,9 +30,9 @@ type Contract = {
 	}[];
 };
 type Contracts = {
-	[key: string]: Contract | undefined;
-	ZorpFactory: Contract | undefined;
-	ZorpStudy: Contract | undefined;
+	[key: string]: Contract;
+	ZorpFactory: Contract;
+	ZorpStudy: Contract;
 };
 
 // TODO: maybe find a less memory abusive way to satisfy MicroSoft™ TypeScript®
@@ -109,5 +109,9 @@ export function ContractsProvider({ children }: ProvidersProps) {
 }
 
 export function useContracts() {
-	return useContext(ContractsContext);
+	const context = useContext(ContractsContext);
+	if (context == null) {
+		throw new Error('ContractsContext has not been Provided?!');
+	}
+	return context;
 }

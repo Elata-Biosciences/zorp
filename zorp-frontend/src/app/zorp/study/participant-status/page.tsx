@@ -18,8 +18,8 @@ export default function ZorpStudyReadParticipantStatus() {
 	const { ZorpStudy } = useContracts();
 
 	const { data: participant_status, isFetching } = useReadContract({
-		abi: (ZorpStudy as NonNullable<typeof ZorpStudy>).abi,
-		address: (ZorpStudy as NonNullable<typeof ZorpStudy>).address,
+		abi: ZorpStudy.abi,
+		address: ZorpStudy.address,
 		functionName: 'participant_status',
 		args: [addressParticipant],
 		query: {

@@ -16,8 +16,8 @@ export default function ZorpStudyReadSubmissions() {
 	const { ZorpStudy } = useContracts();
 
 	const { data: submissions, isFetching } = useReadContract({
-		abi: (ZorpStudy as NonNullable<typeof ZorpStudy>).abi,
-		address: (ZorpStudy as NonNullable<typeof ZorpStudy>).address,
+		abi: ZorpStudy.abi,
+		address: ZorpStudy.address,
 		functionName: 'submissions',
 		args: [],
 		query: {

@@ -16,8 +16,8 @@ export default function ZorpStudyReadInvalidated() {
 	const { ZorpStudy } = useContracts();
 
 	const { data: invalidated, isFetching } = useReadContract({
-		abi: (ZorpStudy as NonNullable<typeof ZorpStudy>).abi,
-		address: (ZorpStudy as NonNullable<typeof ZorpStudy>).address,
+		abi: ZorpStudy.abi,
+		address: ZorpStudy.address,
 		functionName: 'invalidated',
 		args: [],
 		query: {

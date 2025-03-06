@@ -16,8 +16,8 @@ export default function ZorpStudyReadParticipantPayoutAmount() {
 	const { ZorpStudy } = useContracts();
 
 	const { data: participant_payout_amount, isFetching } = useReadContract({
-		abi: (ZorpStudy as NonNullable<typeof ZorpStudy>).abi,
-		address: (ZorpStudy as NonNullable<typeof ZorpStudy>).address,
+		abi: ZorpStudy.abi,
+		address: ZorpStudy.address,
 		functionName: 'participant_payout_amount',
 		args: [],
 		query: {

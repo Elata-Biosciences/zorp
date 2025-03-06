@@ -5,7 +5,6 @@ import { useQuery } from '@tanstack/react-query';
 import * as openpgp from 'openpgp';
 import type { Key } from 'openpgp';
 import { useReadContract } from 'wagmi';
-import { abi as ZorpStudyABI } from 'abi/IZorpStudy.json';
 import { useContracts } from '@/contexts/Contracts';
 import * as irysConfig from '@/lib/constants/irysConfig';
 import * as wagmiConfig from '@/lib/constants/wagmiConfig';
@@ -20,19 +19,21 @@ export default function IrysFetchFileGpgKey({
 	const [messageReadContract, setMessageReadContract] = useState<string>('Info: Waiting for ZorpStudy.encryptionKey() read to return something...');
 	const [messageFetchEncryptionKey, setMessageFetchEncryptionKey] = useState<string>('Info: waiting for fetch of CID ZorpStudy.encryptionKey() to return something...');
 
+	const { ZorpStudy } = useContracts();
+
 	// TODO: set `chainName` and `sourceId` dynamically or via `.env.<thang>` file
 	const chainName = 'anvil';
 	const sourceId = 31337
 	const { data: cid } = useReadContract<
-		typeof ZorpStudyABI,
+		typeof ZorpStudy.abi,
 		string,
 		unknown[],
 		typeof wagmiConfig.wagmiConfig,
 		string
 	>({
+		abi: ZorpStudy.abi,
+		address: ZorpStudy.address,
 		config: wagmiConfig.wagmiConfig,
-		abi: ZorpStudyABI,
-		address: wagmiConfig[chainName].contracts.ZorpStudy[sourceId].address,
 		functionName: 'encryption_key',
 	});
 

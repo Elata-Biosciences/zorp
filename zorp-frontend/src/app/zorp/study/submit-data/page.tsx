@@ -11,7 +11,6 @@ import IrysBalanceGet from '@/components/features/IrysBalanceGet';
 import IrysFetchFileGpgKey from '@/components/features/IrysFetchFileGpgKey';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
-// import type { WebIrysOpts } from '@/@types/irys';
 
 export default function ZorpStudySubmitData() {
 	const className = '';

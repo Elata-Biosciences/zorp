@@ -22,8 +22,8 @@ export default function ZorpFactoryReadLatestStudyIndex() {
 												&& addressFactory.startsWith('0x');
 
 	const { data: latest_study_index, isFetching } = useReadContract({
-		abi: (ZorpFactory as NonNullable<typeof ZorpFactory>).abi,
-		address: (ZorpFactory as NonNullable<typeof ZorpFactory>).address,
+		abi: ZorpFactory.abi,
+		address: ZorpFactory.address,
 		functionName: 'latest_study_index',
 		args: [],
 		query: {

@@ -16,8 +16,8 @@ export default function ZorpStudyReadEncryptionKeyCid() {
 	const { ZorpStudy } = useContracts();
 
 	const { data: encryption_key_cid, isFetching } = useReadContract({
-		abi: (ZorpStudy as NonNullable<typeof ZorpStudy>).abi,
-		address: (ZorpStudy as NonNullable<typeof ZorpStudy>).address,
+		abi: ZorpStudy.abi,
+		address: ZorpStudy.address,
 		functionName: 'encryption_key',
 		args: [],
 		query: {

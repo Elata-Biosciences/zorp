@@ -26,8 +26,8 @@ export default function ZorpStudyWriteClaimReward() {
 	};
 
 	const { data: participant_status, isFetching: isFetchingParticipantStatus } = useReadContract({
-		abi: (ZorpStudy as NonNullable<typeof ZorpStudy>).abi,
-		address: (ZorpStudy as NonNullable<typeof ZorpStudy>).address,
+		abi: ZorpStudy.abi,
+		address: ZorpStudy.address,
 		functionName: 'participant_status',
 		args: [address],
 		query: {
@@ -39,8 +39,8 @@ export default function ZorpStudyWriteClaimReward() {
 	});
 
 	const { data: study_status, isFetching: isFetchingStudyStatus } = useReadContract({
-		abi: (ZorpStudy as NonNullable<typeof ZorpStudy>).abi,
-		address: (ZorpStudy as NonNullable<typeof ZorpStudy>).address,
+		abi: ZorpStudy.abi,
+		address: ZorpStudy.address,
 		functionName: 'study_status',
 		args: [],
 		query: {
@@ -96,8 +96,8 @@ export default function ZorpStudyWriteClaimReward() {
 
 					setIsFetching(true);
 					writeContractAsync({
-						abi: (ZorpStudy as NonNullable<typeof ZorpStudy>).abi,
-						address: (ZorpStudy as NonNullable<typeof ZorpStudy>).address,
+						abi: ZorpStudy.abi,
+						address: ZorpStudy.address,
 						functionName: 'claimReward',
 						args: [],
 					}).then((response) => {

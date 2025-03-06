@@ -18,8 +18,8 @@ export default function ZorpStudyReadParticipantIndex() {
 	const { ZorpStudy } = useContracts();
 
 	const { data: participant_index, isFetching } = useReadContract({
-		abi: (ZorpStudy as NonNullable<typeof ZorpStudy>).abi,
-		address: (ZorpStudy as NonNullable<typeof ZorpStudy>).address,
+		abi: ZorpStudy.abi,
+		address: ZorpStudy.address,
 		functionName: 'participant_index',
 		args: [addressParticipant],
 		query: {
