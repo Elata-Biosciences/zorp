@@ -66,7 +66,7 @@ export function ContractsProvider({ children }: ProvidersProps) {
 			isChainIdDefined: !!chainId?.toString().length,
 		};
 		if (!Object.values(assertsClient).every(assert => assert)) {
-			console.info('ContractsProvider -- Waiting on all assertsClient to be true ->', {assertsClient, chain, chainId});
+			console.warn('ContractsProvider -- Waiting on all assertsClient to be true ->', {assertsClient, chain, chainId});
 			return;
 		}
 
@@ -98,7 +98,7 @@ export function ContractsProvider({ children }: ProvidersProps) {
 		}
 
 		setContracts(updatedContracts);
-		console.info('ContractsProvider -- Finished updating contrac data ->', {assertsClient, chain, chainId, updatedContracts});
+		console.warn('ContractsProvider -- Finished updating contrac data ->', {assertsClient, chain, chainId, updatedContracts});
 	}, [ chain, chainId ]);
 
 	return (

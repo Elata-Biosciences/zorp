@@ -112,7 +112,7 @@ export default function ZorpFactoryWriteCreateStudy() {
 				onClick={(event) => {
 					event.stopPropagation();
 					event.preventDefault();
-					console.info('ZorpFactoryWriteCreateStudy', {event});
+					console.warn('ZorpFactoryWriteCreateStudy', {event});
 					handleZorpFactoryWriteCreateStudy();
 				}}
 			>Zorp Factory Create Study</button>

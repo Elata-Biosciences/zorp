@@ -21,9 +21,6 @@ export default function IrysFetchFileGpgKey({
 
 	const { ZorpStudy } = useContracts();
 
-	// TODO: set `chainName` and `sourceId` dynamically or via `.env.<thang>` file
-	const chainName = 'anvil';
-	const sourceId = 31337
 	const { data: cid } = useReadContract<
 		typeof ZorpStudy.abi,
 		string,

@@ -21,7 +21,7 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 	const startId = useId();
 	const limitId = useId();
 
-	const { ZorpFactory, ZorpStudy } = useContracts();
+	const { ZorpFactory } = useContracts();
 
 	const { data: cids, isFetching, refetch } = useReadContract({
 		abi: ZorpFactory.abi,
