@@ -36,7 +36,7 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 	return (
 		<div className="w-full flex flex-col">
 			<h1 className="flex flex-col sm:flex-row justify-center items-center text-4xl font-bold">
-				Zorp Factory -- Paginate studies
+				Zorp Factory -- Paginate study data
 			</h1>
 			<div className="flex justify-center mt-8">
 				<ThemeSwitch />
@@ -120,10 +120,15 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 			>Get Study Addresses</button>
 
 			<section>
-				<header>Study addresses</header>
+				<header>Study CIDs</header>
 				<ul>
 					{ (cids as `0x${string}`[])?.map((cid, i) => {
-						return <li key={`${i}-${cid}`}>{cid}</li>;
+						return (
+							<li key={`${i}-${cid}`}>
+								{i + start} --
+								{!!cid.length ? cid : 'null'}
+							</li>
+						);
 					}) }
 				</ul>
 			</section>
