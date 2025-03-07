@@ -2,6 +2,7 @@ const merge = require('lodash.merge');
 const fs = require('fs');
 const process = require('process');
 const path = require('path');
+const { foundry } = require('@wagmi/cli/plugins');
 
 /**
  * @see https://nextjs.org/docs/pages/building-your-application/deploying#static-html-export
@@ -25,6 +26,28 @@ const nextConfigDefaults = {
 async function hook(phase, { nextConfigCustom }) {
 	const nextConfig = merge({}, nextConfigDefaults, nextConfigCustom);
 	console.log('START -- next.config.js -- hook(phase, { nextConfigCustom }) ->', { phase, nextConfigCustom, nextConfig });
+
+	/**
+	 * @see https://d.sh/cli/getting-started
+	 */
+	const foundryResult = foundry({
+		project: path.join(path.dirname(__dirname), 'zorp-contracts'),
+		include: [
+			'IZorpFactory.json',
+			'IZorpStudy.json',
+		],
+	});
+	const contractOutDir = path.join(__dirname, 'src', 'lib', 'constants', 'wagmiContractConfig');
+	for (const contract of await foundryResult.contracts()) {
+		const contractPathDest = path.join(contractOutDir, `${contract.name}.ts`);
+		if (fs.existsSync(contractPathDest)) {
+			console.warn(`Output contract config file already exists ->`, {contractPathDest});
+			continue;
+		}
+
+		const contractOutputText = `export const ${contract.name} = ${JSON.stringify(contract, null, 2)} as const;`;
+		fs.writeFileSync(contractPathDest, contractOutputText, { encoding: 'utf-8', mode: '440' });
+	}
 
 	// Copy select ABIs from `../zorp-contracts/out/` to `public/assets/abi/`
 	//

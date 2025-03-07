@@ -6,6 +6,7 @@ import merge from 'lodash.merge';
 import { ThemeProvider } from 'next-themes';
 import { WagmiProvider } from 'wagmi';
 import { RainbowKitProvider, lightTheme, Theme } from '@rainbow-me/rainbowkit';
+import { ContractsProvider } from '@/contexts/Contracts';
 import { wagmiConfig } from '@/lib/constants/wagmiConfig';
 
 const theme = merge(lightTheme(), {
@@ -38,7 +39,9 @@ export default function Providers({ children }: ProvidersProps) {
       <WagmiProvider config={wagmiConfig}>
         <QueryClientProvider client={queryClient}>
           <RainbowKitProvider theme={theme} showRecentTransactions={true}>
-            {children}
+            <ContractsProvider>
+              {children}
+            </ContractsProvider>
           </RainbowKitProvider>
         </QueryClientProvider>
       </WagmiProvider>

@@ -22,7 +22,7 @@ export default function InputFileToEncryptedMessage({
 	const [inputSubmitDataFile, setInputSubmitDataFile] = useState<null | File>(null);
 	const [message, setMessage] = useState<string>('Info: waiting for public GPG encryption keys and or input file');
 
-	const { data: encryptedMessage } = useQuery({
+	useQuery({
 		enabled: !!inputSubmitDataFile && !!gpgKey && !!gpgKey.key && !!encryptionKey && !!encryptionKey.key,
 		queryKey: ['message_recipients', [gpgKey?.key, encryptionKey?.key]],
 		queryFn: async () => {

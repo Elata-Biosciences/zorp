@@ -3,7 +3,8 @@
 import { useCallback, useState } from 'react';
 import { WebIrys } from '@irys/sdk';
 import type { BigNumber } from 'bignumber.js';
-import type { WebIrysOpts } from '@/@types/irys';
+import { useAccount } from 'wagmi';
+import { webIrysOpts } from '@/lib/constants/irysConfig';
 
 /**
  * @see https://github.com/Irys-xyz/provenance-toolkit/blob/master/app/utils/getIrys.ts#L107
@@ -13,16 +14,13 @@ export default function IrysBalanceGet({
 	className = '',
 	labelText = 'Check Irys balance',
 	setState,
-	webIrysOpts,
-	address,
 }: {
 	className?: string;
 	labelText: string;
 	setState: (balance: null | number | BigNumber) => void;
-	webIrysOpts: WebIrysOpts;
-	address: string | `0x${string}` | undefined;
 }) {
 	const [message, setMessage] = useState<string>('Info: connected wallet/provider required');
+	const { address } = useAccount();
 
 	const handleIrysBalanceGet = useCallback(async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		console.warn('IrysBalance', {event});
@@ -58,7 +56,7 @@ export default function IrysBalanceGet({
 			setMessage(message);
 			setState(null);
 		}
-	}, [address]);
+	}, [ address, message, setState ]);
 
 	return (
 		<>

@@ -9,20 +9,15 @@ import * as raw from 'multiformats/codecs/raw';
 import { sha256 } from 'multiformats/hashes/sha2';
 import type { Digest } from 'multiformats/src/hashes/digest';
 import type { Subkey, Key } from 'openpgp';
-// import type { Network, IrysConfig } from '@irys/sdk/build/cjs/common/types.d.ts';
-
-// import type { WebIrysOpts } from '@/@types/irys';
+import { useAccount } from 'wagmi';
+import { irysBalanceThreshold } from '@/lib/constants/irysConfig';
 
 export default function IrysUploadFileGpgKey({
 	className = '',
 	labelText = 'Irys upload public GPG encryption key',
 	setState,
-	// webIrysOpts,
-	address,
-	provider,
 	gpgKey,
 	irysBalance,
-	irysBalanceThreshold,
 }: {
 	className?: string;
 	labelText: string;
@@ -30,14 +25,11 @@ export default function IrysUploadFileGpgKey({
 		receipt: unknown;
 		cid: string;
 	}) => void;
-	// webIrysOpts: WebIrysOpts;
-	address: string | `0x${string}` | undefined;
-	provider: unknown;
 	gpgKey: null | { file: File; key: Subkey | Key; };
 	irysBalance: null | (number | BigNumber);
-	irysBalanceThreshold: number | BigNumber;
 }) {
 	const [message, setMessage] = useState<string>('Info: connected wallet/provider required');
+	const { address, connector } = useAccount();
 
 	return (
 		<>
@@ -92,7 +84,7 @@ export default function IrysUploadFileGpgKey({
 									console.warn('IrysUploadFileGpgKey', {message});
 									setMessage(message);
 
-									WebUploader(WebBaseEth).withProvider(provider)
+									WebUploader(WebBaseEth).withProvider(connector)
 										.then((irysUploadBuilder) => {
 											const message = 'Info: attempting to upload GPG key to Irys';
 											console.warn('IrysUploadFileGpgKey', {message});

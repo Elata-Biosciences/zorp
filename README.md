@@ -1,6 +1,6 @@
 # ZORP – Zero-Knowledge On-chain Research Protocol
 
-ZORP is a privacy-preserving data collection and reward distribution platform built on [Semaphore](https://semaphore.appliedzkp.org/). It allows participants to submit data (e.g., EEG or survey results) anonymously, while enabling administrators to moderate submissions and distribute rewards in ETH or a native token.
+ZORP is a privacy-preserving data collection and reward distribution platform built on [Semaphore](https://semaphore.appliedzkp.org/). It allows participants to submit data (e.g., EEG or survey results) pseudonymously, while enabling administrators to moderate submissions and distribute rewards in ETH or a native token.
 
 ## Project Overview
 
@@ -28,6 +28,7 @@ zorp/
 ```
 
 ### `zorp-contracts/` (Foundry Project)
+
 - **Purpose**: Contains all the ZORP smart contracts (e.g., `ZorpFactory.sol`, `ZorpStudy.sol`) and Foundry configuration/testing.
 - **Key Files**:
   - `foundry.toml`: Foundry configuration (compiler settings, etc.).
@@ -56,6 +57,7 @@ zorp/
    - Example: `forge script script/DeployZorp.s.sol --rpc-url <YOUR_RPC> --private-key <YOUR_KEY> --broadcast`
 
 ### `zorp-frontend/` (Next.js + RainbowKit)
+
 - **Purpose**: A React-based web application for managing studies, uploading data to IPFS, and interacting with the ZORP contracts.
 - **Key Files**:
   - `package.json`: Manages dependencies, including Next.js, wagmi, RainbowKit.
@@ -79,7 +81,6 @@ zorp/
    # or yarn dev
    ```
 4. **Open** [http://localhost:3000](http://localhost:3000) in your browser to see the app.
-
 
 ## Contributing
 
