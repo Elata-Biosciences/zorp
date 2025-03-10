@@ -72,6 +72,14 @@ async function hook(phase, { nextConfigCustom }) {
 		});
 	}
 
+	/**
+	 * @see {@link https://nextjs.org/docs/messages/swc-disabled}
+	 * TLDR: ignore `./babel.config.js` because be for satisfying test tooling
+	 */
+	nextConfig.experimental = {
+		forceSwcTransforms: true,
+	};
+
 	console.log('END -- next.config.js -- hook(phase, { nextConfigCustom }) ->', { phase, nextConfigCustom, nextConfig });
 	return nextConfig;
 }
