@@ -17,7 +17,7 @@ const nextConfigDefaults = {
 };
 
 /**
- * @param {any} phase
+ * @param {"phase-test"|string} phase
  * @param {NextConfig} config
  *
  * @see https://nextjs.org/docs/pages/api-reference/config/next-config-js
@@ -79,6 +79,14 @@ async function hook(phase, { nextConfigCustom }) {
 	nextConfig.experimental = {
 		forceSwcTransforms: true,
 	};
+
+	if (phase === 'phase-test') {
+		console.log('Detected phase is test');
+		if (!nextConfig.transpilePackages || !Array.isArray(nextConfig.transpilePackages)) {
+			nextConfig.transpilePackages = [];
+		}
+		nextConfig.transpilePackages.push( 'wagmi' );
+	}
 
 	console.log('END -- next.config.js -- hook(phase, { nextConfigCustom }) ->', { phase, nextConfigCustom, nextConfig });
 	return nextConfig;

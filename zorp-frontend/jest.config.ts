@@ -13,6 +13,8 @@
  * @see {@link https://jestjs.io/docs/next/ecmascript-modules}
  * @see {@link https://nextjs.org/docs/app/building-your-application/testing/jest}
  * @see {@link https://stackoverflow.com/questions/56806193/jest-syntaxerror-unexpected-token}
+ * @see {@link https://github.com/wevm/wagmi/issues/1329}
+ * @see {@link https://github.com/vercel/next.js/issues/8663}
  */
 
 import type { Config } from 'jest';
@@ -25,29 +27,51 @@ const createJestConfig = nextJest({
 const config: Config = {
 	coverageProvider: 'v8',
 	transform: {
-		'^.+\\.(js|jsx)$': ['babel-jest', { presets: ['next/babel'] }],
-		// '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', { presets: ['next/babel'] }],
-		"^.+\.tsx?$": ["ts-jest", { tsconfig: 'tsconfig.jest.json' }],
+		'^.+\\.(js|jsx|ts|tsx)$': 'ts-jest',
+		// '^.+\\.(js|jsx)$': ['babel-jest', { presets: ['next/babel'] }],
+		// // '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', { presets: ['next/babel'] }],
+		// "^.+\.tsx?$": ["ts-jest", { tsconfig: 'tsconfig.jest.json' }],
 	},
-	transformIgnorePatterns: [
-		'/node_modules',
-		'^.+\\.module\\.(css|sass|scss)$',
-	],
+
+	// transformIgnorePatterns: [
+	// 	'/node_modules',
+	// 	'^.+\\.module\\.(css|sass|scss)$',
+	// ],
+
 	extensionsToTreatAsEsm: [
 		'.jsx',
 		'.ts',
 		'.tsx',
 	],
+
 	moduleNameMapper: {
 		'^@irys/sdk$': require.resolve('@irys/sdk'),
 		'^@irys/query$': require.resolve('@irys/query'),
 		'^arbundles$': require.resolve('arbundles'),
 		'^uuid$': require.resolve('uuid'),
-		// '^wagmi$': require.resolve('wagmi'),
+		'^@/(.*)$': '<rootDir>/$1',
+		// 'wagmi': require.resolve('wagmi'),
+		// 'wagmi': '<rootDir>/node_modules/wagmi/dist/esm/exports/index.js',
+		// '^wagmi$': '<rootDir>/node_modules/wagmi/dist/esm/exports/index.js',
 	},
+	transformIgnorePatterns: [
+		'node_modules/wagmi',
+	],
+	globals: {
+		'ts-jest': {
+			tsConfig: 'tsconfig.jest.json',
+		},
+	},
+	preset: 'ts-jest',
+
 	// testEnvironment: "node",
 	// testEnvironment: 'jsdom',
 	testEnvironment: '<rootDir>/.jest/env-jsdom.ts',
 };
+
+console.warn('config ->', config);
+(async () => {
+	console.warn('createJestConfig(config) ->', await (createJestConfig(config)()));
+})();
 
 export default createJestConfig(config);
