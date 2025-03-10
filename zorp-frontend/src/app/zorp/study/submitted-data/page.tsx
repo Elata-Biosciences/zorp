@@ -15,19 +15,19 @@ export default function ZorpStudyReadSubmittedData() {
 	const addressStudyId = useId();
 	const indexId = useId();
 
-	const { ZorpStudy } = useContracts();
+	const { IZorpStudy } = useContracts();
 
 	const { data: submitted_data, isFetching } = useReadContract({
-		abi: ZorpStudy.abi,
-		address: ZorpStudy.address,
+		abi: IZorpStudy.abi,
+		address: IZorpStudy.address,
 		functionName: 'submitted_data',
 		args: [index],
 		query: {
 			enabled: addressStudy.length === addressStudyAnvil.length
 						&& addressStudy.startsWith('0x')
-						&& !!ZorpStudy?.abi
-						&& !!Object.keys(ZorpStudy.abi).length
-						&& !!ZorpStudy?.address.length
+						&& !!IZorpStudy?.abi
+						&& !!Object.keys(IZorpStudy.abi).length
+						&& !!IZorpStudy?.address.length
 						&& !!index
 						&& index > 0
 		},

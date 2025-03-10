@@ -32,7 +32,7 @@ export default function ZorpStudySubmitData() {
 	});
 
 	const { address, isConnected } = useAccount();
-	const { ZorpStudy } = useContracts();
+	const { IZorpStudy } = useContracts();
 
 	const handleZorpStudySubmitData = useCallback(() => {
 		if (!isConnected) {
@@ -53,7 +53,7 @@ export default function ZorpStudySubmitData() {
 			setMessage(message)
 			return;
 		}
-		if (!ZorpStudy?.abi || !Object.keys(ZorpStudy.abi).length || !ZorpStudy?.address.length) {
+		if (!IZorpStudy?.abi || !Object.keys(IZorpStudy.abi).length || !IZorpStudy?.address.length) {
 			const message = 'Error: no contracts found for current chain';
 			console.error('ZorpStudySubmitData', {message});
 			setMessage(message)
@@ -61,8 +61,8 @@ export default function ZorpStudySubmitData() {
 		}
 
 		writeContractAsync({
-			abi: ZorpStudy.abi,
-			address: ZorpStudy.address,
+			abi: IZorpStudy.abi,
+			address: IZorpStudy.address,
 			functionName: 'submitData',
 			args: [
 				address.toString(),
@@ -73,7 +73,7 @@ export default function ZorpStudySubmitData() {
 			console.warn('ZorpStudySubmitData', {message});
 			setMessage(message)
 		});
-	}, [isConnected, address, irysUploadData, writeContractAsync, ZorpStudy]);
+	}, [isConnected, address, irysUploadData, writeContractAsync, IZorpStudy]);
 
 	return (
 		<div className="w-full flex flex-col">

@@ -17,7 +17,7 @@ export default function ZorpStudyWriteFlagInvalidSubmission() {
 	const addressStudyId = useId();
 	const addressParticipantId = useId();
 
-	const { ZorpStudy } = useContracts();
+	const { IZorpStudy } = useContracts();
 	const { address, isConnected } = useAccount();
 	const { writeContractAsync } = useWriteContract();
 
@@ -25,12 +25,12 @@ export default function ZorpStudyWriteFlagInvalidSubmission() {
 		isAddressStudySet: addressStudy.length === addressStudyAnvil.length && addressStudy.startsWith('0x'),
 		isAddressParticipantSet: addressParticipant.length === addressStudyAnvil.length && addressParticipant.startsWith('0x'),
 		isAddressWalletSet: !!address && address.length === addressStudyAnvil.length && address.startsWith('0x'),
-		isContractStudySet: !!ZorpStudy?.abi && !!Object.keys(ZorpStudy.abi).length && !!ZorpStudy?.address.length,
+		isContractStudySet: !!IZorpStudy?.abi && !!Object.keys(IZorpStudy.abi).length && !!IZorpStudy?.address.length,
 	};
 
 	const { data: owner, isFetching: isFetchingOwner } = useReadContract({
-		abi: ZorpStudy.abi,
-		address: ZorpStudy.address,
+		abi: IZorpStudy.abi,
+		address: IZorpStudy.address,
 		functionName: 'owner',
 		args: [],
 		query: {
@@ -39,8 +39,8 @@ export default function ZorpStudyWriteFlagInvalidSubmission() {
 	});
 
 	const { data: participant_status, isFetching: isFetchingParticipantStatus } = useReadContract({
-		abi: ZorpStudy.abi,
-		address: ZorpStudy.address,
+		abi: IZorpStudy.abi,
+		address: IZorpStudy.address,
 		functionName: 'participant_status',
 		args: [addressParticipant],
 		query: {
@@ -52,8 +52,8 @@ export default function ZorpStudyWriteFlagInvalidSubmission() {
 	});
 
 	const { data: study_status, isFetching: isFetchingStudyStatus } = useReadContract({
-		abi: ZorpStudy.abi,
-		address: ZorpStudy.address,
+		abi: IZorpStudy.abi,
+		address: IZorpStudy.address,
 		functionName: 'study_status',
 		args: [],
 		query: {
@@ -130,8 +130,8 @@ export default function ZorpStudyWriteFlagInvalidSubmission() {
 
 					setIsFetching(true);
 					writeContractAsync({
-						abi: ZorpStudy.abi,
-						address: ZorpStudy.address,
+						abi: IZorpStudy.abi,
+						address: IZorpStudy.address,
 						functionName: 'flagInvalidSubmission',
 						args: [addressParticipant],
 					}).then((response) => {

@@ -13,11 +13,11 @@ export default function ZorpStudyReadStudyStatus() {
 
 	const addressStudyId = useId();
 
-	const { ZorpStudy } = useContracts();
+	const { IZorpStudy } = useContracts();
 
 	const { data: study_status, isFetching } = useReadContract({
-		abi: ZorpStudy.abi,
-		address: ZorpStudy.address,
+		abi: IZorpStudy.abi,
+		address: IZorpStudy.address,
 		functionName: 'study_status',
 		args: [],
 		query: {

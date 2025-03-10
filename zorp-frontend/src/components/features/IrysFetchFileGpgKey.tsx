@@ -19,17 +19,17 @@ export default function IrysFetchFileGpgKey({
 	const [messageReadContract, setMessageReadContract] = useState<string>('Info: Waiting for ZorpStudy.encryptionKey() read to return something...');
 	const [messageFetchEncryptionKey, setMessageFetchEncryptionKey] = useState<string>('Info: waiting for fetch of CID ZorpStudy.encryptionKey() to return something...');
 
-	const { ZorpStudy } = useContracts();
+	const { IZorpStudy } = useContracts();
 
 	const { data: cid } = useReadContract<
-		typeof ZorpStudy.abi,
+		typeof IZorpStudy.abi,
 		string,
 		unknown[],
 		typeof wagmiConfig.wagmiConfig,
 		string
 	>({
-		abi: ZorpStudy.abi,
-		address: ZorpStudy.address,
+		abi: IZorpStudy.abi,
+		address: IZorpStudy.address,
 		config: wagmiConfig.wagmiConfig,
 		functionName: 'encryption_key',
 	});

@@ -13,19 +13,19 @@ export default function ZorpStudyReadParticipantPayoutAmount() {
 
 	const addressStudyId = useId();
 
-	const { ZorpStudy } = useContracts();
+	const { IZorpStudy } = useContracts();
 
 	const { data: participant_payout_amount, isFetching } = useReadContract({
-		abi: ZorpStudy.abi,
-		address: ZorpStudy.address,
+		abi: IZorpStudy.abi,
+		address: IZorpStudy.address,
 		functionName: 'participant_payout_amount',
 		args: [],
 		query: {
 			enabled: addressStudy.length === addressStudyAnvil.length
 						&& addressStudy.startsWith('0x')
-						&& !!ZorpStudy?.abi
-						&& !!Object.keys(ZorpStudy.abi).length
-						&& !!ZorpStudy?.address.length,
+						&& !!IZorpStudy?.abi
+						&& !!Object.keys(IZorpStudy.abi).length
+						&& !!IZorpStudy?.address.length,
 		},
 	});
 

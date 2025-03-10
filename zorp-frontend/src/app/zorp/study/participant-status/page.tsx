@@ -15,11 +15,11 @@ export default function ZorpStudyReadParticipantStatus() {
 	const addressStudyId = useId();
 	const addressParticipantId = useId();
 
-	const { ZorpStudy } = useContracts();
+	const { IZorpStudy } = useContracts();
 
 	const { data: participant_status, isFetching } = useReadContract({
-		abi: ZorpStudy.abi,
-		address: ZorpStudy.address,
+		abi: IZorpStudy.abi,
+		address: IZorpStudy.address,
 		functionName: 'participant_status',
 		args: [addressParticipant],
 		query: {
@@ -27,9 +27,9 @@ export default function ZorpStudyReadParticipantStatus() {
 						&& addressStudy.startsWith('0x')
 						&& addressParticipant.length === addressStudyAnvil.length
 						&& addressParticipant.startsWith('0x')
-						&& !!ZorpStudy?.abi
-						&& !!Object.keys(ZorpStudy.abi).length
-						&& !!ZorpStudy?.address.length,
+						&& !!IZorpStudy?.abi
+						&& !!Object.keys(IZorpStudy.abi).length
+						&& !!IZorpStudy?.address.length,
 		},
 	});
 

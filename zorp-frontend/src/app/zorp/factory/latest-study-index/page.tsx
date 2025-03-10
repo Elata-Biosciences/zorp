@@ -13,17 +13,17 @@ export default function ZorpFactoryReadLatestStudyIndex() {
 
 	const addressFactoryId = useId();
 
-	const { ZorpFactory } = useContracts();
+	const { IZorpFactory } = useContracts();
 
-	const enabled: boolean = !!ZorpFactory?.abi
-												&& !!Object.keys(ZorpFactory.abi).length
-												&& !!ZorpFactory?.address.length
+	const enabled: boolean = !!IZorpFactory?.abi
+												&& !!Object.keys(IZorpFactory.abi).length
+												&& !!IZorpFactory?.address.length
 												&& addressFactory.length === addressFactoryAnvil.length
 												&& addressFactory.startsWith('0x');
 
 	const { data: latest_study_index, isFetching } = useReadContract({
-		abi: ZorpFactory.abi,
-		address: ZorpFactory.address,
+		abi: IZorpFactory.abi,
+		address: IZorpFactory.address,
 		functionName: 'latest_study_index',
 		args: [],
 		query: {

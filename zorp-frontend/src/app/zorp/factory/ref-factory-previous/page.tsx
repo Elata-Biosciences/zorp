@@ -11,19 +11,19 @@ export default function ZorpFactoryReadRefFactoryPrevious() {
 	const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
 	const addressFactoryId = useId();
 
-	const { ZorpFactory } = useContracts();
+	const { IZorpFactory } = useContracts();
 
 	const { data: ref_factory_previous, isFetching } = useReadContract({
-		abi: ZorpFactory.abi,
-		address: ZorpFactory.address,
+		abi: IZorpFactory.abi,
+		address: IZorpFactory.address,
 		functionName: 'ref_factory_previous',
 		args: [],
 		query: {
 			enabled: addressFactory.length === addressFactoryAnvil.length
 						&& addressFactory.startsWith('0x')
-						&& !!ZorpFactory?.abi
-						&& !!Object.keys(ZorpFactory.abi).length
-						&& !!ZorpFactory?.address.length,
+						&& !!IZorpFactory?.abi
+						&& !!Object.keys(IZorpFactory.abi).length
+						&& !!IZorpFactory?.address.length,
 		},
 	});
 

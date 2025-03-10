@@ -17,11 +17,11 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 	const startId = useId();
 	const limitId = useId();
 
-	const { ZorpFactory } = useContracts();
+	const { IZorpFactory } = useContracts();
 
 	const { data: studyAddresses, isFetching, refetch } = useReadContract({
-		abi: ZorpFactory.abi,
-		address: ZorpFactory.address,
+		abi: IZorpFactory.abi,
+		address: IZorpFactory.address,
 		functionName: 'paginateStudies',
 		args: [start, limit],
 		query: {
@@ -83,15 +83,15 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 					event.preventDefault();
 					event.stopPropagation();
 					const enabled: boolean = !isFetching
-																&& !!ZorpFactory?.abi
-																&& !!Object.keys(ZorpFactory.abi).length
-																&& !!ZorpFactory?.address.length
+																&& !!IZorpFactory?.abi
+																&& !!Object.keys(IZorpFactory.abi).length
+																&& !!IZorpFactory?.address.length
 																&& addressFactory.length === addressFactoryAnvil.length
 																&& addressFactory.startsWith('0x');
 
 					if (!enabled) {
 						console.warn('Missing required input(s) ->', {
-							ZorpFactory,
+							IZorpFactory,
 							addressFactory,
 							start,
 							limit,

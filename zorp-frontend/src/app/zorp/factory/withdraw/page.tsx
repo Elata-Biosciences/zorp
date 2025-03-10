@@ -23,7 +23,7 @@ export default function ZorpFactoryWriteWithdraw() {
 
 	const { writeContractAsync } = useWriteContract();
 
-	const { ZorpFactory } = useContracts();
+	const { IZorpFactory } = useContracts();
 
 	return (
 		<div className="w-full flex flex-col">
@@ -75,9 +75,9 @@ export default function ZorpFactoryWriteWithdraw() {
 					event.stopPropagation();
 
 					const enabled: boolean = isConnected
-																&& !!ZorpFactory?.abi
-																&& !!Object.keys(ZorpFactory.abi).length
-																&& !!ZorpFactory?.address.length
+																&& !!IZorpFactory?.abi
+																&& !!Object.keys(IZorpFactory.abi).length
+																&& !!IZorpFactory?.address.length
 																&& addressFactory.length === addressFactoryAnvil.length
 																&& addressFactory.startsWith('0x')
 																&& !!addressTo
@@ -93,8 +93,8 @@ export default function ZorpFactoryWriteWithdraw() {
 
 					setIsFetching(true);
 					writeContractAsync({
-						abi: ZorpFactory.abi,
-						address: ZorpFactory.address,
+						abi: IZorpFactory.abi,
+						address: IZorpFactory.address,
 						functionName: 'withdraw',
 						args: [addressTo, ammount],
 					}).then((response) => {

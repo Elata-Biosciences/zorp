@@ -31,18 +31,18 @@ type Contract = {
 };
 type Contracts = {
 	[key: string]: Contract;
-	ZorpFactory: Contract;
-	ZorpStudy: Contract;
+	IZorpFactory: Contract;
+	IZorpStudy: Contract;
 };
 
 // TODO: maybe find a less memory abusive way to satisfy MicroSoft™ TypeScript®
 //       instead of copying each `abi`
 const contractsAnvil: Contracts = {
-	ZorpFactory: {
+	IZorpFactory: {
 		address: config.anvil.contracts.ZorpFactory[31337].address,
 		abi: Object.assign(config.anvil.contracts.ZorpFactory[31337].abi),
 	},
-	ZorpStudy: {
+	IZorpStudy: {
 		address: config.anvil.contracts.ZorpStudy[31337].address,
 		abi: Object.assign(config.anvil.contracts.ZorpStudy[31337].abi),
 	}

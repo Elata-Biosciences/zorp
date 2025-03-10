@@ -25,7 +25,7 @@ export default function ZorpFactoryWriteCreateStudy() {
 	});
 
 	const { address, isConnected } = useAccount();
-	const { ZorpFactory } = useContracts();
+	const { IZorpFactory } = useContracts();
 
 	const handleZorpFactoryWriteCreateStudy = useCallback(() => {
 		if (!isConnected) {
@@ -48,12 +48,12 @@ export default function ZorpFactoryWriteCreateStudy() {
 		}
 
 		if (
-			!ZorpFactory
-			|| !ZorpFactory?.abi
-			|| !Object.keys(ZorpFactory?.abi).length
-			|| !ZorpFactory?.address.length
+			!IZorpFactory
+			|| !IZorpFactory?.abi
+			|| !Object.keys(IZorpFactory?.abi).length
+			|| !IZorpFactory?.address.length
 		) {
-			const message = 'Error: cannot find ZorpFactory for current chain';
+			const message = 'Error: cannot find IZorpFactory for current chain';
 			console.error('ZorpFactoryWriteCreateStudy', {message});
 			setMessage(message)
 			return;
@@ -63,8 +63,8 @@ export default function ZorpFactoryWriteCreateStudy() {
 		console.warn('ZorpFactoryWriteCreateStudy', {message});
 		setMessage(message)
 		writeContractAsync({
-			abi: ZorpFactory.abi,
-			address: ZorpFactory.address,
+			abi: IZorpFactory.abi,
+			address: IZorpFactory.address,
 			functionName: 'createStudy',
 			args: [
 				address.toString(),
@@ -75,7 +75,7 @@ export default function ZorpFactoryWriteCreateStudy() {
 			console.warn('ZorpFactoryWriteCreateStudy', {message});
 			setMessage(message)
 		});
-	}, [isConnected, address, irysUploadData, writeContractAsync, ZorpFactory]);
+	}, [isConnected, address, irysUploadData, writeContractAsync, IZorpFactory]);
 
 	return (
 		<div className="w-full flex flex-col">

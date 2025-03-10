@@ -12,19 +12,19 @@ export default function ZorpStudyReadCreator() {
 
 	const addressStudyId = useId();
 
-	const { ZorpStudy } = useContracts();
+	const { IZorpStudy } = useContracts();
 
 	const { data: creator, isFetching } = useReadContract({
-		abi: ZorpStudy.abi,
-		address: ZorpStudy.address,
+		abi: IZorpStudy.abi,
+		address: IZorpStudy.address,
 		functionName: 'creator',
 		args: [],
 		query: {
 			enabled: addressStudy.length === addressStudyAnvil.length
 						&& addressStudy.startsWith('0x')
-						&& !!ZorpStudy?.abi
-						&& !!Object.keys(ZorpStudy.abi).length
-						&& !!ZorpStudy?.address.length,
+						&& !!IZorpStudy?.abi
+						&& !!Object.keys(IZorpStudy.abi).length
+						&& !!IZorpStudy?.address.length,
 		},
 	});
 
