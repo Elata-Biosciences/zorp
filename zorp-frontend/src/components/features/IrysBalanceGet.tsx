@@ -35,6 +35,7 @@ export default function IrysBalanceGet({
 		try {
 			const webIrys = await (new WebIrys(webIrysOpts)).ready();
 			const balance = await webIrys.getBalance(address);
+			const message = `Irys balance: ${balance}`;
 			console.warn('new WebIrys(webIrysOpts).ready().getLoadedBalance()', {message, balance});
 			setMessage(message);
 			setState(balance);
