@@ -17,7 +17,7 @@ const nextConfigDefaults = {
 };
 
 /**
- * @param {"phase-test"|string} phase
+ * @param {"phase-test"|"phase-development-server"|string} phase
  * @param {NextConfig} config
  *
  * @see https://nextjs.org/docs/pages/api-reference/config/next-config-js
