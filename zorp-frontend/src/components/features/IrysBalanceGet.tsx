@@ -23,11 +23,8 @@ export default function IrysBalanceGet({
 	const { address } = useAccount();
 
 	const handleIrysBalanceGet = useCallback(async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-		console.warn('IrysBalance', {event});
-
 		if (!address) {
 			const message = 'Info: waiting for client to connect wallet with an address';
-			console.warn('IrysBalance', {message, address});
 			setMessage(message);
 			return;
 		}
@@ -36,7 +33,6 @@ export default function IrysBalanceGet({
 			const webIrys = await (new WebIrys(webIrysOpts)).ready();
 			const balance = await webIrys.getBalance(address);
 			const message = `Irys balance: ${balance}`;
-			console.warn('new WebIrys(webIrysOpts).ready().getLoadedBalance()', {message, balance});
 			setMessage(message);
 			setState(balance);
 		} catch (error: unknown) {
