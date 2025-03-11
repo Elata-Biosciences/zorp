@@ -1,14 +1,7 @@
 // TODO: maybe figure out a way to quite-down `WagmiProvider` logger stuff
 
-import {
-	afterEach,
-	beforeEach,
-	describe,
-	expect,
-	it,
-	vi,
-} from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
 import { BigNumber } from 'bignumber.js';
 import { WagmiProvider } from 'wagmi';
 import { wagmiConfig } from '@/lib/constants/wagmiConfig';
@@ -74,9 +67,11 @@ describe('Mockery of Irys `webIrys.getBalance`', () => {
 		expect(button).toBeDefined();
 		await button.click();
 
-		const span = document.querySelector('span');
-		expect(span).toBeDefined();
-		/* @ts-ignore */
-		expect(span.textContent).toBe('Irys balance: 419.68');
+		await waitFor(() => {
+			const span = document.querySelector('span');
+			expect(span).toBeDefined();
+			/* @ts-ignore */
+			expect(span.textContent).toBe('Irys balance: 419.68');
+		});
 	});
 });
