@@ -1,7 +1,7 @@
 on:
   push:
-    branches:
-      - main
+    # branches:
+    #   - main
     # paths:
     #   - zorp-contracts/src/**/*
     #   - zorp-contracts/test/**/*
@@ -101,6 +101,9 @@ jobs:
           PAGES_BASE_PATH: ${{ steps.configure_pages.outputs.base_path }}
         run: pushd zorp-frontend && npm run build ; popd
 
+      - name: Test frontend
+        run: pushd zorp-frontend && npm test ; popd
+
       ##
       # @see https://nextjs.org/docs/app/building-your-application/deploying/static-exports
       - name: Upload frontend stuff
@@ -136,6 +139,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     runs-on: ubuntu-latest
+    if: github.ref_name == 'main'
 
     steps:
       - name: Deploy GitHub Pages site
