@@ -72,6 +72,7 @@ export default function InputFileToEncryptedMessage({
 				const message = 'Success: encrypted file with provided GPG keys?!';
 				setMessage(message);
 				setState(encryptedMessage);
+				return encryptedMessage;
 			} catch (error: unknown) {
 				let message = 'Error: ';
 				if (!!error && typeof error == 'object') {
