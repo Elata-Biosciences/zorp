@@ -2,7 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import * as openpgp from 'openpgp';
-import type { Subkey } from 'openpgp';
+import type { Key, Subkey } from 'openpgp';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import InputFileToGpgEncryptionKey from '@/components/features/InputFileToGpgEncryptionKey';
 
@@ -34,7 +34,11 @@ describe('InputFileToGpgEncryptionKey', () => {
 						expect(state?.file).toBeDefined();
 						expect(state?.key).toBeDefined();
 
-						const { file, key } = state as { file: File; key: Subkey };
+						/**
+						 * @dev Note how _good_ MicroSoft™ TypeScript® can be when
+						 * type-hints are totally honest, truly confidence inspiring!
+						 */
+						const { file, key } = state as unknown as { file: File; key: Subkey };
 
 						expect(file).toBe(file);
 

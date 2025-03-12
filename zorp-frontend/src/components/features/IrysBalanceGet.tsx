@@ -64,7 +64,7 @@ export default function IrysBalanceGet({
 				onClick={(event) => {
 					event.stopPropagation();
 					event.preventDefault();
-					handleIrysBalanceGet(event);
+					handleIrysBalanceGet();
 				}}
 			>Get Irys balance</button>
 

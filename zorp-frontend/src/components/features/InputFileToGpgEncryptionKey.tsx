@@ -4,11 +4,15 @@ import { useCallback, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import * as openpgp from 'openpgp';
-import type { Subkey } from 'openpgp';
+import type { Key } from 'openpgp';
 import promiseFromFileReader from '@/lib/utils/promiseFromFileReader';
 
 /**
  * @see https://github.com/openpgpjs/openpgpjs?tab=readme-ov-file#browser-webpack
+ *
+ * @warning `Key` is _really_ of type `Subkey` **but** OpenPGP JS has kinda
+ * funky `Key | Subkey` hint that MicroSoft™ TypeScript® doesn't take kindly to
+ * attached on `await openpgp.readKey().then((key) => key.getEncryptionKey())`
  */
 export default function InputFileToGpgEncryptionKey({
 	className = '',
@@ -19,7 +23,7 @@ export default function InputFileToGpgEncryptionKey({
 	labelText: string;
 	setState: (state: null | {
 		file: File;
-		key: Subkey;
+		key: Key;
 	}) => void;
 }) {
 	const [message, setMessage] = useState<string>('Info: GPG public encryption key required');
@@ -49,7 +53,7 @@ export default function InputFileToGpgEncryptionKey({
 				if (encryption_key) {
 					setMessage('Success: recovered GPG encryption key from file!');
 					// TODO: add runtime check to ensure type-hint casting is not a lie
-					setState({ file, key: encryption_key as Subkey });
+					setState({ file, key: encryption_key as Key });
 				} else {
 					setState(null);
 				}
