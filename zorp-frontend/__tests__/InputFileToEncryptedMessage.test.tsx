@@ -44,8 +44,52 @@ describe('InputFileToEncryptedMessage', () => {
 			<QueryClientProvider client={queryClient}>
 				<InputFileToEncryptedMessage
 					labelText={'Mocked -- InputFileToEncryptedMessage'}
-					setState={(study_encrypted_message: null | Uint8Array) => {
-						console.log('Mocked -- setState', {study_encrypted_message});
+					setState={async (study_encrypted_message: null | Uint8Array) => {
+						gpgKeyStudy_can_decrypt_message: {
+							const { data } = await openpgp.decrypt({
+								/* Works when message was encrypted with `{ format: 'armored' }` */
+								// message: await openpgp.readMessage({ armoredMessage: study_encrypted_message }),
+
+								/* Works when message was encrypted with `{ format: 'binary' }` */
+								message: await openpgp.readMessage({ binaryMessage: study_encrypted_message }),
+
+								decryptionKeys: await openpgp.decryptKey({
+									privateKey: await openpgp.readPrivateKey({
+										armoredKey: gpgKeyStudy.privateKey,
+									}),
+									passphrase: 'wat',
+								}),
+
+								config: {
+									allowInsecureDecryptionWithSigningKeys: true,
+								},
+							});
+
+							expect(data).toBe('Maybe I found the River you know');
+						};
+
+						gpgKeyParticipant_can_decrypt_message: {
+							const { data } = await openpgp.decrypt({
+								/* Works when message was encrypted with `{ format: 'armored' }` */
+								// message: await openpgp.readMessage({ armoredMessage: study_encrypted_message }),
+
+								/* Works when message was encrypted with `{ format: 'binary' }` */
+								message: await openpgp.readMessage({ binaryMessage: study_encrypted_message }),
+
+								decryptionKeys: await openpgp.decryptKey({
+									privateKey: await openpgp.readPrivateKey({
+										armoredKey: gpgKeyParticipant.privateKey,
+									}),
+									passphrase: 'ICouldStandToHearALittleMore',
+								}),
+
+								config: {
+									allowInsecureDecryptionWithSigningKeys: true,
+								},
+							});
+
+							expect(data).toBe('Maybe I found the River you know');
+						};
 					}}
 					gpgKey={{
 						file: new File(
@@ -68,7 +112,6 @@ describe('InputFileToEncryptedMessage', () => {
 
 		const input = document.querySelector('input') as HTMLInputElement;
 		expect(input).toBeDefined();
-
 
 		const file = new File(
 			['Maybe I found the River you know'],
