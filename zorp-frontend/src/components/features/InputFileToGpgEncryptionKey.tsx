@@ -47,6 +47,7 @@ export default function InputFileToGpgEncryptionKey({
 				const message = 'Error: problem detected while reading file';
 				console.error('reader.onload', {message, event});
 				setMessage(message);
+				setState(null);
 				return;
 			}
 
