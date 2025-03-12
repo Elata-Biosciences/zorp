@@ -39,7 +39,7 @@ export default function InputFileToGpgEncryptionKey({
 				const { result: armoredKey } = await promiseFromFileReader({
 					file: file,
 					readerMethod: ({ reader, file, encoding }) => {
-						reader.readAsText(file);
+						reader.readAsText(file, encoding);
 					},
 				}) as { result: string };
 
@@ -84,7 +84,7 @@ export default function InputFileToGpgEncryptionKey({
 		} else {
 			setFile(null);
 		}
-	}, [ setState ]);
+	}, [ setFile ]);
 
 	return (
 		<>

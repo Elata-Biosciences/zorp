@@ -22,7 +22,7 @@ export default function IrysBalanceGet({
 	const [message, setMessage] = useState<string>('Info: connected wallet/provider required');
 	const { address } = useAccount();
 
-	const handleIrysBalanceGet = useCallback(async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+	const handleIrysBalanceGet = useCallback(async () => {
 		if (!address) {
 			const message = 'Info: waiting for client to connect wallet with an address';
 			setMessage(message);
@@ -53,7 +53,7 @@ export default function IrysBalanceGet({
 			setMessage(message);
 			setState(null);
 		}
-	}, [ address, message, setState ]);
+	}, [ address, setState ]);
 
 	return (
 		<>

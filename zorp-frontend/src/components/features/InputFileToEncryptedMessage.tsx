@@ -51,7 +51,7 @@ export default function InputFileToEncryptedMessage({
 			try {
 				const buffer = await promiseFromFileReader({
 					file,
-					readerMethod: ({ reader, file, encoding }) => {
+					readerMethod: ({ reader, file }) => {
 						reader.readAsArrayBuffer(file);
 					},
 				}).then(({ result }) => {
@@ -104,7 +104,7 @@ export default function InputFileToEncryptedMessage({
 		} else {
 			setFile(null);
 		}
-	}, [ setState ]);
+	}, [ setFile ]);
 
 	return (
 		<>
