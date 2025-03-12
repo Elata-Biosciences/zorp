@@ -14,7 +14,7 @@ export default function InputFileToEncryptedMessage({
 	encryptionKey,
 }: {
 	className?: string;
-	setState: (study_encryption_key: null | Uint8Array) => void;
+	setState: (study_encrypted_message: null | Uint8Array) => void;
 	labelText: string;
 	gpgKey: null | { file: File; key: Key; };
 	encryptionKey: null | { response: Response; key: Key; };
@@ -24,7 +24,9 @@ export default function InputFileToEncryptedMessage({
 
 	useQuery({
 		enabled: !!inputSubmitDataFile && !!gpgKey && !!gpgKey.key && !!encryptionKey && !!encryptionKey.key,
-		queryKey: ['message_recipients', [gpgKey?.key, encryptionKey?.key]],
+		queryKey: ['message_recipients'],
+		// TODO: investigate circular reference errors in tests possibly propagating to web-clients
+		// queryKey: ['message_recipients', [gpgKey?.key, encryptionKey?.key]],
 		queryFn: async () => {
 			// TODO: investigate why TypeScript and `useQuery` don't sync-up on `enabled`
 			if (!gpgKey?.key) {
@@ -49,6 +51,7 @@ export default function InputFileToEncryptedMessage({
 			}
 
 			try {
+				console.log('InputFileToEncryptedMessage ->', { 'inputSubmitDataFile.text': inputSubmitDataFile.text });
 				const buffer = await inputSubmitDataFile.arrayBuffer();
 
 				const createdmessage = await openpgp.createMessage({ binary: buffer });
@@ -96,7 +99,12 @@ export default function InputFileToEncryptedMessage({
 				onChange={(event: ChangeEvent<HTMLInputElement>) => {
 					event.stopPropagation();
 					event.preventDefault();
-					setInputSubmitDataFile(event.target.files?.item(0) || null);
+					console.warn({ 'event.target.files': event.target.files });
+					if (!!event.target.files?.length) {
+						setInputSubmitDataFile(event.target.files[0]);
+					} else {
+						setInputSubmitDataFile(null);
+					}
 				}}
 			/>
 			<span className={`file_encrypt file_encrypt__span ${className}`}>{message}</span>
