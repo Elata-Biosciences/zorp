@@ -32,21 +32,18 @@ export default function InputFileToEncryptedMessage({
 			// TODO: investigate why TypeScript and `useQuery` don't sync-up on `enabled`
 			if (!gpgKey?.key) {
 				const message = 'Warn: input GPG encryption key';
-				console.warn('InputFileToEncryptedMessage', {message});
 				setMessage(message);
 				return;
 			}
 
 			if (!encryptionKey?.key) {
 				const message = 'Warn: study GPG encryption key';
-				console.warn('InputFileToEncryptedMessage', {message});
 				setMessage(message);
 				return;
 			}
 
 			if (!inputSubmitDataFile) {
 				const message = 'Warn: need an input file to encrypt';
-				console.warn('InputFileToEncryptedMessage', {message});
 				setMessage(message);
 				return;
 			}
@@ -73,7 +70,6 @@ export default function InputFileToEncryptedMessage({
 				});
 
 				const message = 'Success: encrypted file with provided GPG keys?!';
-				console.warn('InputFileToEncryptedMessage', {message});
 				setMessage(message);
 				setState(encryptedMessage);
 			} catch (error: unknown) {
@@ -106,7 +102,6 @@ export default function InputFileToEncryptedMessage({
 				onChange={(event: ChangeEvent<HTMLInputElement>) => {
 					event.stopPropagation();
 					event.preventDefault();
-					console.warn({ 'event.target.files': event.target.files });
 					if (!!event.target.files?.length) {
 						setInputSubmitDataFile(event.target.files[0]);
 					} else {
