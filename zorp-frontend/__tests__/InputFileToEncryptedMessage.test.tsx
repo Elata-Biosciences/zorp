@@ -84,19 +84,11 @@ describe('InputFileToEncryptedMessage', () => {
 		});
 		fireEvent.change(input);
 
-		// const filesList = Object.create(input.files);
-		// filesList[0] = file;
-		// Object.defineProperty(filesList, 'length', { value: 1 });
-		// fireEvent.change(input, { target: { files: filesList } });
-		// console.log('InputFileToEncryptedMessage test ->', { file });
-		// fireEvent.change(input, { target: { files: [file] } });
-
 		await waitFor(() => {
 			const span = document.querySelector('span');
 			expect(span).toBeDefined();
 			/* @ts-ignore */
 			expect(span.textContent).toBe('Success: encrypted file with provided GPG keys?!');
 		});
-		console.log({ input });
 	});
 });

@@ -5,6 +5,7 @@ import type { ChangeEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import * as openpgp from 'openpgp';
 import type { Key } from 'openpgp';
+import promiseFromFileReader from '@/lib/utils/promiseFromFileReader';
 
 export default function InputFileToEncryptedMessage({
 	className = '',
@@ -51,8 +52,14 @@ export default function InputFileToEncryptedMessage({
 			}
 
 			try {
-				console.log('InputFileToEncryptedMessage ->', { 'inputSubmitDataFile.text': inputSubmitDataFile.text });
-				const buffer = await inputSubmitDataFile.arrayBuffer();
+				const buffer = await promiseFromFileReader({
+					file: inputSubmitDataFile,
+					readerMethod: ({ reader, file, encoding }) => {
+						reader.readAsArrayBuffer(file);
+					},
+				}).then(({ result }) => {
+					return new Uint8Array(result as ArrayBuffer);
+				});
 
 				const createdmessage = await openpgp.createMessage({ binary: buffer });
 
