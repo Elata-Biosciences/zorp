@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import * as openpgp from 'openpgp';
@@ -20,11 +20,11 @@ export default function InputFileToEncryptedMessage({
 	gpgKey: null | { file: File; key: Key; };
 	encryptionKey: null | { response: Response; key: Key; };
 }) {
-	const [inputSubmitDataFile, setInputSubmitDataFile] = useState<null | File>(null);
+	const [file, setFile] = useState<null | File>(null);
 	const [message, setMessage] = useState<string>('Info: waiting for public GPG encryption keys and or input file');
 
 	useQuery({
-		enabled: !!inputSubmitDataFile && !!gpgKey && !!gpgKey.key && !!encryptionKey && !!encryptionKey.key,
+		enabled: !!file && !!gpgKey && !!gpgKey.key && !!encryptionKey && !!encryptionKey.key,
 		queryKey: ['message_recipients'],
 		// TODO: investigate circular reference errors in tests possibly propagating to web-clients
 		// queryKey: ['message_recipients', [gpgKey?.key, encryptionKey?.key]],
@@ -42,7 +42,7 @@ export default function InputFileToEncryptedMessage({
 				return;
 			}
 
-			if (!inputSubmitDataFile) {
+			if (!file) {
 				const message = 'Warn: need an input file to encrypt';
 				setMessage(message);
 				return;
@@ -50,7 +50,7 @@ export default function InputFileToEncryptedMessage({
 
 			try {
 				const buffer = await promiseFromFileReader({
-					file: inputSubmitDataFile,
+					file,
 					readerMethod: ({ reader, file, encoding }) => {
 						reader.readAsArrayBuffer(file);
 					},
@@ -94,21 +94,25 @@ export default function InputFileToEncryptedMessage({
 		},
 	});
 
+	const onChangeHandler = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+		event.stopPropagation();
+		event.preventDefault();
+		if (!!event.target.files?.length) {
+			setFile(event.target.files[0]);
+			// TODO: update test(s) to allow for _proper_ usage
+			// setFile(event.target.files.item(0));
+		} else {
+			setFile(null);
+		}
+	}, [ setState ]);
+
 	return (
 		<>
 			<label className={`file_encrypt file_encrypt__label ${className}`}>{labelText}</label>
 			<input
 				className={`file_encrypt file_encrypt__input ${className}`}
 				type="file"
-				onChange={(event: ChangeEvent<HTMLInputElement>) => {
-					event.stopPropagation();
-					event.preventDefault();
-					if (!!event.target.files?.length) {
-						setInputSubmitDataFile(event.target.files[0]);
-					} else {
-						setInputSubmitDataFile(null);
-					}
-				}}
+				onChange={onChangeHandler}
 			/>
 			<span className={`file_encrypt file_encrypt__span ${className}`}>{message}</span>
 		</>
