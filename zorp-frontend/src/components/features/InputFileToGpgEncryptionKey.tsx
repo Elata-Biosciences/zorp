@@ -57,6 +57,8 @@ export default function InputFileToGpgEncryptionKey({
 				} else {
 					setState(null);
 				}
+
+				return encryption_key;
 			} catch (error: unknown) {
 				let message = 'Error: ';
 				if (!!error && typeof error == 'object') {
@@ -74,6 +76,8 @@ export default function InputFileToGpgEncryptionKey({
 				console.error('InputFileToEncryptedMessage', {message, error});
 				setMessage(message);
 				setState(null);
+
+				return error;
 			}
 		},
 	});
