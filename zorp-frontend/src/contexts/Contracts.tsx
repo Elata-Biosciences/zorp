@@ -39,12 +39,12 @@ type Contracts = {
 //       instead of copying each `abi`
 const contractsAnvil: Contracts = {
 	IZorpFactory: {
-		address: config.anvil.contracts.ZorpFactory[31337].address,
-		abi: Object.assign(config.anvil.contracts.ZorpFactory[31337].abi),
+		address: config.anvil.contracts.IZorpFactory[31337].address,
+		abi: Object.assign(config.anvil.contracts.IZorpFactory[31337].abi),
 	},
 	IZorpStudy: {
-		address: config.anvil.contracts.ZorpStudy[31337].address,
-		abi: Object.assign(config.anvil.contracts.ZorpStudy[31337].abi),
+		address: config.anvil.contracts.IZorpStudy[31337].address,
+		abi: Object.assign(config.anvil.contracts.IZorpStudy[31337].abi),
 	}
 };
 
