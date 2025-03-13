@@ -2,13 +2,16 @@
 
 import { useCallback, useState } from 'react';
 import { WebIrys } from '@irys/sdk';
+import merge from 'lodash.merge';
 import type { BigNumber } from 'bignumber.js';
 import { useAccount } from 'wagmi';
 import { webIrysOpts } from '@/lib/constants/irysConfig';
+import type { WebIrysOpts } from '@/@types/irys';
 
 /**
- * @see https://github.com/Irys-xyz/provenance-toolkit/blob/master/app/utils/getIrys.ts#L107
- * @see https://github.com/Irys-xyz/provenance-toolkit/blob/master/app/utils/fundAndUpload.ts#L33
+ * @see {@link https://github.com/Irys-xyz/provenance-toolkit/blob/master/app/utils/fundAndUpload.ts#L33}
+ * @see {@link https://github.com/Irys-xyz/provenance-toolkit/blob/master/app/utils/getIrys.ts#L107}
+ * @see {@link https://github.com/wevm/wagmi/discussions/2405}
  */
 export default function IrysBalanceGet({
 	className = '',
@@ -20,7 +23,7 @@ export default function IrysBalanceGet({
 	setState: (balance: null | number | BigNumber) => void;
 }) {
 	const [message, setMessage] = useState<string>('Info: connected wallet/provider required');
-	const { address } = useAccount();
+	const { address, connector } = useAccount();
 
 	const handleIrysBalanceGet = useCallback(async () => {
 		if (!address) {
@@ -29,12 +32,23 @@ export default function IrysBalanceGet({
 			return;
 		}
 
+		if (!connector) {
+			const message = 'Info: waiting for client to connect wallet provider';
+			setMessage(message);
+			return;
+		}
+
 		try {
-			const webIrys = await (new WebIrys(webIrysOpts)).ready();
+			const opts = merge({}, webIrysOpts) as WebIrysOpts ;
+			/* @ts-ignore */
+			opts.wallet.provider = await connector.getProvider();
+			const webIrys = await (new WebIrys(opts)).ready();
 			const balance = await webIrys.getBalance(address);
 			const message = `Irys balance: ${balance}`;
 			setMessage(message);
 			setState(balance);
+			console.warn({ balance });
+			return balance;
 		} catch (error: unknown) {
 			let message = 'Error: ';
 			if (!!error && typeof error == 'object') {
@@ -53,7 +67,7 @@ export default function IrysBalanceGet({
 			setMessage(message);
 			setState(null);
 		}
-	}, [ address, setState ]);
+	}, [ address, connector, setState ]);
 
 	return (
 		<>
