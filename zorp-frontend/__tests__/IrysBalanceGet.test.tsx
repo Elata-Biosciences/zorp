@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { BigNumber } from 'bignumber.js';
 import { WagmiProvider } from 'wagmi';
+import type irys_sdk from '@irys/sdk';
 import { wagmiConfig } from '@/lib/constants/wagmiConfig';
 import IrysBalanceGet from '@/components/features/IrysBalanceGet';
 
@@ -16,7 +17,7 @@ describe('Mockery of Irys `webIrys.getBalance`', () => {
 		const balance = 419.68;
 		vi.mock('@irys/sdk', async (importOriginal) => {
 			// console.warn('Mocking "@irys/sdk"');
-			const irys_sdk = await importOriginal() as { [key:string]: unknown; };
+			const irys_sdk = await importOriginal<irys_sdk>();
 
 			const WebIrys = function() {
 				// console.warn('Mocked "@irys/sdk" -> WebIrys');
