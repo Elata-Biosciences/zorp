@@ -11,6 +11,12 @@ import type { Subkey, Key } from 'openpgp';
 import { useAccount } from 'wagmi';
 import { irysBalanceThreshold } from '@/lib/constants/irysConfig';
 
+/**
+ * @see {@link https://github.com/wevm/wagmi/discussions/4297}
+ * @see {@link https://wagmi.sh/react/guides/ethers}
+ * @see {@link https://github.com/wevm/wagmi/discussions/2615}
+ * @see {@link https://wagmi.sh/react/ethers-adapters}
+ */
 export default function IrysUploadFileGpgKey({
 	className = '',
 	labelText = 'Irys upload public GPG encryption key',
@@ -76,6 +82,7 @@ export default function IrysUploadFileGpgKey({
 
 			setMessage('Success: Uploded GPG key to Irys?!');
 			setState({ receipt, cid: cid.toString() });
+			console.warn('IrysUploadFileGpgKey ->', { cid, receipt });
 		} catch (error: unknown) {
 			let message = 'Error: ';
 			if (!!error && typeof error == 'object') {
