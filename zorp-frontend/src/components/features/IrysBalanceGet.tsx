@@ -2,8 +2,8 @@
 
 import { useCallback, useState } from 'react';
 import type { BigNumber } from 'bignumber.js';
-import { useAccount } from 'wagmi';
 import { JsonRpcProvider } from 'ethers';
+import { useAccount } from 'wagmi';
 // import { webIrysOpts } from '@/lib/constants/irysConfig';
 
 /**
