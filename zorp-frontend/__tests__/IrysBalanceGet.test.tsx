@@ -4,9 +4,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { BigNumber } from 'bignumber.js';
 import { WagmiProvider } from 'wagmi';
-import type irys_sdk from '@irys/sdk';
 import { wagmiConfig } from '@/lib/constants/wagmiConfig';
 import IrysBalanceGet from '@/components/features/IrysBalanceGet';
+import type ethers_type from 'ethers';
 
 describe('Mockery of Irys `webIrys.getBalance`', () => {
 	afterEach(() => {
@@ -15,27 +15,16 @@ describe('Mockery of Irys `webIrys.getBalance`', () => {
 
 	it('Calls setState as expected', async () => {
 		const balance = 419.68;
-		vi.mock('@irys/sdk', async (importOriginal) => {
+		vi.mock('ethers', async (importOriginal) => {
 			// console.warn('Mocking "@irys/sdk"');
-			const irys_sdk = await importOriginal<irys_sdk>();
+			const ethers = await importOriginal<typeof ethers_type>();
 
-			const WebIrys = function() {
-				// console.warn('Mocked "@irys/sdk" -> WebIrys');
-
+			const JsonRpcProvider = function(){
 				/* @ts-ignore */
-				this.ready = async () => {
-					// console.warn('Mocked "@irys/sdk" -> async WebIrys.ready()');
-					return {
-						getBalance: async () => {
-							const data = BigNumber(419.68);
-							// console.warn('Mocked "@irys/sdk" -> async (await WebIrys.ready()).getBalance()', { data });
-							return data;
-						},
-					};
-				};
-			}
+				this.getBalance = async () => 9001;
+			};
 
-			return { ...irys_sdk, WebIrys };
+			return { ...ethers, JsonRpcProvider };
 		});
 
 		vi.mock('wagmi', async (importOriginal) => {
@@ -58,7 +47,7 @@ describe('Mockery of Irys `webIrys.getBalance`', () => {
 					setState={(balance: unknown) => {
 						console.warn('Vitest mocked', {balance});
 
-						expect(balance).toEqual(BigNumber(419.68));
+						expect(balance).toEqual(9001);
 					}}
 				/>
 			</WagmiProvider>
@@ -72,7 +61,7 @@ describe('Mockery of Irys `webIrys.getBalance`', () => {
 			const span = document.querySelector('span');
 			expect(span).toBeDefined();
 			/* @ts-ignore */
-			expect(span.textContent).toBe('Irys balance: 419.68');
+			expect(span.textContent).toBe('Irys balance: 9001');
 		});
 	});
 });

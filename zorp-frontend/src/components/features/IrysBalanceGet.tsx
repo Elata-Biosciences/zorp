@@ -36,7 +36,7 @@ export default function IrysBalanceGet({
 		try {
 			const provider = new JsonRpcProvider('https://testnet-rpc.irys.xyz/v1/execution-rpc');
 			const balance = await provider.getBalance(address);
-			const message = `Success?... balance is -> ${balance}`;
+			const message = `Irys balance: ${balance}`;
 			setMessage(message);
 			setState(balance);
 			return balance;
