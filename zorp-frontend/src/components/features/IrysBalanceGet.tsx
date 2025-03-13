@@ -1,17 +1,17 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import { WebIrys } from '@irys/sdk';
-import merge from 'lodash.merge';
 import type { BigNumber } from 'bignumber.js';
 import { useAccount } from 'wagmi';
-import { webIrysOpts } from '@/lib/constants/irysConfig';
-import type { WebIrysOpts } from '@/@types/irys';
+import { JsonRpcProvider } from 'ethers';
+// import { webIrysOpts } from '@/lib/constants/irysConfig';
 
 /**
  * @see {@link https://github.com/Irys-xyz/provenance-toolkit/blob/master/app/utils/fundAndUpload.ts#L33}
  * @see {@link https://github.com/Irys-xyz/provenance-toolkit/blob/master/app/utils/getIrys.ts#L107}
  * @see {@link https://github.com/wevm/wagmi/discussions/2405}
+ * @see {@link https://docs.irys.xyz/build/d/sdk/setup#base-ethereum}
+ * @see {@link https://docs.irys.xyz/build/programmability/connecting-to-testnet}
  */
 export default function IrysBalanceGet({
 	className = '',
@@ -20,37 +20,29 @@ export default function IrysBalanceGet({
 }: {
 	className?: string;
 	labelText: string;
-	setState: (balance: null | number | BigNumber) => void;
+	setState: (balance: null | number | BigNumber | bigint) => void;
 }) {
 	const [message, setMessage] = useState<string>('Info: connected wallet/provider required');
-	const { address, connector } = useAccount();
+	const { address } = useAccount();
 
 	const handleIrysBalanceGet = useCallback(async () => {
 		if (!address) {
 			const message = 'Info: waiting for client to connect wallet with an address';
 			setMessage(message);
-			return;
-		}
-
-		if (!connector) {
-			const message = 'Info: waiting for client to connect wallet provider';
-			setMessage(message);
+			setState(null);
 			return;
 		}
 
 		try {
-			const opts = merge({}, webIrysOpts) as WebIrysOpts ;
-			/* @ts-ignore */
-			opts.wallet.provider = await connector.getProvider();
-			const webIrys = await (new WebIrys(opts)).ready();
-			const balance = await webIrys.getBalance(address);
-			const message = `Irys balance: ${balance}`;
+			const provider = new JsonRpcProvider('https://testnet-rpc.irys.xyz/v1/execution-rpc');
+			const balance = await provider.getBalance(address);
+			const message = `Success?... balance is -> ${balance}`;
 			setMessage(message);
 			setState(balance);
-			console.warn({ balance });
 			return balance;
-		} catch (error: unknown) {
+		} catch (error) {
 			let message = 'Error: ';
+
 			if (!!error && typeof error == 'object') {
 				if ('message' in error) {
 					message += error.message;
@@ -63,11 +55,11 @@ export default function IrysBalanceGet({
 				message += `Novel error detected -> ${error}`;
 			}
 
-			console.error('new WebIrys(webIrysOpts).ready() ...', {message, error});
 			setMessage(message);
-			setState(null);
+			console.error('IrysBaseShowBalance ->', { error, message });
+			return error;
 		}
-	}, [ address, connector, setState ]);
+	}, [ address, setState ]);
 
 	return (
 		<>
@@ -75,10 +67,10 @@ export default function IrysBalanceGet({
 
 			<button
 				className={`irys_balance irys_balance__button ${className}`}
-				onClick={(event) => {
+				onClick={async (event) => {
 					event.stopPropagation();
 					event.preventDefault();
-					handleIrysBalanceGet();
+					await handleIrysBalanceGet();
 				}}
 			>Get Irys balance</button>
 
