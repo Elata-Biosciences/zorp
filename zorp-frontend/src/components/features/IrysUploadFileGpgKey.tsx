@@ -1,21 +1,15 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import type { BigNumber } from 'bignumber.js';
-import { CID } from 'multiformats/cid';
-import * as raw from 'multiformats/codecs/raw';
-import { sha256 } from 'multiformats/hashes/sha2';
 import type { Subkey, Key } from 'openpgp';
-import * as openpgp from 'openpgp';
 import { useAccount } from 'wagmi';
-import { getIrysUploaderWebBaseEth } from '@/lib/utils/irys';
+import { cidFromFile } from '@/lib/utils/ipfs';
+import { getGpgKeyFromCid, getIrysUploaderWebBaseEth } from '@/lib/utils/irys';
 import { irysBalanceThreshold } from '@/lib/constants/irysConfig';
 import * as irysConfig from '@/lib/constants/irysConfig';
 
 /**
- * @TODO maybe recover/setState for `receipt: undefined` when `cid` is of preexisting upload
- *
  * @see {@link https://github.com/wevm/wagmi/discussions/4297}
  * @see {@link https://wagmi.sh/react/guides/ethers}
  * @see {@link https://github.com/wevm/wagmi/discussions/2615}
@@ -39,34 +33,10 @@ export default function IrysUploadFileGpgKey({
 	irysBalance: null | (number | bigint | BigNumber);
 }) {
 	const [cid, setCid] = useState<null | string>(null);
+	const [maybePreexistingGpgKeyFile, setMaybePreexistingGpgKeyFile] = useState<null | (Key | Subkey)>(null);
 	const [message, setMessage] = useState<string>('Info: connected wallet/provider required');
 
 	const { address } = useAccount();
-
-	const { data: maybePreexistingGpgKeyFile } = useQuery({
-		enabled: !!cid?.length,
-		queryKey: ['cid_create-study', cid],
-		queryFn: async () => {
-			const url = `${irysConfig.gatewayUrl.irys}/ipfs/${cid}`;
-			setMessage(`Info: attempting to download key from ${url}`);
-			console.warn(`Info: attempting to download key from ${url}`)
-
-			const response = await fetch(url).then((response) => {
-				if (!response.ok) {
-					setMessage(`Warn: failed to download key from ${url}`);
-					console.warn('IrysUploadFileGpgKey', { response });
-				}
-				return response;
-			});
-
-			const text = await response.text();
-
-			const key = await openpgp.readKey({ armoredKey: text });
-			setMessage(`Info: GPG key already uploaded at -> ${url}`);
-			setState({ cid: (cid as string).toString(), receipt: undefined });
-			return key;
-		},
-	});
 
 	const handleOnClick = useCallback(async () => {
 		if (!address) {
@@ -78,7 +48,7 @@ export default function IrysUploadFileGpgKey({
 		if (!!maybePreexistingGpgKeyFile && !!cid) {
 			const url = `${irysConfig.gatewayUrl.irys}/ipfs/${cid}`;
 			setMessage(`Info: GPG key already uploaded at -> ${url}`);
-			setState({ cid: cid.toString(), receipt: undefined });
+			setState({ cid, receipt: undefined });
 			return;
 		};
 
@@ -88,42 +58,48 @@ export default function IrysUploadFileGpgKey({
 			return;
 		}
 
-		const buffer = await gpgKey.file.arrayBuffer();
-		const hash = await sha256.digest(raw.encode(new Uint8Array(buffer)));
-		setCid((await CID.create(1, raw.code, hash)).toString());
-
 		if (!irysBalance || irysBalance <= irysBalanceThreshold) {
 			setMessage('Info: waiting for client to fund Irys for upload');
 			setState(null);
 			return;
 		}
 
-		if (!cid) {
-			setMessage('Error: cannot cope with no CID');
-			setState(null);
-			return;
-		}
-
 		setMessage('Info: attempting to convert GPG key to ArrayBuffer');
 		try {
+			const cid = await cidFromFile(gpgKey.file);
+			setCid(cid);
+
+			const url = `${irysConfig.gatewayUrl.irys}/ipfs/${cid}`;
+			setMessage(`Info: attempting to download key from ${url}`);
+
+			const key = await getGpgKeyFromCid(cid);
+			if (!!key) {
+				setMessage(`Info: GPG key already uploaded at -> ${url}`);
+				setState({ cid, receipt: undefined });
+				setMaybePreexistingGpgKeyFile(key);
+				return key;
+			}
+
 			setMessage('Info: attempting to initalize Irys Web Uploader');
 			const irysUploader = await getIrysUploaderWebBaseEth();
 
 			setMessage('Info: attempting to upload GPG key to Irys');
+			const buffer = await gpgKey.file.arrayBuffer();
 			// TODO: maybe configure `opts` AKA CreateAndUploadOptions
 			const receipt = await irysUploader.uploader.uploadData(
 				Buffer.from(buffer),
 				{
 					tags: [
 						{ name: 'Content-Type', value: 'application/pgp-encrypted' },
-						{ name: 'IPFS-CID', value: cid.toString() },
+						{ name: 'IPFS-CID', value: cid },
 					]
 				},
 			);
 
 			setMessage(`Success: Uploded GPG key to Irys?! JSON: '{ "id": "${receipt.id}", "cid": "${cid}", "url": "https://gateway.irys.xyz/ipfs/${cid}" }'`);
-			setState({ receipt, cid: cid.toString() });
-			console.warn('IrysUploadFileGpgKey ->', { cid, receipt });
+			const state = { receipt, cid };
+			setState(state);
+			return state;
 		} catch (error: unknown) {
 			let message = 'Error: ';
 			if (!!error && typeof error == 'object') {
@@ -141,6 +117,7 @@ export default function IrysUploadFileGpgKey({
 			console.error('IrysUploadFileGpgKey ...', {message, error});
 			setMessage(message);
 			setState(null);
+			return error;
 		}
 	}, [
 		address,
@@ -160,7 +137,6 @@ export default function IrysUploadFileGpgKey({
 				onClick={(event) => {
 					event.stopPropagation();
 					event.preventDefault();
-					console.warn('IrysUploadFileGpgKey', {event});
 					handleOnClick();
 				}}
 			>Upload GPG key to Irys</button>
