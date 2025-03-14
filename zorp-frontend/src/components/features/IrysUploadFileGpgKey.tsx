@@ -32,7 +32,7 @@ export default function IrysUploadFileGpgKey({
 		cid: string;
 	}) => void;
 	gpgKey: null | { file: File; key: Subkey | Key; };
-	irysBalance: null | (number | BigNumber);
+	irysBalance: null | (number | bigint | BigNumber);
 }) {
 	const [message, setMessage] = useState<string>('Info: connected wallet/provider required');
 	const { address } = useAccount();

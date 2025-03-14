@@ -5,7 +5,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import type wagmiType from 'wagmi';
+import type * as wagmiType from 'wagmi';
 import type * as wagmiConfig from '@/lib/constants/wagmiConfig';
 import type { IZorpStudy } from '@/lib/constants/wagmiContractConfig/IZorpStudy';
 import type node_fetch_type from 'node-fetch';

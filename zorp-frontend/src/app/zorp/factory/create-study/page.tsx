@@ -16,7 +16,7 @@ export default function ZorpFactoryWriteCreateStudy() {
 
 	// TODO: consider reducing need of keeping bot `Key` and `File` in memory at same time
 	const [gpgKey, setGpgKey] = useState<null | { file: File; key: Key; }>(null);
-	const [irysBalance, setIrysBalance] = useState<null | number | BigNumber>(null);
+	const [irysBalance, setIrysBalance] = useState<null | bigint | number | BigNumber>(null);
 	const [irysUploadData, setIrysUploadData] = useState<null | { receipt: unknown; cid: string; }>(null);
 	const [message, setMessage] = useState<string>('Info: connected wallet/provider required');
 

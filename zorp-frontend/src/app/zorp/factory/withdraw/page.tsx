@@ -7,7 +7,7 @@ import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
 export default function ZorpFactoryWriteWithdraw() {
-	const addressFactoryAnvil = config.anvil.contracts.ZorpFactory[31337].address;
+	const addressFactoryAnvil = config.anvil.contracts.IZorpFactory[31337].address;
 
 	const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
 	const [addressTo, setAddressTo] = useState<`0x${string}` | undefined>(undefined);

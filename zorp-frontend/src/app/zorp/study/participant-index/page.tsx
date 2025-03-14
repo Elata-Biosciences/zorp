@@ -7,7 +7,7 @@ import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
 export default function ZorpStudyReadParticipantIndex() {
-	const addressStudyAnvil = config.anvil.contracts.ZorpStudy[31337].address;
+	const addressStudyAnvil = config.anvil.contracts.IZorpStudy[31337].address;
 
 	const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
 	const [addressParticipant, setAddressParticipant] = useState<`0x${string}`>('0x70997970C51812dc3A010C7d01b50e0d17dc79C8');

@@ -9,7 +9,7 @@ import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
 export default function ZorpFactoryReadPaginateSubmittedData() {
-	const addressFactoryAnvil = config.anvil.contracts.ZorpFactory[31337].address;
+	const addressFactoryAnvil = config.anvil.contracts.IZorpFactory[31337].address;
 
 	const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
 	const [addressStudy, setAddressStudy] = useState<`0x${string}`>('0xa16E02E87b7454126E5E10d957A927A7F5B5d2be');

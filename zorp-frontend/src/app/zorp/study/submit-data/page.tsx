@@ -18,7 +18,7 @@ export default function ZorpStudySubmitData() {
 	// TODO: consider reducing need of keeping both `Key` and `File` in memory at same time
 	const [gpgKey, setGpgKey] = useState<null | { file: File; key: Key; }>(null);
 
-	const [irysBalance, setIrysBalance] = useState<null | number | BigNumber>(null);
+	const [irysBalance, setIrysBalance] = useState<null | bigint | number | BigNumber>(null);
 
 	const [irysUploadData, setIrysUploadData] = useState<null | { receipt: unknown; cid: string; }>(null);
 

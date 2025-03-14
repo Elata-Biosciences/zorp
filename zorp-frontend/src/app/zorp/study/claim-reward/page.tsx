@@ -7,7 +7,7 @@ import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
 export default function ZorpStudyWriteClaimReward() {
-	const addressStudyAnvil = config.anvil.contracts.ZorpStudy[31337].address;
+	const addressStudyAnvil = config.anvil.contracts.IZorpStudy[31337].address;
 
 	const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
 	const [isFetching, setIsFetching] = useState<boolean>(false);
