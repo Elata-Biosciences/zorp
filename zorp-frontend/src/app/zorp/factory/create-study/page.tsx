@@ -19,6 +19,7 @@ export default function ZorpFactoryWriteCreateStudy() {
 	const [irysBalance, setIrysBalance] = useState<null | bigint | number | BigNumber>(null);
 	const [irysUploadData, setIrysUploadData] = useState<null | { receipt: unknown; cid: string; }>(null);
 	const [message, setMessage] = useState<string>('Info: connected wallet/provider required');
+	const [ammount, setAmmount] = useState<null | bigint>(null);
 
 	const { writeContractAsync } = useWriteContract({
 		config: config.wagmiConfig,
@@ -27,6 +28,16 @@ export default function ZorpFactoryWriteCreateStudy() {
 	const { address, isConnected } = useAccount();
 	const { IZorpFactory } = useContracts();
 
+	const handleZorpFactoryCreateStudyAmmount = useCallback((ammount: bigint) => {
+		if (!ammount || ammount < 1) {
+			setMessage('Waiting for positive study deposit ammount');
+			setAmmount(null);
+			return;
+		}
+
+		setAmmount(ammount);
+	}, []);
+
 	const handleZorpFactoryWriteCreateStudy = useCallback(() => {
 		if (!isConnected) {
 			const message = 'Warn: waiting on client to connect an account';
@@ -34,13 +45,22 @@ export default function ZorpFactoryWriteCreateStudy() {
 			setMessage(message)
 			return;
 		}
+
 		if (!address?.toString().length) {
 			const message = 'Warn: waiting on client to connect an account with an address';
 			console.warn('ZorpFactoryWriteCreateStudy', {message});
 			setMessage(message)
 			return;
 		}
-		if (!irysUploadData || !irysUploadData.cid || !irysUploadData.receipt) {
+
+		if (!ammount || ammount < 1) {
+			setMessage('Waiting for positive study deposit ammount');
+			setAmmount(null);
+			return;
+		}
+
+		// if (!irysUploadData || !irysUploadData.cid || !irysUploadData.receipt) {
+		if (!irysUploadData || !irysUploadData.cid) {
 			const message = 'Warn: for Irys upload to report success';
 			console.warn('ZorpFactoryWriteCreateStudy', {message});
 			setMessage(message)
@@ -59,9 +79,7 @@ export default function ZorpFactoryWriteCreateStudy() {
 			return;
 		}
 
-		const message = 'Warn: starting blockchain write request to `ZorpFactory.createStudy`';
-		console.warn('ZorpFactoryWriteCreateStudy', {message});
-		setMessage(message)
+		setMessage('Warn: starting blockchain write request to `ZorpFactory.createStudy`')
 		writeContractAsync({
 			abi: IZorpFactory.abi,
 			address: IZorpFactory.address,
@@ -70,12 +88,20 @@ export default function ZorpFactoryWriteCreateStudy() {
 				address.toString(),
 				irysUploadData.cid.toString(),
 			],
+			value: ammount,
 		}).then((writeContractData) => {
 			const message = `Result: transaction hash: ${writeContractData}`;
-			console.warn('ZorpFactoryWriteCreateStudy', {message});
+			console.warn('ZorpFactoryWriteCreateStudy', { message });
 			setMessage(message)
 		});
-	}, [isConnected, address, irysUploadData, writeContractAsync, IZorpFactory]);
+	}, [
+		IZorpFactory,
+		ammount,
+		address,
+		irysUploadData,
+		isConnected,
+		writeContractAsync,
+	]);
 
 	return (
 		<div className="w-full flex flex-col">
@@ -104,6 +130,17 @@ export default function ZorpFactoryWriteCreateStudy() {
 				setState={setIrysUploadData}
 				gpgKey={gpgKey}
 				irysBalance={irysBalance}
+			/>
+
+			<hr />
+			<label>Study deposit amount:</label>
+			<input
+				type="number"
+				onChange={(event) => {
+					event.stopPropagation();
+					event.preventDefault();
+					handleZorpFactoryCreateStudyAmmount(BigInt(event.target.value));
+				}}
 			/>
 
 			<hr />
