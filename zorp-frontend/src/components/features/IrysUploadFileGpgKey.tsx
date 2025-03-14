@@ -8,7 +8,6 @@ import { sha256 } from 'multiformats/hashes/sha2';
 import type { Subkey, Key } from 'openpgp';
 import { useAccount } from 'wagmi';
 import { getIrysUploaderWebBaseEth } from '@/lib/utils/irys';
-
 import { irysBalanceThreshold } from '@/lib/constants/irysConfig';
 
 /**
