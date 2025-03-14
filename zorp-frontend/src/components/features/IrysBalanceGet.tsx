@@ -4,6 +4,8 @@ import { useCallback, useState } from 'react';
 import type { BigNumber } from 'bignumber.js';
 import { JsonRpcProvider } from 'ethers';
 import { useAccount } from 'wagmi';
+// TODO: maybe make `.getBalance` work with `getIrysUploaderWebBaseEth` coerced instance?
+// import { getIrysUploaderWebBaseEth } from '@/lib/utils/irys';
 // import { webIrysOpts } from '@/lib/constants/irysConfig';
 
 /**
@@ -37,6 +39,13 @@ export default function IrysBalanceGet({
 			const provider = new JsonRpcProvider('https://testnet-rpc.irys.xyz/v1/execution-rpc');
 			const balance = await provider.getBalance(address);
 			const message = `Irys balance: ${balance}`;
+
+			// TODO: maybe make `.getBalance` work with `getIrysUploaderWebBaseEth` coerced instance?
+			// const irysUploaderWebBaseEth = await getIrysUploaderWebBaseEth();
+			// const balance = await irysUploaderWebBaseEth.getBalance(address);
+			// const message = `Irys balance: ${balance}`;
+
+			console.warn('IrysBalanceGet ->', { balance, balance_toString: balance.toString() });
 			setMessage(message);
 			setState(balance);
 			return balance;
