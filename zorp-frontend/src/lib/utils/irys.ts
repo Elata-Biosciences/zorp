@@ -4,6 +4,8 @@ import { WebUploader } from "@irys/web-upload";
 import { WebBaseEth } from '@irys/web-upload-ethereum';
 import { EthersV6Adapter } from "@irys/web-upload-ethereum-ethers-v6";
 import { ethers } from "ethers";
+import * as openpgp from 'openpgp';
+import * as irysConfig from '@/lib/constants/irysConfig';
 
 /**
  * Because `wagmi` and/or `viet` and/or ReactJS and/or NextJS and/or Irys do not play well with on another
@@ -27,3 +29,15 @@ export async function getIrysUploaderWebBaseEth() {
 		// .devnet();
 		// TODO: maybe add `.withIrysConfig(config)` to the mix?
 };
+
+/**
+ *
+ */
+export async function getGpgKeyFromCid(cid: string) {
+	const url = `${irysConfig.gatewayUrl.irys}/ipfs/${cid}`;
+	const response = await fetch(url);
+	if (response.ok) {
+		const text = await response.text();
+		return await openpgp.readKey({ armoredKey: text });
+	}
+}
