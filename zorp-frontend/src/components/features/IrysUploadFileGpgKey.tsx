@@ -1,14 +1,14 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import { WebUploader } from '@irys/web-upload';
-import { WebBaseEth } from '@irys/web-upload-ethereum';
 import type { BigNumber } from 'bignumber.js';
 import { CID } from 'multiformats/cid';
 import * as raw from 'multiformats/codecs/raw';
 import { sha256 } from 'multiformats/hashes/sha2';
 import type { Subkey, Key } from 'openpgp';
 import { useAccount } from 'wagmi';
+import { getIrysUploaderWebBaseEth } from '@/lib/utils/irys';
+
 import { irysBalanceThreshold } from '@/lib/constants/irysConfig';
 
 /**
@@ -16,6 +16,7 @@ import { irysBalanceThreshold } from '@/lib/constants/irysConfig';
  * @see {@link https://wagmi.sh/react/guides/ethers}
  * @see {@link https://github.com/wevm/wagmi/discussions/2615}
  * @see {@link https://wagmi.sh/react/ethers-adapters}
+ * @see {@link https://docs.irys.xyz/build/d/sdk/upload/uploadFile}
  */
 export default function IrysUploadFileGpgKey({
 	className = '',
@@ -34,7 +35,7 @@ export default function IrysUploadFileGpgKey({
 	irysBalance: null | (number | BigNumber);
 }) {
 	const [message, setMessage] = useState<string>('Info: connected wallet/provider required');
-	const { address, connector } = useAccount();
+	const { address } = useAccount();
 
 	const handleOnClick = useCallback(async () => {
 		if (!address) {
@@ -65,12 +66,14 @@ export default function IrysUploadFileGpgKey({
 			setMessage('Info: attempting generate an IPFS compatible CID');
 			const cid = await CID.create(1, raw.code, hash);
 
+			// TODO: check for duplicate upload via -> https://gateway.irys.xyz/ipfs/${cid}
+
 			setMessage('Info: attempting to initalize Irys Web Uploader');
-			const irysUploadBuilder = await WebUploader(WebBaseEth).withProvider(connector);
+			const irysUploader = await getIrysUploaderWebBaseEth();
 
 			setMessage('Info: attempting to upload GPG key to Irys');
 			// TODO: maybe configure `opts` AKA CreateAndUploadOptions
-			const receipt = await irysUploadBuilder.uploader.uploadData(
+			const receipt = await irysUploader.uploader.uploadData(
 				Buffer.from(buffer),
 				{
 					tags: [
@@ -80,7 +83,7 @@ export default function IrysUploadFileGpgKey({
 				},
 			);
 
-			setMessage('Success: Uploded GPG key to Irys?!');
+			setMessage(`Success: Uploded GPG key to Irys?! JSON: '{ "id": "${receipt.id}", "cid": "${cid}", "url": "https://gateway.irys.xyz/ipfs/${cid}" }'`);
 			setState({ receipt, cid: cid.toString() });
 			console.warn('IrysUploadFileGpgKey ->', { cid, receipt });
 		} catch (error: unknown) {
@@ -101,7 +104,7 @@ export default function IrysUploadFileGpgKey({
 			setMessage(message);
 			setState(null);
 		}
-	}, [ address, gpgKey, connector, irysBalance, setState ]);
+	}, [ address, gpgKey, irysBalance, setState ]);
 
 	return (
 		<>
