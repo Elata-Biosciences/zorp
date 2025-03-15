@@ -17,9 +17,9 @@ import type { IZorpStudy } from '@/lib/constants/wagmiContractConfig/IZorpStudy'
 import type node_fetch_type from 'node-fetch';
 import IrysUploadFileGpgKey from '@/components/features/IrysUploadFileGpgKey';
 import * as irysConfig from '@/lib/constants/irysConfig';
-import type { getGpgKeyFromCid, getIrysUploaderWebBaseEth } from '@/lib/utils/irys';
+import type { getGpgKeyFromCid } from '@/lib/utils/irys';
 import { cidFromFile } from '@/lib/utils/ipfs';
-
+import type * as useIrys_type from '@/hooks/useIrys';
 
 describe('IrysUploadFileGpgKey does not re-upload preexisting PGP key', () => {
 	const queryClient = new QueryClient();
@@ -62,8 +62,22 @@ describe('IrysUploadFileGpgKey does not re-upload preexisting PGP key', () => {
 	it('Mockery of `getGpgKeyFromCid` CID against Irys for file and `getIrysUploaderWebBaseEth` should not be called', async () => {
 		const url = `${irysConfig.gatewayUrl.irys}/ipfs/${cid}`;
 
+		vi.mock('@/hooks/useIrys', async (importOriginal) => {
+			const useIrys = await importOriginal<typeof useIrys_type>();
+			return {
+				...useIrys,
+				useIrysWebUploaderBuilderBaseEth: (...args: any[]) => {
+					return {
+						build: async (...args: any[]) => {
+							throw new Error('useIrysWebUploaderBuilderBaseEth().build() should never be called when preexisting CID was already uploded');
+						},
+					};
+				},
+			};
+		});
+
 		vi.mock('@/lib/utils/irys', async (importOriginal) => {
-			const utilsIrys = importOriginal<{getIrysUploaderWebBaseEth: typeof getIrysUploaderWebBaseEth}>();
+			const utilsIrys = importOriginal<{getGpgKeyFromCid: typeof getGpgKeyFromCid}>();
 
 			return {
 				...utilsIrys,
@@ -73,11 +87,8 @@ describe('IrysUploadFileGpgKey does not re-upload preexisting PGP key', () => {
 						response: new Response(),
 					};
 				},
-				getIrysUploaderWebBaseEth: async (...args: any[]) => {
-					throw new Error('getIrysUploaderWebBaseEthMocked should never be called when preexisting CID was already uploded');
-				},
 			};
-		})
+		});
 
 		vi.mock('wagmi', async (importOriginal) => {
 			const wagmi = await importOriginal<typeof wagmiType>();

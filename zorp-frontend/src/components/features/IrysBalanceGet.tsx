@@ -2,11 +2,8 @@
 
 import { useCallback, useState } from 'react';
 import type { BigNumber } from 'bignumber.js';
-import { JsonRpcProvider } from 'ethers';
 import { useAccount } from 'wagmi';
-// TODO: maybe make `.getBalance` work with `getIrysUploaderWebBaseEth` coerced instance?
-// import { getIrysUploaderWebBaseEth } from '@/lib/utils/irys';
-// import { webIrysOpts } from '@/lib/constants/irysConfig';
+import { useIrysWebUploaderBuilderBaseEth } from '@/hooks/useIrys';
 
 /**
  * @see {@link https://github.com/Irys-xyz/provenance-toolkit/blob/master/app/utils/fundAndUpload.ts#L33}
@@ -26,27 +23,25 @@ export default function IrysBalanceGet({
 }) {
 	const [message, setMessage] = useState<string>('Info: connected wallet/provider required');
 	const { address } = useAccount();
+	const irysWebUploaderBuilderBaseEth = useIrysWebUploaderBuilderBaseEth();
 
 	const handleIrysBalanceGet = useCallback(async () => {
 		if (!address) {
-			const message = 'Info: waiting for client to connect wallet with an address';
-			setMessage(message);
+			setMessage('Info: waiting for client to connect wallet with an address');
+			setState(null);
+			return;
+		}
+
+		if (!irysWebUploaderBuilderBaseEth) {
+			setMessage('Info: waiting for Irys Web Uploader Builder to connect');
 			setState(null);
 			return;
 		}
 
 		try {
-			const provider = new JsonRpcProvider('https://testnet-rpc.irys.xyz/v1/execution-rpc');
-			const balance = await provider.getBalance(address);
-			const message = `Irys balance: ${balance}`;
-
-			// TODO: maybe make `.getBalance` work with `getIrysUploaderWebBaseEth` coerced instance?
-			// const irysUploaderWebBaseEth = await getIrysUploaderWebBaseEth();
-			// const balance = await irysUploaderWebBaseEth.getBalance(address);
-			// const message = `Irys balance: ${balance}`;
-
-			console.warn('IrysBalanceGet ->', { balance, balance_toString: balance.toString() });
-			setMessage(message);
+			const irysUploaderWebBaseEth = await irysWebUploaderBuilderBaseEth.build();
+			const balance = await irysUploaderWebBaseEth.getBalance(address);
+			setMessage(`Irys balance: ${balance}`);
 			setState(balance);
 			return balance;
 		} catch (error) {
@@ -68,7 +63,7 @@ export default function IrysBalanceGet({
 			console.error('IrysBaseShowBalance ->', { error, message });
 			return error;
 		}
-	}, [ address, setState ]);
+	}, [ address, irysWebUploaderBuilderBaseEth, setState ]);
 
 	return (
 		<>

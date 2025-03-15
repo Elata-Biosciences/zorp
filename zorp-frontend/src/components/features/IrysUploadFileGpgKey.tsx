@@ -5,7 +5,8 @@ import type { BigNumber } from 'bignumber.js';
 import type { Subkey, Key } from 'openpgp';
 import { useAccount } from 'wagmi';
 import { cidFromFile } from '@/lib/utils/ipfs';
-import { getGpgKeyFromCid, getIrysUploaderWebBaseEth } from '@/lib/utils/irys';
+import { getGpgKeyFromCid } from '@/lib/utils/irys';
+import { useIrysWebUploaderBuilderBaseEth } from '@/hooks/useIrys';
 import { irysThreshold } from '@/lib/constants/irysConfig';
 import * as irysConfig from '@/lib/constants/irysConfig';
 
@@ -35,6 +36,7 @@ export default function IrysUploadFileGpgKey({
 	const [cid, setCid] = useState<null | string>(null);
 	const [maybePreexistingGpgKeyFile, setMaybePreexistingGpgKeyFile] = useState<null | (Key | Subkey)>(null);
 	const [message, setMessage] = useState<string>('Info: connected wallet/provider required');
+	const irysWebUploaderBuilderBaseEth = useIrysWebUploaderBuilderBaseEth();
 
 	const { address } = useAccount();
 
@@ -66,6 +68,12 @@ export default function IrysUploadFileGpgKey({
 			}
 		}
 
+		if (!irysWebUploaderBuilderBaseEth) {
+			setMessage('Info: waiting for Irys Web Uploader Builder to connect');
+			setState(null);
+			return;
+		}
+
 		/* @TODO: attempt to download before checking if upload is needed/possible */
 
 		try {
@@ -85,12 +93,12 @@ export default function IrysUploadFileGpgKey({
 			}
 
 			setMessage('Info: attempting to initalize Irys Web Uploader');
-			const irysUploader = await getIrysUploaderWebBaseEth();
+			const irysUploaderWebBaseEth = await irysWebUploaderBuilderBaseEth.build();
 
 			setMessage('Info: attempting to upload GPG key to Irys');
 			const buffer = await gpgKey.file.arrayBuffer();
 			// TODO: maybe configure `opts` AKA CreateAndUploadOptions
-			const receipt = await irysUploader.uploader.uploadData(
+			const receipt = await irysUploaderWebBaseEth.uploader.uploadData(
 				Buffer.from(buffer),
 				{
 					tags: [
@@ -128,6 +136,7 @@ export default function IrysUploadFileGpgKey({
 		cid,
 		gpgKey,
 		irysBalance,
+		irysWebUploaderBuilderBaseEth,
 		maybePreexistingGpgKeyFile,
 		setState,
 	]);

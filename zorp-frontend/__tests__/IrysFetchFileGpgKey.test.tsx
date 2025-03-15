@@ -10,7 +10,7 @@ import type * as wagmiType from 'wagmi';
 import type * as wagmiConfig from '@/lib/constants/wagmiConfig';
 import type { IZorpStudy } from '@/lib/constants/wagmiContractConfig/IZorpStudy';
 import type node_fetch_type from 'node-fetch';
-import type { getGpgKeyFromCid, getIrysUploaderWebBaseEth } from '@/lib/utils/irys';
+import type { getGpgKeyFromCid } from '@/lib/utils/irys';
 import * as openpgp from 'openpgp';
 import type { Key, Subkey } from 'openpgp';
 import { cidFromFile } from '@/lib/utils/ipfs';
@@ -86,7 +86,7 @@ describe('IrysFetchFileGpgKey', () => {
 		});
 
 		vi.mock('@/lib/utils/irys', async (importOriginal) => {
-			const utilsIrys = importOriginal<{getIrysUploaderWebBaseEth: typeof getIrysUploaderWebBaseEth}>();
+			const utilsIrys = importOriginal<{getGpgKeyFromCid: typeof getGpgKeyFromCid}>();
 
 			return {
 				...utilsIrys,
@@ -97,11 +97,8 @@ describe('IrysFetchFileGpgKey', () => {
 						response: new Response(),
 					};
 				},
-				getIrysUploaderWebBaseEth: async (...args: any[]) => {
-					throw new Error('getIrysUploaderWebBaseEth should never be called by this component');
-				},
 			};
-		})
+		});
 
 		render(
 			<QueryClientProvider client={queryClient}>

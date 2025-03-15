@@ -17,8 +17,9 @@ import type { IZorpStudy } from '@/lib/constants/wagmiContractConfig/IZorpStudy'
 import type node_fetch_type from 'node-fetch';
 import IrysUploadFileGpgKey from '@/components/features/IrysUploadFileGpgKey';
 import * as irysConfig from '@/lib/constants/irysConfig';
-import type { getGpgKeyFromCid, getIrysUploaderWebBaseEth } from '@/lib/utils/irys';
+import type { getGpgKeyFromCid } from '@/lib/utils/irys';
 import { cidFromFile } from '@/lib/utils/ipfs';
+import type * as useIrys_type from '@/hooks/useIrys';
 
 
 describe('IrysUploadFileGpgKey attempts to upload new PGP key', () => {
@@ -59,15 +60,35 @@ describe('IrysUploadFileGpgKey attempts to upload new PGP key', () => {
 		cid = await cidFromFile(file);
 	});
 
-	it('Mockery of `getGpgKeyFromCid` CID against Irys for file and `getIrysUploaderWebBaseEth` must be called', async () => {
+	it('Mockery of `getGpgKeyFromCid` CID against Irys for file and `useIrys` must be used', async () => {
 		const url = `${irysConfig.gatewayUrl.irys}/ipfs/${cid}`;
 
 		const receipt = {
 			id: 'wat',
 		};
 
+		vi.mock('@/hooks/useIrys', async (importOriginal) => {
+			const useIrys = await importOriginal<typeof useIrys_type>();
+			return {
+				...useIrys,
+				useIrysWebUploaderBuilderBaseEth: (...args: any[]) => {
+					return {
+						build: async (...args: any[]) => {
+							return {
+								uploader: {
+									uploadData: async (...args: any[]) => {
+										return { id: 'wat' };
+									},
+								},
+							};
+						},
+					};
+				},
+			};
+		});
+
 		vi.mock('@/lib/utils/irys', async (importOriginal) => {
-			const utilsIrys = importOriginal<{getIrysUploaderWebBaseEth: typeof getIrysUploaderWebBaseEth}>();
+			const utilsIrys = importOriginal<{getGpgKeyFromCid: typeof getGpgKeyFromCid}>();
 
 			return {
 				...utilsIrys,
@@ -77,17 +98,8 @@ describe('IrysUploadFileGpgKey attempts to upload new PGP key', () => {
 						response: new Response(),
 					};
 				},
-				getIrysUploaderWebBaseEth: async (...args: any[]) => {
-					return {
-						uploader: {
-							uploadData: async (...args: any[]) => {
-								return { id: 'wat' };
-							},
-						},
-					};
-				},
 			};
-		})
+		});
 
 		vi.mock('wagmi', async (importOriginal) => {
 			const wagmi = await importOriginal<typeof wagmiType>();
