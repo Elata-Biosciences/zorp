@@ -76,7 +76,7 @@ export default function IrysUploadFileGpgKey({
 		/* @TODO: attempt to download before checking if upload is needed/possible */
 
 		try {
-			setMessage('Info: attempting to convert GPG key to ArrayBuffer');
+			setMessage('Info: attempting to generate CID from GPG key file');
 			const cid = await cidFromFile(gpgKey.file);
 			setCid(cid);
 
@@ -107,7 +107,7 @@ export default function IrysUploadFileGpgKey({
 				},
 			);
 
-			setMessage(`Success: Uploded GPG key to Irys?! JSON: '{ "id": "${receipt.id}", "cid": "${cid}", "url": "https://gateway.irys.xyz/ipfs/${cid}" }'`);
+			setMessage(`Success: Uploded GPG key to Irys?! JSON: '{ "id": "${receipt.id}", "cid": "${cid}", "url": "${url}" }'`);
 			const state = { receipt, cid };
 			setState(state);
 			return state;
