@@ -7,7 +7,6 @@ import { useAccount } from 'wagmi';
 import { cidFromFile } from '@/lib/utils/ipfs';
 import { getGpgKeyFromCid } from '@/lib/utils/irys';
 import { useIrysWebUploaderBuilderBaseEth } from '@/hooks/useIrys';
-import { irysThreshold } from '@/lib/constants/irysConfig';
 import * as irysConfig from '@/lib/constants/irysConfig';
 
 /**
@@ -60,8 +59,8 @@ export default function IrysUploadFileGpgKey({
 			return;
 		}
 
-		if (gpgKey.file.size >= irysThreshold.fileSizeMaxFree) {
-			if (!irysBalance || irysBalance <= irysThreshold.minimumBalance) {
+		if (gpgKey.file.size >= irysConfig.irysThreshold.fileSizeMaxFree) {
+			if (!irysBalance || irysBalance <= irysConfig.irysThreshold.minimumBalance) {
 				setMessage('Info: waiting for client to fund Irys for upload');
 				setState(null);
 				return;
