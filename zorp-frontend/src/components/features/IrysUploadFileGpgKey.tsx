@@ -6,7 +6,7 @@ import type { Subkey, Key } from 'openpgp';
 import { useAccount } from 'wagmi';
 import { cidFromFile } from '@/lib/utils/ipfs';
 import { getGpgKeyFromCid, getIrysUploaderWebBaseEth } from '@/lib/utils/irys';
-import { irysBalanceThreshold } from '@/lib/constants/irysConfig';
+import { irysThreshold } from '@/lib/constants/irysConfig';
 import * as irysConfig from '@/lib/constants/irysConfig';
 
 /**
@@ -58,14 +58,18 @@ export default function IrysUploadFileGpgKey({
 			return;
 		}
 
-		if (!irysBalance || irysBalance <= irysBalanceThreshold) {
-			setMessage('Info: waiting for client to fund Irys for upload');
-			setState(null);
-			return;
+		if (gpgKey.file.size >= irysThreshold.fileSizeMaxFree) {
+			if (!irysBalance || irysBalance <= irysThreshold.minimumBalance) {
+				setMessage('Info: waiting for client to fund Irys for upload');
+				setState(null);
+				return;
+			}
 		}
 
-		setMessage('Info: attempting to convert GPG key to ArrayBuffer');
+		/* @TODO: attempt to download before checking if upload is needed/possible */
+
 		try {
+			setMessage('Info: attempting to convert GPG key to ArrayBuffer');
 			const cid = await cidFromFile(gpgKey.file);
 			setCid(cid);
 
