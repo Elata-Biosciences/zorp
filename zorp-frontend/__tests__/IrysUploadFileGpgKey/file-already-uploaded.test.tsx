@@ -77,7 +77,7 @@ describe('IrysUploadFileGpgKey does not re-upload preexisting PGP key', () => {
 		});
 
 		vi.mock('@/lib/utils/irys', async (importOriginal) => {
-			const utilsIrys = importOriginal<{getGpgKeyFromCid: typeof getGpgKeyFromCid}>();
+			const utilsIrys = await importOriginal<{getGpgKeyFromCid: typeof getGpgKeyFromCid}>();
 
 			return {
 				...utilsIrys,

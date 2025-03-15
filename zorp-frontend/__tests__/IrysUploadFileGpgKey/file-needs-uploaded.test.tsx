@@ -88,7 +88,7 @@ describe('IrysUploadFileGpgKey attempts to upload new PGP key', () => {
 		});
 
 		vi.mock('@/lib/utils/irys', async (importOriginal) => {
-			const utilsIrys = importOriginal<{getGpgKeyFromCid: typeof getGpgKeyFromCid}>();
+			const utilsIrys = await importOriginal<{getGpgKeyFromCid: typeof getGpgKeyFromCid}>();
 
 			return {
 				...utilsIrys,
@@ -137,11 +137,10 @@ describe('IrysUploadFileGpgKey attempts to upload new PGP key', () => {
 					<IrysUploadFileGpgKey
 						labelText={'Mocked -- IrysUploadFileGpgKey -- Key needs uploaded'}
 						setState={(state) => {
-							console.log({ state });
-							// expect(state).toEqual({
-							// 	cid,
-							// 	receipt,
-							// });
+							expect(state).toEqual({
+								cid,
+								receipt,
+							});
 						}}
 						gpgKey={gpgKey}
 						irysBalance={41968}
@@ -157,8 +156,8 @@ describe('IrysUploadFileGpgKey attempts to upload new PGP key', () => {
 		await waitFor(() => {
 			const span = document.querySelector('span');
 			expect(span).toBeDefined();
-			// /* @ts-ignore */
-			// expect(span.textContent).toBe(`Success: Uploded GPG key to Irys?! JSON: '{ "id": "${receipt.id}", "cid": "${cid}", "url": "https://gateway.irys.xyz/ipfs/${cid}" }'`);
+			/* @ts-ignore */
+			expect(span.textContent).toBe(`Success: Uploded GPG key to Irys?! JSON: '{ "id": "${receipt.id}", "cid": "${cid}", "url": "https://gateway.irys.xyz/ipfs/${cid}" }'`);
 		});
 	});
 });
