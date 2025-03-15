@@ -15,17 +15,19 @@ export default function ZorpStudyReadEncryptionKeyCid() {
 
 	const { IZorpStudy } = useContracts();
 
-	const { data: encryption_key_cid, isFetching } = useReadContract({
+	const enabled = addressStudy.length === addressStudyAnvil.length
+								&& addressStudy.startsWith('0x')
+								&& !!IZorpStudy?.abi
+								&& !!Object.keys(IZorpStudy.abi).length
+								&& !!IZorpStudy?.address.length;
+
+	const { data: encryption_key_cid, isFetching, refetch } = useReadContract({
 		abi: IZorpStudy.abi,
 		address: IZorpStudy.address,
 		functionName: 'encryption_key',
 		args: [],
 		query: {
-			enabled: addressStudy.length === addressStudyAnvil.length
-						&& addressStudy.startsWith('0x')
-						&& !!IZorpStudy?.abi
-						&& !!Object.keys(IZorpStudy.abi).length
-						&& !!IZorpStudy?.address.length,
+			enabled: false,
 		},
 	});
 
@@ -44,9 +46,25 @@ export default function ZorpStudyReadEncryptionKeyCid() {
 				value={addressStudy}
 				onChange={(event) => {
 					setAddressStudy(event.target.value as `0x${string}`);
+					console.warn('ZorpStudyReadEncryptionKeyCid input ->', {  enabled, addressStudy });
 				}}
 				disabled={isFetching}
 			/>
+
+			<button
+				onClick={(event) => {
+					event.stopPropagation();
+					event.preventDefault();
+					console.warn('ZorpStudyReadEncryptionKeyCid button ->', { enabled, addressStudy });
+					if (!enabled) {
+						console.warn('ZorpStudyReadEncryptionKeyCid button ->', { enabled });
+						return;
+					}
+					console.warn('ZorpStudyReadEncryptionKeyCid button ->', { event });
+
+					refetch();
+				}}
+			>Request GPG key CID</button>
 
 			<span>ZorpStudy encryption key CID: {encryption_key_cid as string}</span>
 		</div>
