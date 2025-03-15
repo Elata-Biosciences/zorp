@@ -21,7 +21,7 @@ import type { getGpgKeyFromCid, getIrysUploaderWebBaseEth } from '@/lib/utils/ir
 import { cidFromFile } from '@/lib/utils/ipfs';
 
 
-describe.sequential('IrysUploadFileGpgKey does not re-upload preexisting PGP key', () => {
+describe('IrysUploadFileGpgKey attempts to upload new PGP key', () => {
 	const queryClient = new QueryClient();
 
 	afterEach(() => {
@@ -59,123 +59,7 @@ describe.sequential('IrysUploadFileGpgKey does not re-upload preexisting PGP key
 		cid = await cidFromFile(file);
 	});
 
-	it.sequential('Mockery of `getGpgKeyFromCid` CID against Irys for file and `getIrysUploaderWebBaseEth` should not be called', async () => {
-		const url = `${irysConfig.gatewayUrl.irys}/ipfs/${cid}`;
-
-		vi.mock('@/lib/utils/irys', async (importOriginal) => {
-			const utilsIrys = importOriginal<{getIrysUploaderWebBaseEth: typeof getIrysUploaderWebBaseEth}>();
-
-			return {
-				...utilsIrys,
-				getGpgKeyFromCid: async (cid: string) => {
-					return '--- fake key --- is truethy but un-trustworthy --- fake key ---';
-				},
-				getIrysUploaderWebBaseEth: async (...args: any[]) => {
-					throw new Error('getIrysUploaderWebBaseEthMocked should never be called when preexisting CID was already uploded');
-				},
-			};
-		})
-
-		vi.mock('wagmi', async (importOriginal) => {
-			const wagmi = await importOriginal<typeof wagmiType>();
-
-			const useReadContractMocked = ({
-				abi,
-				address,
-				config,
-				functionName,
-			}: {
-				abi: typeof IZorpStudy.abi;
-				address: `0x${string}`;
-				config: typeof wagmiConfig;
-				functionName: string;
-			}) => {
-				return {
-					data: '0xDEADBEEF',
-				};
-			};
-
-			return {
-				...wagmi,
-				useReadContract: useReadContractMocked,
-				useAccount: () => {
-					return {
-						address: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-					};
-				},
-			};
-		});
-
-		render(
-			<QueryClientProvider client={queryClient}>
-				<WagmiProvider config={wagmiConfig}>
-					<IrysUploadFileGpgKey
-						labelText={'Mocked -- IrysUploadFileGpgKey'}
-						setState={(state) => {
-							expect(state).toEqual({
-								cid,
-								receipt: undefined,
-							});
-						}}
-						gpgKey={gpgKey}
-						irysBalance={41968}
-					/>
-				</WagmiProvider>
-			</QueryClientProvider>
-		);
-
-		const button = document.querySelector('button') as HTMLButtonElement;
-		expect(button).toBeDefined();
-		fireEvent.click(button);
-
-		await waitFor(() => {
-			const span = document.querySelector('span');
-			expect(span).toBeDefined();
-			/* @ts-ignore */
-			expect(span.textContent).toBe(`Info: GPG key already uploaded at -> ${url}`);
-		});
-	});
-});
-
-describe.sequential('IrysUploadFileGpgKey attempts to upload new PGP key', () => {
-	const queryClient = new QueryClient();
-
-	afterEach(() => {
-		vi.resetAllMocks();
-	});
-
-	let cid: string;
-	let gpgKey: { file: File, key: Key | Subkey };
-	beforeEach(async () => {
-		const key = await openpgp.generateKey({
-			userIDs: [{
-				name: 'Hands of Blue',
-				email: 'BlueSunCorp@union-of-allied-planets.example.com',
-			}],
-			format: 'armored',
-			type: 'rsa',
-			passphrase: 'wat',
-		}).then(({ publicKey }) => {
-			return openpgp.readKey({ armoredKey: publicKey });
-		});
-
-		const file = new File(
-			[key.armor()],
-			'armored.pub.pgp',
-			{
-				type: 'text/plain',
-				lastModified: Date.now(),
-			},
-		);
-		/* @ts-ignore */
-		file.arrayBuffer = async () => new ArrayBuffer(file);
-
-		gpgKey = { file, key };
-
-		cid = await cidFromFile(file);
-	});
-
-	it.sequential('Mockery of `getGpgKeyFromCid` CID against Irys for file and `getIrysUploaderWebBaseEth` must be called', async () => {
+	it('Mockery of `getGpgKeyFromCid` CID against Irys for file and `getIrysUploaderWebBaseEth` must be called', async () => {
 		const url = `${irysConfig.gatewayUrl.irys}/ipfs/${cid}`;
 
 		const receipt = {
@@ -188,7 +72,10 @@ describe.sequential('IrysUploadFileGpgKey attempts to upload new PGP key', () =>
 			return {
 				...utilsIrys,
 				getGpgKeyFromCid: async (cid: string) => {
-					undefined;
+					return {
+						key: undefined,
+						response: new Response(),
+					};
 				},
 				getIrysUploaderWebBaseEth: async (...args: any[]) => {
 					return {
@@ -236,7 +123,7 @@ describe.sequential('IrysUploadFileGpgKey attempts to upload new PGP key', () =>
 			<QueryClientProvider client={queryClient}>
 				<WagmiProvider config={wagmiConfig}>
 					<IrysUploadFileGpgKey
-						labelText={'Mocked -- IrysUploadFileGpgKey'}
+						labelText={'Mocked -- IrysUploadFileGpgKey -- Key needs uploaded'}
 						setState={(state) => {
 							console.log({ state });
 							// expect(state).toEqual({
