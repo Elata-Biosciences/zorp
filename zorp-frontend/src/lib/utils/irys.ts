@@ -31,13 +31,16 @@ export async function getIrysUploaderWebBaseEth() {
 };
 
 /**
- *
+ * Wrapper to aid mocked testing and reduce run-time boilerplate
  */
 export async function getGpgKeyFromCid(cid: string) {
 	const url = `${irysConfig.gatewayUrl.irys}/ipfs/${cid}`;
 	const response = await fetch(url);
 	if (response.ok) {
 		const text = await response.text();
-		return await openpgp.readKey({ armoredKey: text });
+		const key = await openpgp.readKey({ armoredKey: text });
+		return { key, response };
 	}
+
+	return { response };
 }

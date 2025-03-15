@@ -72,7 +72,7 @@ export default function IrysUploadFileGpgKey({
 			const url = `${irysConfig.gatewayUrl.irys}/ipfs/${cid}`;
 			setMessage(`Info: attempting to download key from ${url}`);
 
-			const key = await getGpgKeyFromCid(cid);
+			const { key } = await getGpgKeyFromCid(cid);
 			if (!!key) {
 				setMessage(`Info: GPG key already uploaded at -> ${url}`);
 				setState({ cid, receipt: undefined });
