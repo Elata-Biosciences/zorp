@@ -3,7 +3,7 @@
 import { useCallback, useState } from 'react';
 import type { BigNumber } from 'bignumber.js';
 import type { Key } from 'openpgp';
-import { useAccount, useWriteContract } from 'wagmi';
+import { useAccount, useWriteContract, useTransactionReceipt } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
 import InputFileToGpgEncryptionKey from '@/components/features/InputFileToGpgEncryptionKey';
 import IrysBalanceGet from '@/components/features/IrysBalanceGet';
@@ -11,11 +11,15 @@ import IrysUploadFileGpgKey from '@/components/features/IrysUploadFileGpgKey';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
+/**
+ * @see {@link https://wagmi.sh/react/api/hooks/useTransactionReceipt}
+ */
 export default function ZorpFactoryWriteCreateStudy() {
 	const className = '';
 
 	// TODO: consider reducing need of keeping bot `Key` and `File` in memory at same time
 	const [gpgKey, setGpgKey] = useState<null | { file: File; key: Key; }>(null);
+	const [hash, setHash] = useState<undefined | `0x${string}`>(undefined);
 	const [irysBalance, setIrysBalance] = useState<null | bigint | number | BigNumber>(null);
 	const [irysUploadData, setIrysUploadData] = useState<null | { receipt: unknown; cid: string; }>(null);
 	const [message, setMessage] = useState<string>('Info: connected wallet/provider required');
@@ -89,10 +93,9 @@ export default function ZorpFactoryWriteCreateStudy() {
 				irysUploadData.cid.toString(),
 			],
 			value: ammount,
-		}).then((writeContractData) => {
-			const message = `Result: transaction hash: ${writeContractData}`;
-			console.warn('ZorpFactoryWriteCreateStudy', { message });
-			setMessage(message)
+		}).then((hash) => {
+			setHash(hash);
+			setMessage('Transaction sent!');
 		});
 	}, [
 		IZorpFactory,
@@ -102,6 +105,19 @@ export default function ZorpFactoryWriteCreateStudy() {
 		isConnected,
 		writeContractAsync,
 	]);
+
+	const { data: txResult } = useTransactionReceipt({
+		query: {
+			enabled: !!hash
+						&& !!IZorpFactory
+						&& !!ammount
+						&& !!address
+						&& !!irysUploadData
+						&& !!isConnected,
+		},
+		hash,
+	});
+	console.warn({ txResult });
 
 	return (
 		<div className="w-full flex flex-col">
@@ -155,6 +171,8 @@ export default function ZorpFactoryWriteCreateStudy() {
 			>Zorp Factory Create Study</button>
 
 			<span>Status: {message}</span>
+			<span>Hash: {hash}</span>
+			<span>Tx Result: {txResult?.logs?.filter((log) => log?.address != txResult?.to)?.at(0)?.address}</span>
 		</div>
 	);
 }
