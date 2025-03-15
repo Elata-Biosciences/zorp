@@ -57,11 +57,10 @@ export default function IrysFetchFileGpgKey({
 	});
 
 	useEffect(() => {
-		if (!cid) {
+		if (!cid?.length) {
 			return;
 		}
-		const message = `Success: ZorpStudy.encryptionKey() read returned: ${cid}`;
-		setMessageReadContract(message);
+		setMessageReadContract(`Success: ZorpStudy.encryptionKey() read returned: ${cid}`);
 	}, [cid])
 
 	return (
