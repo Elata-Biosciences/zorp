@@ -7,7 +7,7 @@ import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
 export default function ZorpFactoryReadStudyAddress() {
-	const addressFactoryAnvil = config.anvil.contracts.ZorpFactory[31337].address;
+	const addressFactoryAnvil = config.anvil.contracts.IZorpFactory[31337].address;
 
 	const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
 	const [studyIndex, setStudyIndex] = useState<number>(1);
@@ -15,19 +15,19 @@ export default function ZorpFactoryReadStudyAddress() {
 	const addressFactoryId = useId();
 	const addressFactoryStudyIndexId = useId();
 
-	const { ZorpFactory } = useContracts();
+	const { IZorpFactory } = useContracts();
 
-	const enabled: boolean = !!ZorpFactory?.abi
-												&& !!Object.keys(ZorpFactory.abi).length
-												&& !!ZorpFactory?.address.length
+	const enabled: boolean = !!IZorpFactory?.abi
+												&& !!Object.keys(IZorpFactory.abi).length
+												&& !!IZorpFactory?.address.length
 												&& addressFactory.length === addressFactoryAnvil.length
 												&& addressFactory.startsWith('0x')
 												&& !Number.isNaN(studyIndex)
 												&& studyIndex > 0
 
 	const { data: studyAddress, isFetching } = useReadContract({
-		abi: ZorpFactory.abi,
-		address: ZorpFactory.address,
+		abi: IZorpFactory.abi,
+		address: IZorpFactory.address,
 		functionName: 'studies',
 		args: [studyIndex],
 		query: {
