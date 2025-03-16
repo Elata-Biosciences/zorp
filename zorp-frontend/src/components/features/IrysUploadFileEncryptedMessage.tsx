@@ -2,8 +2,8 @@
 
 import { useCallback, useState } from 'react';
 import type { BigNumber } from 'bignumber.js';
-import { cidFromFile } from '@/lib/utils/ipfs';
 import { fileFromUint8Array } from '@/lib/utils/file';
+import { cidFromFile } from '@/lib/utils/ipfs';
 import { getIrysResponseFromCid } from '@/lib/utils/irys';
 import { useIrysWebUploaderBuilderBaseEth } from '@/hooks/useIrys';
 import * as irysConfig from '@/lib/constants/irysConfig';
