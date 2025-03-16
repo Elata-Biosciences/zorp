@@ -9,6 +9,7 @@ import InputFileToEncryptedMessage from '@/components/features/InputFileToEncryp
 import InputFileToGpgEncryptionKey from '@/components/features/InputFileToGpgEncryptionKey';
 import IrysBalanceGet from '@/components/features/IrysBalanceGet';
 import IrysFetchFileGpgKey from '@/components/features/IrysFetchFileGpgKey';
+import IrysUploadFileEncryptedMessage from '@/components/features/IrysUploadFileEncryptedMessage'
 import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
@@ -41,18 +42,21 @@ export default function ZorpStudySubmitData() {
 			setMessage(message)
 			return;
 		}
+
 		if (!address?.toString().length) {
 			const message = 'Warn: waiting on client to connect an account with an address';
 			console.warn('ZorpStudySubmitData', {message});
 			setMessage(message)
 			return;
 		}
+
 		if (!irysUploadData || !irysUploadData.cid || !irysUploadData.receipt) {
 			const message = 'Warn: for Irys upload to report success';
 			console.warn('ZorpStudySubmitData', {message});
 			setMessage(message)
 			return;
 		}
+
 		if (!IZorpStudy?.abi || !Object.keys(IZorpStudy.abi).length || !IZorpStudy?.address.length) {
 			const message = 'Error: no contracts found for current chain';
 			console.error('ZorpStudySubmitData', {message});
@@ -73,7 +77,13 @@ export default function ZorpStudySubmitData() {
 			console.warn('ZorpStudySubmitData', {message});
 			setMessage(message)
 		});
-	}, [isConnected, address, irysUploadData, writeContractAsync, IZorpStudy]);
+	}, [
+		IZorpStudy,
+		address,
+		irysUploadData,
+		isConnected,
+		writeContractAsync,
+	]);
 
 	return (
 		<div className="w-full flex flex-col">
@@ -109,6 +119,15 @@ export default function ZorpStudySubmitData() {
 				setState={setEncryptedMessage}
 				gpgKey={gpgKey}
 				encryptionKey={encryptionKey}
+			/>
+
+			<hr />
+
+			<IrysUploadFileEncryptedMessage
+				labelText='Irys upload public encrypted message'
+				setState={setIrysUploadData}
+				encryptedMessage={encryptedMessage}
+				irysBalance={irysBalance}
 			/>
 
 			<hr />
