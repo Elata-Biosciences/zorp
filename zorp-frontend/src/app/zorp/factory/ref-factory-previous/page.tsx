@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useCallback, useId, useState } from 'react';
 import { useReadContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
 import * as config from '@/lib/constants/wagmiConfig';
@@ -27,15 +27,17 @@ export default function ZorpFactoryReadRefFactoryPrevious() {
 		},
 	});
 
+	const handleChangeFactoryAddress = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+		setAddressFactory(event.target.value as `0x${string}`);
+	}, [ setAddressFactory ]);
+
 	return (
 		<>
 			<label htmlFor={addressFactoryId}>ZORP Factory Address:</label>
 			<input
 				id={addressFactoryId}
 				value={addressFactory}
-				onChange={(event) => {
-					setAddressFactory(event.target.value as `0x${string}`);
-				}}
+				onChange={handleChangeFactoryAddress}
 				disabled={isFetching}
 			/>
 			<span>ZorpFactory previous address: {ref_factory_previous as string}</span>
