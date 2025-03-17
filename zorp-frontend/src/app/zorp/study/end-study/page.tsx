@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useCallback, useId, useMemo, useState } from 'react';
 import { useAccount, useReadContract, useWriteContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
@@ -19,11 +19,18 @@ export default function ZorpStudyWriteEndStudy() {
 	const { address, isConnected } = useAccount();
 	const { writeContractAsync } = useWriteContract();
 
-	const assertsClient = {
-		isAddressStudySet: addressStudy.length === addressStudyAnvil.length && addressStudy.startsWith('0x'),
-		isAddressWalletSet: !!address && address.length === addressStudyAnvil.length && address.startsWith('0x'),
-		isContractStudySet: !!IZorpStudy?.abi && !!Object.keys(IZorpStudy.abi).length && !!IZorpStudy?.address.length,
-	};
+	const assertsClient = useMemo(() => {
+		return {
+			isAddressStudySet: addressStudy.length === addressStudyAnvil.length && addressStudy.startsWith('0x'),
+			isAddressWalletSet: !!address && address.length === addressStudyAnvil.length && address.startsWith('0x'),
+			isContractStudySet: !!IZorpStudy?.abi && !!Object.keys(IZorpStudy.abi).length && !!IZorpStudy?.address.length,
+		};
+	}, [
+		IZorpStudy,
+		address,
+		addressStudy,
+		addressStudyAnvil,
+	])
 
 	const { data: owner, isFetching: isFetchingOwner } = useReadContract({
 		abi: IZorpStudy.abi,
@@ -45,13 +52,20 @@ export default function ZorpStudyWriteEndStudy() {
 		},
 	});
 
-	const assertsBlockchain = {
-		isAddressOwnerSet: !!(owner as `0x${string}`)
-										&& (owner as `0x${string}`).length === addressStudyAnvil.length
-										&& (owner as `0x${string}`).startsWith('0x'),
-		isStudyOwner: address == owner,
-		isStudyActive: study_status == 1,
-	};
+	const assertsBlockchain = useMemo(() => {
+		return {
+			isAddressOwnerSet: !!(owner as `0x${string}`)
+			&& (owner as `0x${string}`).length === addressStudyAnvil.length
+			&& (owner as `0x${string}`).startsWith('0x'),
+			isStudyOwner: address == owner,
+			isStudyActive: study_status == 1,
+		};
+	}, [
+		owner,
+		addressStudyAnvil,
+		address,
+		study_status,
+	]);
 
 	const disabled = isFetching
 								|| isFetchingOwner
@@ -66,6 +80,65 @@ export default function ZorpStudyWriteEndStudy() {
 								&& assertsBlockchain.isStudyActive
 								&& assertsClient.isContractStudySet;
 
+	const handleChangeStudyAddress = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+		setAddressStudy(event.target.value as `0x${string}`);
+	}, [ setAddressStudy ]);
+
+	const handleOnClick = useCallback(async () => {
+		if (!enabled) {
+			console.warn('Missing required state', {
+				isConnected,
+				assertsClient,
+				assertsBlockchain,
+			});
+			return;
+		}
+
+		setIsFetching(true);
+
+		try {
+			const response = await writeContractAsync({
+				abi: IZorpStudy.abi,
+				address: IZorpStudy.address,
+				functionName: 'endStudy',
+				args: [],
+			});
+			if (!!response) {
+				setReceipt(response);
+			} else {
+				setReceipt(`...  error with receipt response -> ${response}`);
+			}
+		} catch (error) {
+			let message = 'Error: ';
+			if (!!error && typeof error == 'object') {
+				if ('message' in error) {
+					message += error.message;
+				} else if ('toString' in error) {
+					message += error.toString();
+				} else {
+					message += `Novel error detected -> ${error}`;
+				}
+			} else {
+				message += `Novel error detected -> ${error}`;
+			}
+
+			console.error('ZorpStudyWriteEndStudy ->', { message, error });
+			setReceipt(message);
+			return error;
+		} finally {
+			setIsFetching(false);
+		}
+	}, [
+		IZorpStudy,
+		assertsBlockchain,
+		assertsClient,
+		enabled,
+		isConnected,
+		setIsFetching,
+		setReceipt,
+		writeContractAsync,
+	]);
+
 	return (
 		<div className="w-full flex flex-col">
 			<h1 className="flex flex-col sm:flex-row justify-center items-center text-4xl font-bold">
@@ -79,44 +152,15 @@ export default function ZorpStudyWriteEndStudy() {
 			<input
 				id={addressStudyId}
 				value={addressStudy}
-				onChange={(event) => {
-					setAddressStudy(event.target.value as `0x${string}`);
-				}}
+				onChange={handleChangeStudyAddress}
 				disabled={disabled}
 			/>
 
 			<button
-				onClick={(event) => {
+				onClick={async (event) => {
 					event.preventDefault();
 					event.stopPropagation();
-
-					if (!enabled) {
-						console.warn('Missing required state', {
-							isConnected,
-							assertsClient,
-							assertsBlockchain,
-						});
-						return;
-					}
-
-					setIsFetching(true);
-					writeContractAsync({
-						abi: IZorpStudy.abi,
-						address: IZorpStudy.address,
-						functionName: 'endStudy',
-						args: [],
-					}).then((response) => {
-						if (!!response) {
-							setReceipt(response);
-						} else {
-							setReceipt(`...  error with receipt response -> ${response}`);
-						}
-					}).catch((error) => {
-						console.error(error);
-						setReceipt(`...  error with writeContractAsync error -> ${error}`);
-					}).finally(() => {
-						setIsFetching(false);
-					});
+					await handleOnClick();
 				}}
 				disabled={disabled}
 			>End {enabled ? 'Available' : 'unavailable'}</button>
