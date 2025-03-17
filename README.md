@@ -44,6 +44,8 @@ zorp/
    curl -L https://foundry.paradigm.xyz | bash
    foundryup
    ```
+   > :warning: Be sure to double-check official installation
+   > [documentation](https://book.getfoundry.sh/getting-started/installation)
 2. **Build the project**:  
    ```bash
    cd zorp-contracts
@@ -54,7 +56,21 @@ zorp/
    forge test
    ```
 4. **Deploying**:  
-   - Example: `forge script script/DeployZorp.s.sol --rpc-url <YOUR_RPC> --private-key <YOUR_KEY> --broadcast`
+   - Syntax: `forge script script/DeployZorp.s.sol --rpc-url <YOUR_RPC> --private-key <YOUR_KEY> --broadcast`
+   - Example for Anvil:
+      ```bash
+      _test_net_url='127.0.0.1:8545';
+      _test_private_key0='0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+
+      pushd "zorp-contracts";
+
+      forge script \
+        --offline \
+        --broadcast \
+        --rpc-url "${_test_net_url}" \
+        --private-key "${_test_private_key0}" \
+        script/DeployAnvilZorp.s.sol:DeployAnvil;
+      ```
 
 ### `zorp-frontend/` (Next.js + RainbowKit)
 
