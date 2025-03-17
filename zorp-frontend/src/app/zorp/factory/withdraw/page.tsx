@@ -89,7 +89,7 @@ export default function ZorpFactoryWriteWithdraw() {
 				message += `Novel error detected -> ${error}`;
 			}
 
-			console.error('IrysUploadFileEncryptedMessage ...', { message, error });
+			console.error('ZorpFactoryWriteWithdraw ...', { message, error });
 			setReceipt(message);
 			return error;
 		} finally {
