@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useCallback, useId, useState } from 'react';
 import { useAccount, useWriteContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
@@ -25,6 +25,89 @@ export default function ZorpFactoryWriteWithdraw() {
 
 	const { IZorpFactory } = useContracts();
 
+	const handleChangeFactoryAddress = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+		setAddressFactory(event.target.value as `0x${string}`);
+	}, [ setAddressFactory ]);
+
+	const handleChangeAddressTo = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+		setAddressTo(event.target.value as `0x${string}`);
+	}, [ setAddressTo ]);
+
+	const handleChangeAmount = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+		const value = Number.parseInt(event.target.value);
+		if (Number.isNaN(value) || value < 1) {
+			console.error('Input value was not an intager greater than 1');
+			return;
+		}
+		setAmount(value);
+	}, [ setAmount ]);
+
+	const handleZorpFactoryWriteWithdraw = useCallback(async () => {
+		const enabled: boolean = isConnected
+													&& !isFetching
+													&& !!IZorpFactory?.abi
+													&& !!Object.keys(IZorpFactory.abi).length
+													&& !!IZorpFactory?.address.length
+													&& addressFactory.length === addressFactoryAnvil.length
+													&& addressFactory.startsWith('0x')
+													&& !!addressTo
+													&& addressTo.length === addressFactoryAnvil.length
+													&& addressTo.startsWith('0x')
+													&& !Number.isNaN(amount)
+													&& amount > 0;
+
+		if (!enabled) {
+			console.warn('Missing required state', { addressFactory, addressTo, amount });
+			return;
+		}
+
+		setIsFetching(true);
+
+		try {
+			const response = await writeContractAsync({
+				abi: IZorpFactory.abi,
+				address: IZorpFactory.address,
+				functionName: 'withdraw',
+				args: [addressTo, amount],
+			});
+			if (!!response) {
+				setReceipt(response);
+			} else {
+				setReceipt(`...  error with receipt response -> ${response}`);
+			}
+		} catch (error) {
+			let message = 'Error: ';
+			if (!!error && typeof error == 'object') {
+				if ('message' in error) {
+					message += error.message;
+				} else if ('toString' in error) {
+					message += error.toString();
+				} else {
+					message += `Novel error detected -> ${error}`;
+				}
+			} else {
+				message += `Novel error detected -> ${error}`;
+			}
+
+			console.error('IrysUploadFileEncryptedMessage ...', { message, error });
+			setReceipt(message);
+			return error;
+		} finally {
+			setIsFetching(false);
+		}
+	}, [
+		IZorpFactory,
+		addressFactory,
+		addressFactoryAnvil,
+		addressTo,
+		amount,
+		isConnected,
+		isFetching,
+		setIsFetching,
+		setReceipt,
+		writeContractAsync,
+	]);
+
 	return (
 		<div className="w-full flex flex-col">
 			<h1 className="flex flex-col sm:flex-row justify-center items-center text-4xl font-bold">
@@ -38,9 +121,7 @@ export default function ZorpFactoryWriteWithdraw() {
 			<input
 				id={addressFactoryId}
 				value={addressFactory}
-				onChange={(event) => {
-					setAddressFactory(event.target.value as `0x${string}`);
-				}}
+				onChange={handleChangeFactoryAddress}
 				disabled={isFetching}
 			/>
 
@@ -48,9 +129,7 @@ export default function ZorpFactoryWriteWithdraw() {
 			<input
 				id={addressToId}
 				value={addressTo as `0x${string}`}
-				onChange={(event) => {
-					setAddressTo(event.target.value as `0x${string}`);
-				}}
+				onChange={handleChangeAddressTo}
 				disabled={isFetching}
 			/>
 
@@ -58,57 +137,15 @@ export default function ZorpFactoryWriteWithdraw() {
 			<input
 				id={amountId}
 				value={amount}
-				onChange={(event) => {
-					const value = Number.parseInt(event.target.value);
-					if (Number.isNaN(value) || value < 1) {
-						console.error('Input value was not an intager greater than 1');
-						return;
-					}
-					setAmount(value);
-				}}
+				onChange={handleChangeAmount}
 				disabled={isFetching}
 			/>
 
 			<button
-				onClick={(event) => {
+				onClick={async (event) => {
 					event.preventDefault();
 					event.stopPropagation();
-
-					const enabled: boolean = isConnected
-																&& !!IZorpFactory?.abi
-																&& !!Object.keys(IZorpFactory.abi).length
-																&& !!IZorpFactory?.address.length
-																&& addressFactory.length === addressFactoryAnvil.length
-																&& addressFactory.startsWith('0x')
-																&& !!addressTo
-																&& addressTo.length === addressFactoryAnvil.length
-																&& addressTo.startsWith('0x')
-																&& !Number.isNaN(amount)
-																&& amount > 0;
-
-					if (!enabled) {
-						console.warn('Missing required state', { addressFactory, addressTo, amount });
-						return;
-					}
-
-					setIsFetching(true);
-					writeContractAsync({
-						abi: IZorpFactory.abi,
-						address: IZorpFactory.address,
-						functionName: 'withdraw',
-						args: [addressTo, amount],
-					}).then((response) => {
-						if (!!response) {
-							setReceipt(response);
-						} else {
-							setReceipt(`...  error with receipt response -> ${response}`);
-						}
-					}).catch((error) => {
-						console.error(error);
-						setReceipt(`...  error with writeContractAsync error -> ${error}`);
-					}).finally(() => {
-						setIsFetching(false);
-					});
+					await handleZorpFactoryWriteWithdraw();
 				}}
 			>Withdraw</button>
 
