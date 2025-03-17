@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useId, useState } from 'react';
+import { useCallback, useId, useState } from 'react';
 import { useReadContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
@@ -33,6 +33,60 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 		},
 	});
 
+	const handleChangePaginateFactoryAddress = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+		setAddressFactory(event.target.value as `0x${string}`);
+	}, [ setAddressFactory ]);
+
+	const handleChangePaginateStudyAddress = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+		setAddressStudy(event.target.value as `0x${string}`);
+	}, [ setAddressStudy ]);
+
+	const handleChangePaginateStart = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+		const value = Number.parseInt(event.target.value);
+		if (!isNaN(value)) {
+			setStart(value);
+		}
+	}, [ setStart ]);
+
+	const handleChangePaginateLimit = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+		const value = Number.parseInt(event.target.value);
+		if (!isNaN(value)) {
+			setLimit(value);
+		}
+	}, [ setLimit ]);
+
+	const handleClickPaginateRead = useCallback(async () => {
+		const enabled = !isFetching
+									&& addressFactory.length === addressFactoryAnvil.length
+									&& addressFactory.startsWith('0x')
+									&& addressStudy.length === addressFactoryAnvil.length
+									&& addressStudy.startsWith('0x')
+									&& !!IZorpFactory?.abi
+									&& !!Object.keys(IZorpFactory.abi).length
+									&& !!IZorpFactory?.address.length;
+
+		if (!enabled) {
+			console.warn('Missing required input(s) ->', {
+				addressFactory,
+				addressStudy,
+				start,
+				limit,
+			});
+			return;
+		}
+
+		await refetch();
+	}, [
+		IZorpFactory,
+		addressFactory,
+		addressFactoryAnvil,
+		addressStudy,
+		isFetching,
+		limit,
+		refetch,
+		start,
+	]);
+
 	return (
 		<div className="w-full flex flex-col">
 			<h1 className="flex flex-col sm:flex-row justify-center items-center text-4xl font-bold">
@@ -46,18 +100,14 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 			<input
 				id={addressFactoryId}
 				value={addressFactory}
-				onChange={(event) => {
-					setAddressFactory(event.target.value as `0x${string}`);
-				}}
+				onChange={handleChangePaginateFactoryAddress}
 			/>
 
 			<label htmlFor={addressStudyId}>ZORP Study Address:</label>
 			<input
 				id={addressStudyId}
 				value={addressStudy}
-				onChange={(event) => {
-					setAddressStudy(event.target.value as `0x${string}`);
-				}}
+				onChange={handleChangePaginateStudyAddress}
 			/>
 
 			<label htmlFor={startId}>Start</label>
@@ -66,12 +116,7 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 				type="number"
 				min="1"
 				value={start}
-				onChange={(event) => {
-					const value = Number.parseInt(event.target.value);
-					if (!isNaN(value)) {
-						setStart(value);
-					}
-				}}
+				onChange={handleChangePaginateStart}
 				disabled={isFetching}
 			/>
 
@@ -81,43 +126,18 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 				type="number"
 				min="1"
 				value={limit}
-				onChange={(event) => {
-					const value = Number.parseInt(event.target.value);
-					if (!isNaN(value)) {
-						setLimit(value);
-					}
-				}}
+				onChange={handleChangePaginateLimit}
 				disabled={isFetching}
 			/>
 
 			<button
-				onClick={(event) => {
+				onClick={async (event) => {
 					event.preventDefault();
 					event.stopPropagation();
-
-					const enabled = !isFetching
-												&& addressFactory.length === addressFactoryAnvil.length
-												&& addressFactory.startsWith('0x')
-												&& addressStudy.length === addressFactoryAnvil.length
-												&& addressStudy.startsWith('0x')
-												&& !!IZorpFactory?.abi
-												&& !!Object.keys(IZorpFactory.abi).length
-												&& !!IZorpFactory?.address.length;
-
-					if (!enabled) {
-						console.warn('Missing required input(s) ->', {
-							addressFactory,
-							addressStudy,
-							start,
-							limit,
-						});
-						return;
-					}
-
-					refetch();
+					await handleClickPaginateRead();
 				}}
 				disabled={isFetching}
-			>Get Study Addresses</button>
+			>Get Study CIDs</button>
 
 			<section>
 				<header>Study CIDs</header>
