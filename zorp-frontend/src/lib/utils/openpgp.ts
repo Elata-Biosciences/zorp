@@ -33,3 +33,19 @@ export async function encryptedMessageFromFile({
 		format: 'binary',
 	});
 }
+
+/**
+ * Extract encryption key from armored key file
+ */
+export async function encryptionKeyFromFile({ file }: { file: File; }) {
+	const { result: armoredKey } = await promiseFromFileReader({
+		file: file,
+		readerMethod: ({ reader, file, encoding }) => {
+			reader.readAsText(file, encoding);
+		},
+	}) as { result: string };
+
+	const readKeys = await openpgp.readKey({ armoredKey });
+
+	return await readKeys.getEncryptionKey();
+}

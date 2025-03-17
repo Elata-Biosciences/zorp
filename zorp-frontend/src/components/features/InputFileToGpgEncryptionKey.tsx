@@ -3,9 +3,8 @@
 import { useCallback, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import * as openpgp from 'openpgp';
 import type { Key } from 'openpgp';
-import promiseFromFileReader from '@/lib/utils/promiseFromFileReader';
+import { encryptionKeyFromFile } from '@/lib/utils/openpgp';
 
 /**
  * @see https://github.com/openpgpjs/openpgpjs?tab=readme-ov-file#browser-webpack
@@ -40,15 +39,7 @@ export default function InputFileToGpgEncryptionKey({
 			}
 
 			try {
-				const { result: armoredKey } = await promiseFromFileReader({
-					file: file,
-					readerMethod: ({ reader, file, encoding }) => {
-						reader.readAsText(file, encoding);
-					},
-				}) as { result: string };
-
-				const readKeys = await openpgp.readKey({ armoredKey });
-				const encryption_key = await readKeys.getEncryptionKey();
+				const encryption_key = await encryptionKeyFromFile({ file });
 
 				if (encryption_key) {
 					setMessage('Success: recovered GPG encryption key from file!');
@@ -73,7 +64,7 @@ export default function InputFileToGpgEncryptionKey({
 					message += `Novel error detected -> ${error}`;
 				}
 
-				console.error('InputFileToEncryptedMessage', {message, error});
+				console.error('InputFileToGpgEncryptionKey', { message, error });
 				setMessage(message);
 				setState(null);
 
