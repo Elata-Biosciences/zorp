@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useCallback, useId, useState } from 'react';
 import { useReadContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
@@ -31,6 +31,10 @@ export default function ZorpFactoryReadVersion() {
 		},
 	});
 
+	const handleChangeFactoryAddress = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+		setAddressFactory(event.target.value as `0x${string}`);
+	}, [ setAddressFactory ]);
+
 	return (
 		<div className="w-full flex flex-col">
 			<h1 className="flex flex-col sm:flex-row justify-center items-center text-4xl font-bold">
@@ -44,9 +48,7 @@ export default function ZorpFactoryReadVersion() {
 			<input
 				id={addressFactoryId}
 				value={addressFactory}
-				onChange={(event) => {
-					setAddressFactory(event.target.value as `0x${string}`);
-				}}
+				onChange={handleChangeFactoryAddress}
 				disabled={isFetching}
 			/>
 			<span>ZorpFactory version: {version as string}</span>
