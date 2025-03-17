@@ -1,6 +1,5 @@
 
 import { BigNumber } from 'bignumber.js';
-// import type { WebIrysOpts } from '@/@types/irys';
 
 /**
  * @see https://arweave-tools.irys.xyz/overview/downloading
@@ -15,14 +14,7 @@ export const webIrysOpts = {
 	url: gatewayUrl.irys,
 	wallet: {
 		rpcUrl: 'https://devnet.irys.xyz/',
-		// provider: new Error('Wallet provider required'),
 	},
-	// wallet?: {
-	// 		rpcUrl?: string;
-	// 		name?: string;
-	// 		provider: object;
-	// 		[key: string]: any;
-	// };
 	// url: 'https://devnet.irys.xyz/',
 	// url: 'https://testnet-rpc.irys.xyz',
 	token: 'base-eth',
