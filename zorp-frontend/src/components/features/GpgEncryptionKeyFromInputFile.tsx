@@ -13,7 +13,7 @@ import { encryptionKeyFromFile } from '@/lib/utils/openpgp';
  * funky `Key | Subkey` hint that MicroSoft™ TypeScript® doesn't take kindly to
  * attached on `await openpgp.readKey().then((key) => key.getEncryptionKey())`
  */
-export default function InputFileToGpgEncryptionKey({
+export default function GpgEncryptionKeyFromInputFile({
 	className = '',
 	labelText = 'Public GPG key for encryption',
 	setState,
@@ -64,7 +64,7 @@ export default function InputFileToGpgEncryptionKey({
 					message += `Novel error detected -> ${error}`;
 				}
 
-				console.error('InputFileToGpgEncryptionKey', { message, error });
+				console.error('GpgEncryptionKeyFromInputFile', { message, error });
 				setMessage(message);
 				setState(null);
 

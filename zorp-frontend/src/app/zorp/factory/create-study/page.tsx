@@ -5,7 +5,7 @@ import type { BigNumber } from 'bignumber.js';
 import type { Key } from 'openpgp';
 import { useAccount, useWriteContract, useTransactionReceipt } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
-import InputFileToGpgEncryptionKey from '@/components/features/InputFileToGpgEncryptionKey';
+import GpgEncryptionKeyFromInputFile from '@/components/features/GpgEncryptionKeyFromInputFile';
 import IrysBalanceGet from '@/components/features/IrysBalanceGet';
 import IrysUploadFileGpgKey from '@/components/features/IrysUploadFileGpgKey';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
@@ -129,7 +129,7 @@ export default function ZorpFactoryWriteCreateStudy() {
 			</div>
 
 			<hr />
-			<InputFileToGpgEncryptionKey
+			<GpgEncryptionKeyFromInputFile
 				labelText="Public GPG key"
 				setState={setGpgKey}
 			/>

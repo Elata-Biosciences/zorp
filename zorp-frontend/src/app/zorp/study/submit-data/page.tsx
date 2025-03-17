@@ -6,7 +6,7 @@ import type { Key } from 'openpgp';
 import { useAccount, useWriteContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
 import EncryptedMessageFromInputFile from '@/components/features/EncryptedMessageFromInputFile';
-import InputFileToGpgEncryptionKey from '@/components/features/InputFileToGpgEncryptionKey';
+import GpgEncryptionKeyFromInputFile from '@/components/features/GpgEncryptionKeyFromInputFile';
 import IrysBalanceGet from '@/components/features/IrysBalanceGet';
 import IrysFetchFileGpgKey from '@/components/features/IrysFetchFileGpgKey';
 import IrysUploadFileEncryptedMessage from '@/components/features/IrysUploadFileEncryptedMessage'
@@ -96,7 +96,7 @@ export default function ZorpStudySubmitData() {
 
 			<hr />
 
-			<InputFileToGpgEncryptionKey
+			<GpgEncryptionKeyFromInputFile
 				labelText="Public GPG key"
 				setState={setGpgKey}
 			/>
