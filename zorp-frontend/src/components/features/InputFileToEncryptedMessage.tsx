@@ -3,9 +3,8 @@
 import { useCallback, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import * as openpgp from 'openpgp';
 import type { Key } from 'openpgp';
-import promiseFromFileReader from '@/lib/utils/promiseFromFileReader';
+import { encryptedMessageFromFile } from '@/lib/utils/openpgp';
 
 export default function InputFileToEncryptedMessage({
 	className = '',
@@ -49,24 +48,9 @@ export default function InputFileToEncryptedMessage({
 			}
 
 			try {
-				const buffer = await promiseFromFileReader({
+				const encryptedMessage = await encryptedMessageFromFile({
 					file,
-					readerMethod: ({ reader, file }) => {
-						reader.readAsArrayBuffer(file);
-					},
-				}).then(({ result }) => {
-					return new Uint8Array(result as ArrayBuffer);
-				});
-
-				const createdmessage = await openpgp.createMessage({ binary: buffer });
-
-				const encryptedMessage = await openpgp.encrypt({
-					message: createdmessage,
-					encryptionKeys: [gpgKey.key, encryptionKey.key],
-					// TODO: maybe figure out how to make irysUploader happy with
-					//       Uint8Array returned by 'binary' format
-					// format: 'armored',
-					format: 'binary',
+					keys:[gpgKey.key, encryptionKey.key],
 				});
 
 				const message = 'Success: encrypted file with provided GPG keys?!';
