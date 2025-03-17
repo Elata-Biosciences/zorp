@@ -1,8 +1,9 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useState } from 'react';
 import { useReadContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
+import ZorpFactoryAddressInput from '@/components/contracts/ZorpFactoryAddressInput';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
@@ -10,8 +11,6 @@ export default function ZorpFactoryReadLatestStudyIndex() {
 	const addressFactoryAnvil = config.anvil.contracts.IZorpFactory[31337].address;
 
 	const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
-
-	const addressFactoryId = useId();
 
 	const { IZorpFactory } = useContracts();
 
@@ -41,17 +40,12 @@ export default function ZorpFactoryReadLatestStudyIndex() {
 			</div>
 
 			<hr />
-			<section>
-				<label htmlFor={addressFactoryId}>ZORP Factory Address:</label>
-				<input
-					id={addressFactoryId}
-					value={addressFactory}
-					onChange={(event) => {
-						setAddressFactory(event.target.value as `0x${string}`);
-					}}
-					disabled={isFetching}
-				/>
-			</section>
+
+			<ZorpFactoryAddressInput
+				disabled={isFetching}
+				setState={setAddressFactory}
+			/>
+
 			<span>ZorpFactory latest study index: {latest_study_index as string}</span>
 		</div>
 	);

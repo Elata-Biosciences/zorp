@@ -1,15 +1,15 @@
 'use client';
 
-import { useCallback, useId, useState } from 'react';
+import { useState } from 'react';
 import { useReadContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
+import ZorpFactoryAddressInput from '@/components/contracts/ZorpFactoryAddressInput';
 import * as config from '@/lib/constants/wagmiConfig';
 
 export default function ZorpFactoryReadRefFactoryNext() {
 	const addressFactoryAnvil = config.anvil.contracts.IZorpFactory[31337].address;
 
 	const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
-	const addressFactoryId = useId();
 
 	const { IZorpFactory } = useContracts();
 
@@ -27,19 +27,14 @@ export default function ZorpFactoryReadRefFactoryNext() {
 		},
 	});
 
-	const handleChangeFactoryAddress = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-		setAddressFactory(event.target.value as `0x${string}`);
-	}, [ setAddressFactory ]);
-
 	return (
 		<>
-			<label htmlFor={addressFactoryId}>ZORP Factory Address:</label>
-			<input
-				id={addressFactoryId}
-				value={addressFactory}
-				onChange={handleChangeFactoryAddress}
+
+			<ZorpFactoryAddressInput
 				disabled={isFetching}
+				setState={setAddressFactory}
 			/>
+
 			<span>ZorpFactory next address: {ref_factory_next as string}</span>
 		</>
 	);

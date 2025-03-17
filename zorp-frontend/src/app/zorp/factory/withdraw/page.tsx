@@ -3,6 +3,7 @@
 import { useCallback, useId, useState } from 'react';
 import { useAccount, useWriteContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
+import ZorpFactoryAddressInput from '@/components/contracts/ZorpFactoryAddressInput';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
@@ -15,7 +16,6 @@ export default function ZorpFactoryWriteWithdraw() {
 	const [isFetching, setIsFetching] = useState<boolean>(false);
 	const [receipt, setReceipt] = useState<string>('... pending');
 
-	const addressFactoryId = useId();
 	const addressToId = useId();
 	const amountId = useId();
 
@@ -24,10 +24,6 @@ export default function ZorpFactoryWriteWithdraw() {
 	const { writeContractAsync } = useWriteContract();
 
 	const { IZorpFactory } = useContracts();
-
-	const handleChangeFactoryAddress = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-		setAddressFactory(event.target.value as `0x${string}`);
-	}, [ setAddressFactory ]);
 
 	const handleChangeAddressTo = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
 		setAddressTo(event.target.value as `0x${string}`);
@@ -117,12 +113,9 @@ export default function ZorpFactoryWriteWithdraw() {
 				<ThemeSwitch />
 			</div>
 
-			<label htmlFor={addressFactoryId}>ZORP Factory Address:</label>
-			<input
-				id={addressFactoryId}
-				value={addressFactory}
-				onChange={handleChangeFactoryAddress}
+			<ZorpFactoryAddressInput
 				disabled={isFetching}
+				setState={setAddressFactory}
 			/>
 
 			<label htmlFor={addressToId}>ZORP Factory withdraw address:</label>
