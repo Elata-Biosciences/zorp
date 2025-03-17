@@ -119,13 +119,13 @@ information via;
 _test_net_url='127.0.0.1:8545'
 _zorp_factory_address='0x5FbDB2315678afecb367f032d93F642f64180aa3'
 
-cast call "${_zorp_factory_address}" "owner()" --rpc-url "${_test_net_url}"
+cast call "${_zorp_factory_address}" "owner()(address)" --rpc-url "${_test_net_url}"
 ```
 
 **Example reply**
 
 ```
-0x000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb92266
+0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
 ```
 
 ### Help

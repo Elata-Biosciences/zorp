@@ -44,6 +44,8 @@ zorp/
    curl -L https://foundry.paradigm.xyz | bash
    foundryup
    ```
+   > :warning: Be sure to double-check official installation
+   > [documentation](https://book.getfoundry.sh/getting-started/installation)
 2. **Build the project**:  
    ```bash
    cd zorp-contracts
@@ -54,7 +56,21 @@ zorp/
    forge test
    ```
 4. **Deploying**:  
-   - Example: `forge script script/DeployZorp.s.sol --rpc-url <YOUR_RPC> --private-key <YOUR_KEY> --broadcast`
+   - Syntax: `forge script script/DeployZorp.s.sol --rpc-url <YOUR_RPC> --private-key <YOUR_KEY> --broadcast`
+   - Example for Anvil:
+      ```bash
+      _test_net_url='127.0.0.1:8545';
+      _test_private_key0='0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+
+      pushd "zorp-contracts";
+
+      forge script \
+        --offline \
+        --broadcast \
+        --rpc-url "${_test_net_url}" \
+        --private-key "${_test_private_key0}" \
+        script/DeployAnvilZorp.s.sol:DeployAnvil;
+      ```
 
 ### `zorp-frontend/` (Next.js + RainbowKit)
 
@@ -81,6 +97,116 @@ zorp/
    # or yarn dev
    ```
 4. **Open** [http://localhost:3000](http://localhost:3000) in your browser to see the app.
+
+## Usage
+
+### Usage -- Study Creators
+
+1. Prerequisites:
+  - Create a GPG/PGP key pair for encryption
+  - Fund your Base wallet and Irys account
+2. Create a study:
+  - Recommend Web-UI end-points;
+    1. `/zorp/factory/create-study` provided by `zorp-frontend` is recommended as this will; upload your **public** GPG/PGP to Irys, call `ZorpFactory.createStudy` with the necessary inputs, and return the address for your new `ZorpStudy` instance
+    2. `/zorp/study/start-study` provided by `zorp-frontend` is recommended to use when you're ready to start your study
+    3. `/zorp/study/flag-invalid-submission` may be used to flag individual account submissions as invalid, this will delete CID pointer from the contract storage and mark the account as unable to receive a payout after the study is ended
+    4. `/zorp/study/end-study` provided by `zorp-frontedn` is recommended to use when you're ready to end your study and allow participants to withdraw their payout
+  - CLI is more involved, and has more opportunity for mistakes;
+    1. Generate an IPFS CID from your **public** GPG/PGP key
+      - Start a Node REPL
+          ```bash
+          pushd zorp-frontend
+          node --experimental-transform-types
+          ```
+      - Generate an IPFS CID from **public** GPG/PGP key
+          ```javascript
+          var { cidFromFile } = await import('./src/lib/utils/ipfs.ts');
+          var fs = await import('fs');
+          var file = fs.readFileSync('<path-to-public-gpg-key>');
+          if (!('arrayBuffer' in file)) { file.arrayBuffer = async () => new ArrayBuffer(file); }
+          console.log(await cidFromFile(file));
+          ```
+      - Restore previous current working directory
+          ```bash
+          popd zorp-frontend
+          ```
+    2. Upload your **public** GPG/PGP key to [Irys](https://docs.irys.xyz/build/d/storage-cli/commands/upload)
+       ```bash
+       irys upload "<pubic-gpg-key>" \
+         -t base \
+         -w "<private-wallet-key>" \
+         --tags 'IPFS-CID' "<cid-from-previous-step>" \
+                'Content-Type' 'application/pgp-encrypted';
+       ```
+    3. Fund and create a new study, search output for `"Deployed to:"` address for your new `ZorpStudy` contract instance
+       ```bash
+       cast send "<ZorpFactory-address>" \
+         --rpc-url "<url>" \
+         --private-key "<private-wallet-key>" \
+         --value "<amount-to-fund-study-with>" \
+         'createStudy(address,string)(address)' \
+           "<public-wallet-key>" \
+           "<cid-from-previous-step>";
+       ```
+    4. Start your new `ZorpStudy` contract instance
+       ```bash
+       cast send "<ZorpStudy-address>" \
+          --rpc-url "<rpc-url>" \
+          --private-key "<private-wallet-key>" \
+          'startStudy()';
+       ```
+    5. End your `ZorpStudy` and allow participants to claim payout
+       ```bash
+       cast send "<ZorpStudy-address>" \
+          --rpc-url "<url>" \
+          --private-key "<private-wallet-key>" \
+          'endStudy()';
+       ```
+
+> **Notes**
+>
+> In above CLI examples there are many "fill in your own values" (`<word>`) opportunities for mistakes, the following will attempt to help explain, but if unsure please either use the Web-UI or search GitHub [Issues](https://github.com/Elata-Biosciences/zorp/issues?q=is%3Aissue) or ask on [Discord](https://discord.com/invite/UxSQnZnPus);
+>
+> - `<pubic-gpg-key>` should be the file-path to the **public** GPG/PGP key study participants will use to encrypt data prior to uploading to Irys, and submitting the CID to your instance of `ZorpStudy.submitData(string)`
+> - `<rpc-url>` should be the RPC URL of the chain that `ZorpFactory` is deployed on that you wish to use, for local testing this may be `127.0.0.1:8545`
+> - `<cid-from-previous-step>` should be what `console.log(await cidFromFile(file))` output, and eventually will be saved to your `ZorpStudy.encryption_key` instance for participants to use when submitting encrypted data
+> - `<private-wallet-key>` should be the crypto-coin wallet's private key used for publishing GPG/PGP **public** key and creating a new `ZorpStudy` instance
+> - `<ZorpFactory-address>` should be the smart contract address for the `ZorpFactory` (**not `ZorpStudy`**) accessible via same network/chain that `<rpc-url>` can reach
+> - `<amount-to-fund-study-with>` is the **total** amount that will be split evenly among all participants after `ZorpStudy.endStudy()` is executed, please be sure to estimate a fair value to encourage continued involvement from high-quality data submitters!
+> - `<ZorpStudy-address>` is returned by `ZorpFactory.createStudy(...)` and is the address you must use for administrating your study
+
+### Usage -- Study Data Submission
+
+1. Prerequisites:
+  - Create a GPG/PGP key pair for encryption
+  - Fund your Base wallet and Irys account
+2. Discover a `ZorpStudy` instance
+   > TBD
+3. Submit data to a `ZorpStudy` instance
+  - Recommend Web-UI end-points;
+    1. `/zorp/study/submit-data` is recommended as it will download the public GPG/PGP key for a given `ZorpStudy` instance, request your **public** GPG/PGP key, locally encrypt your data submission with both GPG/PGP public keys as recipients, upload encrypted data to Irys, and then call `ZorpStudy.submitData(string)` with necessary information
+    2. `/zorp/study/participant-status` check your on-chain status of a participant account;
+      - `0` ⇔ `NA` no data has been submitted
+      - `1` ⇔ `SUBMITTED` data has been submitted
+      - `2` ⇔ `PAID` payment has been collected
+      - `3` ⇔ `INVALID` study moderator marked submission as invalid
+    3. `/zorp/study/study-status` check on-chain status of study;
+      - `0` ⇔ `NA` study has not been activated
+      - `1` ⇔ `ACTIVE` study is ready for data submissions
+      - `2` ⇔ `FINISHED` study is no longer accepting new data and ready to pay participants
+    4. `/zorp/study/claim-reward` provided an account has the status of `SUBMITTED` **and** the study has the status of `FINISHED`, this end-point maybe used to request payment for data submitted
+
+## Tips
+
+The `zorp-contracts/src/IZorpStudy.sol` file contains interface contract code that, for study creators, maybe be useful for data collection and moderation as well as, for participants, discovery of new studies.  Check the doc-comments for example usage for both React-ish web-apps and CLI scripting.
+
+### Tips -- Study Creators
+
+- `IZorpStudy_Functions.paginateSubmittedData` → Return a possibly sparse array of CID strings pointing to submitted data
+
+### Usage -- Study Data Submission
+
+- `IZorpStudy_Functions.paginateSubmittedData` → Intended for off-chain requests for bulk lookup of `ZorpStudy` contract addresses an instance of `ZorpFactory` tracks
 
 ## Contributing
 

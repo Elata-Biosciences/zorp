@@ -7,7 +7,7 @@ import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
 export default function ZorpStudyWriteEndStudy() {
-	const addressStudyAnvil = config.anvil.contracts.ZorpStudy[31337].address;
+	const addressStudyAnvil = config.anvil.contracts.IZorpStudy[31337].address;
 
 	const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
 	const [isFetching, setIsFetching] = useState<boolean>(false);
@@ -15,19 +15,19 @@ export default function ZorpStudyWriteEndStudy() {
 
 	const addressStudyId = useId();
 
-	const { ZorpStudy } = useContracts();
+	const { IZorpStudy } = useContracts();
 	const { address, isConnected } = useAccount();
 	const { writeContractAsync } = useWriteContract();
 
 	const assertsClient = {
 		isAddressStudySet: addressStudy.length === addressStudyAnvil.length && addressStudy.startsWith('0x'),
 		isAddressWalletSet: !!address && address.length === addressStudyAnvil.length && address.startsWith('0x'),
-		isContractStudySet: !!ZorpStudy?.abi && !!Object.keys(ZorpStudy.abi).length && !!ZorpStudy?.address.length,
+		isContractStudySet: !!IZorpStudy?.abi && !!Object.keys(IZorpStudy.abi).length && !!IZorpStudy?.address.length,
 	};
 
 	const { data: owner, isFetching: isFetchingOwner } = useReadContract({
-		abi: ZorpStudy.abi,
-		address: ZorpStudy.address,
+		abi: IZorpStudy.abi,
+		address: IZorpStudy.address,
 		functionName: 'owner',
 		args: [],
 		query: {
@@ -36,8 +36,8 @@ export default function ZorpStudyWriteEndStudy() {
 	});
 
 	const { data: study_status, isFetching: isFetchingStudyStatus } = useReadContract({
-		abi: ZorpStudy.abi,
-		address: ZorpStudy.address,
+		abi: IZorpStudy.abi,
+		address: IZorpStudy.address,
 		functionName: 'study_status',
 		args: [],
 		query: {
@@ -101,8 +101,8 @@ export default function ZorpStudyWriteEndStudy() {
 
 					setIsFetching(true);
 					writeContractAsync({
-						abi: ZorpStudy.abi,
-						address: ZorpStudy.address,
+						abi: IZorpStudy.abi,
+						address: IZorpStudy.address,
 						functionName: 'endStudy',
 						args: [],
 					}).then((response) => {

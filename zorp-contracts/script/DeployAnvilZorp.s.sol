@@ -3,8 +3,8 @@ pragma solidity ^0.8.17;
 
 import "../lib/forge-std/src/Script.sol";
 
-import { ZorpFactory } from "./ZorpFactory.sol";
-import { IZorpFactory } from "./IZorpFactory.sol";
+import { ZorpFactory } from "../src/ZorpFactory.sol";
+import { IZorpFactory } from "../src/IZorpFactory.sol";
 
 /// ## Example `forge` usage
 ///

@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import * as openpgp from 'openpgp';
 import type { Key } from 'openpgp';
+import promiseFromFileReader from '@/lib/utils/promiseFromFileReader';
 
 export default function InputFileToEncryptedMessage({
 	className = '',
@@ -14,42 +15,48 @@ export default function InputFileToEncryptedMessage({
 	encryptionKey,
 }: {
 	className?: string;
-	setState: (study_encryption_key: null | Uint8Array) => void;
+	setState: (study_encrypted_message: null | Uint8Array) => void;
 	labelText: string;
 	gpgKey: null | { file: File; key: Key; };
 	encryptionKey: null | { response: Response; key: Key; };
 }) {
-	const [inputSubmitDataFile, setInputSubmitDataFile] = useState<null | File>(null);
+	const [file, setFile] = useState<null | File>(null);
 	const [message, setMessage] = useState<string>('Info: waiting for public GPG encryption keys and or input file');
 
 	useQuery({
-		enabled: !!inputSubmitDataFile && !!gpgKey && !!gpgKey.key && !!encryptionKey && !!encryptionKey.key,
-		queryKey: ['message_recipients', [gpgKey?.key, encryptionKey?.key]],
+		enabled: !!file && !!gpgKey && !!gpgKey.key && !!encryptionKey && !!encryptionKey.key,
+		queryKey: ['message_recipients'],
+		// TODO: investigate circular reference errors in tests possibly propagating to web-clients
+		// queryKey: ['message_recipients', [gpgKey?.key, encryptionKey?.key]],
 		queryFn: async () => {
 			// TODO: investigate why TypeScript and `useQuery` don't sync-up on `enabled`
 			if (!gpgKey?.key) {
 				const message = 'Warn: input GPG encryption key';
-				console.warn('InputFileToEncryptedMessage', {message});
 				setMessage(message);
 				return;
 			}
 
 			if (!encryptionKey?.key) {
 				const message = 'Warn: study GPG encryption key';
-				console.warn('InputFileToEncryptedMessage', {message});
 				setMessage(message);
 				return;
 			}
 
-			if (!inputSubmitDataFile) {
+			if (!file) {
 				const message = 'Warn: need an input file to encrypt';
-				console.warn('InputFileToEncryptedMessage', {message});
 				setMessage(message);
 				return;
 			}
 
 			try {
-				const buffer = await inputSubmitDataFile.arrayBuffer();
+				const buffer = await promiseFromFileReader({
+					file,
+					readerMethod: ({ reader, file }) => {
+						reader.readAsArrayBuffer(file);
+					},
+				}).then(({ result }) => {
+					return new Uint8Array(result as ArrayBuffer);
+				});
 
 				const createdmessage = await openpgp.createMessage({ binary: buffer });
 
@@ -63,9 +70,9 @@ export default function InputFileToEncryptedMessage({
 				});
 
 				const message = 'Success: encrypted file with provided GPG keys?!';
-				console.warn('InputFileToEncryptedMessage', {message});
 				setMessage(message);
 				setState(encryptedMessage);
+				return encryptedMessage;
 			} catch (error: unknown) {
 				let message = 'Error: ';
 				if (!!error && typeof error == 'object') {
@@ -87,17 +94,25 @@ export default function InputFileToEncryptedMessage({
 		},
 	});
 
+	const onChangeHandler = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+		event.stopPropagation();
+		event.preventDefault();
+		if (!!event.target.files?.length) {
+			setFile(event.target.files[0]);
+			// TODO: update test(s) to allow for _proper_ usage
+			// setFile(event.target.files.item(0));
+		} else {
+			setFile(null);
+		}
+	}, [ setFile ]);
+
 	return (
 		<>
 			<label className={`file_encrypt file_encrypt__label ${className}`}>{labelText}</label>
 			<input
 				className={`file_encrypt file_encrypt__input ${className}`}
 				type="file"
-				onChange={(event: ChangeEvent<HTMLInputElement>) => {
-					event.stopPropagation();
-					event.preventDefault();
-					setInputSubmitDataFile(event.target.files?.item(0) || null);
-				}}
+				onChange={onChangeHandler}
 			/>
 			<span className={`file_encrypt file_encrypt__span ${className}`}>{message}</span>
 		</>

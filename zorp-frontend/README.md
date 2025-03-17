@@ -80,3 +80,24 @@ yarn lint
 # or
 pnpm lint
 ```
+
+### Testing
+
+#### Run all tests once
+
+```bash
+npm test
+```
+
+#### Run all tests when changes are detected
+
+```bash
+npm test:watch
+```
+
+#### Run specific test
+
+```bash
+# npm test -- <File_Or_Test_Name>
+npm test -- InputFileToEncryptedMessage
+```

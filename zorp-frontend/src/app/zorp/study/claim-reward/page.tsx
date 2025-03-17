@@ -7,7 +7,7 @@ import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
 export default function ZorpStudyWriteClaimReward() {
-	const addressStudyAnvil = config.anvil.contracts.ZorpStudy[31337].address;
+	const addressStudyAnvil = config.anvil.contracts.IZorpStudy[31337].address;
 
 	const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
 	const [isFetching, setIsFetching] = useState<boolean>(false);
@@ -15,19 +15,19 @@ export default function ZorpStudyWriteClaimReward() {
 
 	const addressStudyId = useId();
 
-	const { ZorpStudy } = useContracts();
+	const { IZorpStudy } = useContracts();
 	const { address, isConnected } = useAccount();
 	const { writeContractAsync } = useWriteContract();
 
 	const assertsClient = {
 		isAddressParticipantSet: address?.length === addressStudyAnvil.length && address.startsWith('0x'),
 		isAddressStudySet: addressStudy.length === addressStudyAnvil.length && addressStudy.startsWith('0x'),
-		isContractStudySet: !!ZorpStudy?.abi && !!Object.keys(ZorpStudy.abi).length && !!ZorpStudy?.address.length,
+		isContractStudySet: !!IZorpStudy?.abi && !!Object.keys(IZorpStudy.abi).length && !!IZorpStudy?.address.length,
 	};
 
 	const { data: participant_status, isFetching: isFetchingParticipantStatus } = useReadContract({
-		abi: ZorpStudy.abi,
-		address: ZorpStudy.address,
+		abi: IZorpStudy.abi,
+		address: IZorpStudy.address,
 		functionName: 'participant_status',
 		args: [address],
 		query: {
@@ -39,8 +39,8 @@ export default function ZorpStudyWriteClaimReward() {
 	});
 
 	const { data: study_status, isFetching: isFetchingStudyStatus } = useReadContract({
-		abi: ZorpStudy.abi,
-		address: ZorpStudy.address,
+		abi: IZorpStudy.abi,
+		address: IZorpStudy.address,
 		functionName: 'study_status',
 		args: [],
 		query: {
@@ -96,8 +96,8 @@ export default function ZorpStudyWriteClaimReward() {
 
 					setIsFetching(true);
 					writeContractAsync({
-						abi: ZorpStudy.abi,
-						address: ZorpStudy.address,
+						abi: IZorpStudy.abi,
+						address: IZorpStudy.address,
 						functionName: 'claimReward',
 						args: [],
 					}).then((response) => {
