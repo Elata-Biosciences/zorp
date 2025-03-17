@@ -51,8 +51,6 @@ describe('IrysUploadFileGpgKey does not re-upload preexisting PGP key', () => {
 				lastModified: Date.now(),
 			},
 		);
-		/* @ts-ignore */
-		file.arrayBuffer = async () => new ArrayBuffer(file);
 
 		gpgKey = { file, key };
 
