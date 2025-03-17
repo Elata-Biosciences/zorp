@@ -5,7 +5,7 @@ import type { BigNumber } from 'bignumber.js';
 import type { Key } from 'openpgp';
 import { useAccount, useWriteContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
-import InputFileToEncryptedMessage from '@/components/features/InputFileToEncryptedMessage';
+import EncryptedMessageFromInputFile from '@/components/features/EncryptedMessageFromInputFile';
 import InputFileToGpgEncryptionKey from '@/components/features/InputFileToGpgEncryptionKey';
 import IrysBalanceGet from '@/components/features/IrysBalanceGet';
 import IrysFetchFileGpgKey from '@/components/features/IrysFetchFileGpgKey';
@@ -114,7 +114,7 @@ export default function ZorpStudySubmitData() {
 
 			<hr />
 
-			<InputFileToEncryptedMessage
+			<EncryptedMessageFromInputFile
 				labelText='Data to encrypt and submit'
 				setState={setEncryptedMessage}
 				gpgKey={gpgKey}

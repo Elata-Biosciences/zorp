@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { Key } from 'openpgp';
 import { encryptedMessageFromFile } from '@/lib/utils/openpgp';
 
-export default function InputFileToEncryptedMessage({
+export default function EncryptedMessageFromInputFile({
 	className = '',
 	labelText = 'Data to encrypt and submit',
 	setState,
@@ -71,7 +71,7 @@ export default function InputFileToEncryptedMessage({
 					message += `Novel error detected -> ${error}`;
 				}
 
-				console.error('InputFileToEncryptedMessage', {message, error});
+				console.error('EncryptedMessageFromInputFile', {message, error});
 				setMessage(message);
 				setState(null);
 			}

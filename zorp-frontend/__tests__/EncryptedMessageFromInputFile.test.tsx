@@ -10,9 +10,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import * as openpgp from 'openpgp';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import InputFileToEncryptedMessage from '@/components/features/InputFileToEncryptedMessage';
+import EncryptedMessageFromInputFile from '@/components/features/EncryptedMessageFromInputFile';
 
-describe('InputFileToEncryptedMessage', () => {
+describe('EncryptedMessageFromInputFile', () => {
 	const queryClient = new QueryClient();
 
 	afterEach(() => {
@@ -42,8 +42,8 @@ describe('InputFileToEncryptedMessage', () => {
 
 		render(
 			<QueryClientProvider client={queryClient}>
-				<InputFileToEncryptedMessage
-					labelText={'Mocked -- InputFileToEncryptedMessage'}
+				<EncryptedMessageFromInputFile
+					labelText={'Mocked -- EncryptedMessageFromInputFile'}
 					setState={async (study_encrypted_message: null | Uint8Array) => {
 						gpgKeyStudy_can_decrypt_message: {
 							const { data } = await openpgp.decrypt({
