@@ -3,6 +3,7 @@
 import { useCallback, useId, useState } from 'react';
 import { useAccount, useReadContract, useWriteContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
+import ZorpStudyAddressInput from '@/components/contracts/ZorpStudyAddressInput';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
@@ -14,7 +15,6 @@ export default function ZorpStudyWriteFlagInvalidSubmission() {
 	const [isFetching, setIsFetching] = useState<boolean>(false);
 	const [receipt, setReceipt] = useState<string>('... pending');
 
-	const addressStudyId = useId();
 	const addressParticipantId = useId();
 
 	const { IZorpStudy } = useContracts();
@@ -85,10 +85,6 @@ export default function ZorpStudyWriteFlagInvalidSubmission() {
 								&& assertsBlockchain.isParticipantSubmitted
 								&& assertsBlockchain.isStudyActive;
 
-	const handleChangeStudyAddress = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-		setAddressStudy(event.target.value as `0x${string}`);
-	}, [ setAddressStudy ]);
-
 	const handleChangeParticipantAddress = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
 		setAddressParticipant(event.target.value as `0x${string}`);
 	}, [ setAddressParticipant ]);
@@ -151,12 +147,9 @@ export default function ZorpStudyWriteFlagInvalidSubmission() {
 				<ThemeSwitch />
 			</div>
 
-			<label htmlFor={addressStudyId}>ZORP Study Address:</label>
-			<input
-				id={addressStudyId}
-				value={addressStudy}
-				onChange={handleChangeStudyAddress}
-				disabled={disabled}
+			<ZorpStudyAddressInput
+				disabled={isFetching}
+				setState={setAddressStudy}
 			/>
 
 			<label htmlFor={addressParticipantId}>ZORP Participant Address:</label>

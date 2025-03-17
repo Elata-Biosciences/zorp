@@ -1,8 +1,9 @@
 'use client';
 
-import { useCallback, useId, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useAccount, useReadContract, useWriteContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
+import ZorpStudyAddressInput from '@/components/contracts/ZorpStudyAddressInput';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
@@ -12,8 +13,6 @@ export default function ZorpStudyWriteEndStudy() {
 	const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
 	const [isFetching, setIsFetching] = useState<boolean>(false);
 	const [receipt, setReceipt] = useState<string>('... pending');
-
-	const addressStudyId = useId();
 
 	const { IZorpStudy } = useContracts();
 	const { address, isConnected } = useAccount();
@@ -80,10 +79,6 @@ export default function ZorpStudyWriteEndStudy() {
 								&& assertsBlockchain.isStudyActive
 								&& assertsClient.isContractStudySet;
 
-	const handleChangeStudyAddress = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-		setAddressStudy(event.target.value as `0x${string}`);
-	}, [ setAddressStudy ]);
-
 	const handleOnClick = useCallback(async () => {
 		if (!enabled) {
 			console.warn('Missing required state', {
@@ -148,12 +143,9 @@ export default function ZorpStudyWriteEndStudy() {
 				<ThemeSwitch />
 			</div>
 
-			<label htmlFor={addressStudyId}>ZORP Study Address:</label>
-			<input
-				id={addressStudyId}
-				value={addressStudy}
-				onChange={handleChangeStudyAddress}
-				disabled={disabled}
+			<ZorpStudyAddressInput
+				disabled={isFetching}
+				setState={setAddressStudy}
 			/>
 
 			<button

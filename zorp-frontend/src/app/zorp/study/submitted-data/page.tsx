@@ -3,6 +3,7 @@
 import { useCallback, useId, useState } from 'react';
 import { useReadContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
+import ZorpStudyAddressInput from '@/components/contracts/ZorpStudyAddressInput';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
@@ -12,7 +13,6 @@ export default function ZorpStudyReadSubmittedData() {
 	const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
 	const [index, setIndex] = useState<number>(0);
 
-	const addressStudyId = useId();
 	const indexId = useId();
 
 	const { IZorpStudy } = useContracts();
@@ -33,10 +33,6 @@ export default function ZorpStudyReadSubmittedData() {
 		},
 	});
 
-	const handleChangeStudyAddress = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-		setAddressStudy(event.target.value as `0x${string}`);
-	}, [ setAddressStudy ]);
-
 	const handleChangeDataIndex = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
 		const value = Number.parseInt(event.target.value);
 		if (!isNaN(value)) {
@@ -53,12 +49,9 @@ export default function ZorpStudyReadSubmittedData() {
 				<ThemeSwitch />
 			</div>
 
-			<label htmlFor={addressStudyId}>ZORP Study Address:</label>
-			<input
-				id={addressStudyId}
-				value={addressStudy}
-				onChange={handleChangeStudyAddress}
+			<ZorpStudyAddressInput
 				disabled={isFetching}
+				setState={setAddressStudy}
 			/>
 
 			<label htmlFor={indexId}>ZORP data index:</label>

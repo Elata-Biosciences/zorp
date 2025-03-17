@@ -1,8 +1,9 @@
 'use client';
 
-import { useCallback, useId, useState } from 'react';
+import { useState } from 'react';
 import { useReadContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
+import ZorpStudyAddressInput from '@/components/contracts/ZorpStudyAddressInput';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
@@ -10,8 +11,6 @@ export default function ZorpStudyReadParticipantPayoutAmount() {
 	const addressStudyAnvil = config.anvil.contracts.IZorpStudy[31337].address;
 
 	const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
-
-	const addressStudyId = useId();
 
 	const { IZorpStudy } = useContracts();
 
@@ -29,10 +28,6 @@ export default function ZorpStudyReadParticipantPayoutAmount() {
 		},
 	});
 
-	const handleChangeStudyAddress = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-		setAddressStudy(event.target.value as `0x${string}`);
-	}, [ setAddressStudy ]);
-
 	return (
 		<div className="w-full flex flex-col">
 			<h1 className="flex flex-col sm:flex-row justify-center items-center text-4xl font-bold">
@@ -42,12 +37,9 @@ export default function ZorpStudyReadParticipantPayoutAmount() {
 				<ThemeSwitch />
 			</div>
 
-			<label htmlFor={addressStudyId}>ZORP Study Address:</label>
-			<input
-				id={addressStudyId}
-				value={addressStudy}
-				onChange={handleChangeStudyAddress}
+			<ZorpStudyAddressInput
 				disabled={isFetching}
+				setState={setAddressStudy}
 			/>
 
 			<span>ZorpStudy per-participant payout: {participant_payout_amount as string}</span>

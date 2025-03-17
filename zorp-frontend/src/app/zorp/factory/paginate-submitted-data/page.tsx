@@ -5,6 +5,7 @@
 import { useCallback, useId, useState } from 'react';
 import { useReadContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
+import ZorpStudyAddressInput from '@/components/contracts/ZorpStudyAddressInput';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
@@ -17,7 +18,6 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 	const [limit, setLimit] = useState<number>(10);
 
 	const addressFactoryId = useId();
-	const addressStudyId = useId();
 	const startId = useId();
 	const limitId = useId();
 
@@ -36,10 +36,6 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 	const handleChangePaginateFactoryAddress = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
 		setAddressFactory(event.target.value as `0x${string}`);
 	}, [ setAddressFactory ]);
-
-	const handleChangePaginateStudyAddress = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-		setAddressStudy(event.target.value as `0x${string}`);
-	}, [ setAddressStudy ]);
 
 	const handleChangePaginateStart = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
 		const value = Number.parseInt(event.target.value);
@@ -103,11 +99,9 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 				onChange={handleChangePaginateFactoryAddress}
 			/>
 
-			<label htmlFor={addressStudyId}>ZORP Study Address:</label>
-			<input
-				id={addressStudyId}
-				value={addressStudy}
-				onChange={handleChangePaginateStudyAddress}
+			<ZorpStudyAddressInput
+				disabled={isFetching}
+				setState={setAddressStudy}
 			/>
 
 			<label htmlFor={startId}>Start</label>
