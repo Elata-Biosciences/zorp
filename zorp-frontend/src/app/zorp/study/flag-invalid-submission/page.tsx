@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useCallback, useId, useState } from 'react';
 import { useAccount, useReadContract, useWriteContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
@@ -85,6 +85,63 @@ export default function ZorpStudyWriteFlagInvalidSubmission() {
 								&& assertsBlockchain.isParticipantSubmitted
 								&& assertsBlockchain.isStudyActive;
 
+	const handleChangeStudyAddress = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+		setAddressStudy(event.target.value as `0x${string}`);
+	}, [ setAddressStudy ]);
+
+	const handleChangeParticipantAddress = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+		setAddressParticipant(event.target.value as `0x${string}`);
+	}, [ setAddressParticipant ]);
+
+	const handleOnClick = useCallback(async () => {
+		if (!enabled) {
+			return;
+		}
+
+		setIsFetching(true);
+
+		try {
+			const response = await writeContractAsync({
+				abi: IZorpStudy.abi,
+				address: IZorpStudy.address,
+				functionName: 'flagInvalidSubmission',
+				args: [addressParticipant],
+			});
+
+			if (!!response) {
+				setReceipt(response);
+			} else {
+				setReceipt(`...  error with receipt response -> ${response}`);
+			}
+		} catch (error) {
+			let message = 'Error: ';
+			if (!!error && typeof error == 'object') {
+				if ('message' in error) {
+					message += error.message;
+				} else if ('toString' in error) {
+					message += error.toString();
+				} else {
+					message += `Novel error detected -> ${error}`;
+				}
+			} else {
+				message += `Novel error detected -> ${error}`;
+			}
+
+			console.error('ZorpStudyWriteFlagInvalidSubmission ->', { message, error });
+			setReceipt(message);
+			return error;
+		} finally {
+			setIsFetching(false);
+		}
+	}, [
+		enabled,
+		setIsFetching,
+		IZorpStudy,
+		addressParticipant,
+		setReceipt,
+		writeContractAsync,
+	]);
+
 	return (
 		<div className="w-full flex flex-col">
 			<h1 className="flex flex-col sm:flex-row justify-center items-center text-4xl font-bold">
@@ -98,9 +155,7 @@ export default function ZorpStudyWriteFlagInvalidSubmission() {
 			<input
 				id={addressStudyId}
 				value={addressStudy}
-				onChange={(event) => {
-					setAddressStudy(event.target.value as `0x${string}`);
-				}}
+				onChange={handleChangeStudyAddress}
 				disabled={disabled}
 			/>
 
@@ -108,44 +163,15 @@ export default function ZorpStudyWriteFlagInvalidSubmission() {
 			<input
 				id={addressParticipantId}
 				value={addressParticipant}
-				onChange={(event) => {
-					setAddressParticipant(event.target.value as `0x${string}`);
-				}}
+				onChange={handleChangeParticipantAddress}
 				disabled={disabled}
 			/>
 
 			<button
-				onClick={(event) => {
+				onClick={async (event) => {
 					event.preventDefault();
 					event.stopPropagation();
-
-					if (!enabled) {
-						console.warn('Missing required state', {
-							isConnected,
-							assertsClient,
-							assertsBlockchain,
-						});
-						return;
-					}
-
-					setIsFetching(true);
-					writeContractAsync({
-						abi: IZorpStudy.abi,
-						address: IZorpStudy.address,
-						functionName: 'flagInvalidSubmission',
-						args: [addressParticipant],
-					}).then((response) => {
-						if (!!response) {
-							setReceipt(response);
-						} else {
-							setReceipt(`...  error with receipt response -> ${response}`);
-						}
-					}).catch((error) => {
-						console.error(error);
-						setReceipt(`...  error with writeContractAsync error -> ${error}`);
-					}).finally(() => {
-						setIsFetching(false);
-					});
+					await handleOnClick();
 				}}
 				disabled={disabled}
 			>Flag Submission {enabled ? 'Available' : 'unavailable'}</button>
