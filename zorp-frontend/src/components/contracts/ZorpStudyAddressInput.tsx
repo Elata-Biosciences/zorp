@@ -3,6 +3,9 @@
 import { useCallback, useId, useState } from 'react';
 import * as config from '@/lib/constants/wagmiConfig';
 
+/**
+ * Renders `input` and associated `label` for handling contract address input
+ */
 export default function ZorpStudyAddressInput({
 	disabled,
 	setState,

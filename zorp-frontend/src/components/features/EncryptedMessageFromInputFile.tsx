@@ -71,7 +71,7 @@ export default function EncryptedMessageFromInputFile({
 					message += `Novel error detected -> ${error}`;
 				}
 
-				console.error('EncryptedMessageFromInputFile', {message, error});
+				console.error('EncryptedMessageFromInputFile ->', { message, error });
 				setMessage(message);
 				setState(null);
 			}

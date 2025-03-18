@@ -60,7 +60,7 @@ export default function IrysBalanceGet({
 			}
 
 			setMessage(message);
-			console.error('IrysBaseShowBalance ->', { error, message });
+			console.error('IrysBalanceGet ->', { error, message });
 			return error;
 		}
 	}, [ address, irysWebUploaderBuilderBaseEth, setState ]);

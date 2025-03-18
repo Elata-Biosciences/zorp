@@ -73,8 +73,6 @@ export default function IrysUploadFileGpgKey({
 			return;
 		}
 
-		/* @TODO: attempt to download before checking if upload is needed/possible */
-
 		try {
 			setMessage('Info: attempting to generate CID from GPG key file');
 			const cid = await cidFromFile(gpgKey.file);
@@ -125,7 +123,7 @@ export default function IrysUploadFileGpgKey({
 				message += `Novel error detected -> ${error}`;
 			}
 
-			console.error('IrysUploadFileGpgKey ...', {message, error});
+			console.error('IrysUploadFileGpgKey ->', { message, error });
 			setMessage(message);
 			setState(null);
 			return error;

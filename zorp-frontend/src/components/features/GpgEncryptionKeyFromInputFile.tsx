@@ -64,7 +64,7 @@ export default function GpgEncryptionKeyFromInputFile({
 					message += `Novel error detected -> ${error}`;
 				}
 
-				console.error('GpgEncryptionKeyFromInputFile', { message, error });
+				console.error('GpgEncryptionKeyFromInputFile ->', { message, error });
 				setMessage(message);
 				setState(null);
 
