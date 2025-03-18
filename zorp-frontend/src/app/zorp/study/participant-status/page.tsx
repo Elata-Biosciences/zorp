@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useId, useState } from 'react';
+import { useCallback, useEffect, useId, useState } from 'react';
 import { useReadContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
 import ZorpStudyAddressInput from '@/components/contracts/ZorpStudyAddressInput';
@@ -12,6 +12,7 @@ export default function ZorpStudyReadParticipantStatus() {
 
 	const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
 	const [addressParticipant, setAddressParticipant] = useState<`0x${string}`>('0x70997970C51812dc3A010C7d01b50e0d17dc79C8');
+	const [message, setMessage] = useState<string>('Waiting for client wallet connection and/or contract response');
 
 	const addressParticipantId = useId();
 
@@ -38,6 +39,24 @@ export default function ZorpStudyReadParticipantStatus() {
 						&& !!IZorpStudy?.address.length,
 		},
 	});
+
+	useEffect(() => {
+		if (!!participant_status?.toString().length) {
+			let messageText = 'ZorpStudy participant status: ';
+			if (participant_status == 0) {
+				messageText += 'NA';
+			} else if (participant_status == 1) {
+				messageText += 'Submitted';
+			} else if (participant_status == 2) {
+				messageText += 'Paid';
+			} else if (participant_status == 3) {
+				messageText += 'Invalid';
+			} else {
+				messageText += 'Error unrecognized state';
+			}
+			setMessage(messageText)
+		}
+	}, [ participant_status ])
 
 	const handleChangeParticipantAddress = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
 		setAddressParticipant(event.target.value as `0x${string}`);
@@ -66,7 +85,7 @@ export default function ZorpStudyReadParticipantStatus() {
 				disabled={isFetching}
 			/>
 
-			<span>ZorpStudy participant status: {participant_status as string}</span>
+			<span>{message}</span>
 		</div>
 	);
 }

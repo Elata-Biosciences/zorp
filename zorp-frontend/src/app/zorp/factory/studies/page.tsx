@@ -30,7 +30,7 @@ export default function ZorpFactoryReadStudyAddress() {
 		'studies',
 		[number],
 		typeof config.wagmiConfig,
-		bigint
+		`0x${string}`
 	>({
 		abi: IZorpFactory.abi,
 		address: IZorpFactory.address,
