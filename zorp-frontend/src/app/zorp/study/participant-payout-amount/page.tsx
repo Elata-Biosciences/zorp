@@ -14,7 +14,13 @@ export default function ZorpStudyReadParticipantPayoutAmount() {
 
 	const { IZorpStudy } = useContracts();
 
-	const { data: participant_payout_amount, isFetching } = useReadContract({
+	const { data: participant_payout_amount, isFetching } = useReadContract<
+		typeof IZorpStudy.abi,
+		'participant_payout_amount',
+		never[],
+		typeof config.wagmiConfig,
+		bigint
+	>({
 		abi: IZorpStudy.abi,
 		address: IZorpStudy.address,
 		functionName: 'participant_payout_amount',

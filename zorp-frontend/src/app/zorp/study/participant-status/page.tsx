@@ -17,7 +17,13 @@ export default function ZorpStudyReadParticipantStatus() {
 
 	const { IZorpStudy } = useContracts();
 
-	const { data: participant_status, isFetching } = useReadContract({
+	const { data: participant_status, isFetching } = useReadContract<
+		typeof IZorpStudy.abi,
+		'participant_status',
+		[`0x${string}`],
+		typeof config.wagmiConfig,
+		bigint | 0 | 1 | 2 | 3
+	>({
 		abi: IZorpStudy.abi,
 		address: IZorpStudy.address,
 		functionName: 'participant_status',

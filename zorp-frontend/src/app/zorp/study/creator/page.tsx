@@ -13,7 +13,13 @@ export default function ZorpStudyReadCreator() {
 
 	const { IZorpStudy } = useContracts();
 
-	const { data: creator, isFetching } = useReadContract({
+	const { data: creator, isFetching } = useReadContract<
+		typeof IZorpStudy.abi,
+		'creator',
+		never[],
+		typeof config.wagmiConfig,
+		`0x${string}`
+	>({
 		abi: IZorpStudy.abi,
 		address: IZorpStudy.address,
 		functionName: 'creator',

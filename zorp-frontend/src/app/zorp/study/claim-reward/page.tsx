@@ -31,7 +31,13 @@ export default function ZorpStudyWriteClaimReward() {
 		addressStudyAnvil,
 	]);
 
-	const { data: participant_status, isFetching: isFetchingParticipantStatus } = useReadContract({
+	const { data: participant_status, isFetching: isFetchingParticipantStatus } = useReadContract<
+		typeof IZorpStudy.abi,
+		'participant_status',
+		[`0x${string}`],
+		typeof config.wagmiConfig,
+		bigint | 0 | 1 | 2 | 3
+	>({
 		abi: IZorpStudy.abi,
 		address: IZorpStudy.address,
 		functionName: 'participant_status',
@@ -44,7 +50,13 @@ export default function ZorpStudyWriteClaimReward() {
 		},
 	});
 
-	const { data: study_status, isFetching: isFetchingStudyStatus } = useReadContract({
+	const { data: study_status, isFetching: isFetchingStudyStatus } = useReadContract<
+		typeof IZorpStudy.abi,
+		'study_status',
+		[`0x${string}`],
+		typeof config.wagmiConfig,
+		bigint | 0 | 1 | 2
+	>({
 		abi: IZorpStudy.abi,
 		address: IZorpStudy.address,
 		functionName: 'study_status',

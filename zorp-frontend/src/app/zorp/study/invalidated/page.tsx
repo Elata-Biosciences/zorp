@@ -14,7 +14,13 @@ export default function ZorpStudyReadInvalidated() {
 
 	const { IZorpStudy } = useContracts();
 
-	const { data: invalidated, isFetching } = useReadContract({
+	const { data: invalidated, isFetching } = useReadContract<
+		typeof IZorpStudy.abi,
+		'invalidated',
+		never[],
+		typeof config.wagmiConfig,
+		bigint
+	>({
 		abi: IZorpStudy.abi,
 		address: IZorpStudy.address,
 		functionName: 'invalidated',

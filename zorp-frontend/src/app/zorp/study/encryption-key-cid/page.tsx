@@ -20,7 +20,13 @@ export default function ZorpStudyReadEncryptionKeyCid() {
 								&& !!Object.keys(IZorpStudy.abi).length
 								&& !!IZorpStudy?.address.length;
 
-	const { data: encryption_key_cid, isFetching, refetch } = useReadContract({
+	const { data: encryption_key_cid, isFetching, refetch } = useReadContract<
+		typeof IZorpStudy.abi,
+		'encryption_key',
+		never[],
+		typeof config.wagmiConfig,
+		string
+	>({
 		abi: IZorpStudy.abi,
 		address: IZorpStudy.address,
 		functionName: 'encryption_key',

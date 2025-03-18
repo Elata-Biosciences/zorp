@@ -1,5 +1,3 @@
-// TODO: figure out why Anvil based testing fails
-
 'use client';
 
 import { useCallback, useId, useState } from 'react';
@@ -23,7 +21,13 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 
 	const { IZorpFactory } = useContracts();
 
-	const { data: cids, isFetching, refetch } = useReadContract({
+	const { data: cids, isFetching, refetch } = useReadContract<
+		typeof IZorpFactory.abi,
+		'paginateSubmittedData',
+		[`0x${string}`, number, number],
+		typeof config.wagmiConfig,
+		string[]
+	>({
 		abi: IZorpFactory.abi,
 		address: IZorpFactory.address,
 		functionName: 'paginateSubmittedData',

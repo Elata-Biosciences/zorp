@@ -20,7 +20,13 @@ export default function ZorpFactoryReadLatestStudyIndex() {
 												&& addressFactory.length === addressFactoryAnvil.length
 												&& addressFactory.startsWith('0x');
 
-	const { data: latest_study_index, isFetching } = useReadContract({
+	const { data: latest_study_index, isFetching } = useReadContract<
+		typeof IZorpFactory.abi,
+		'latest_study_index',
+		never[],
+		typeof config.wagmiConfig,
+		bigint
+	>({
 		abi: IZorpFactory.abi,
 		address: IZorpFactory.address,
 		functionName: 'latest_study_index',
@@ -46,7 +52,11 @@ export default function ZorpFactoryReadLatestStudyIndex() {
 				setState={setAddressFactory}
 			/>
 
-			<span>ZorpFactory latest study index: {latest_study_index as string}</span>
+			<span>ZorpFactory latest study index: {
+				!!latest_study_index
+					? latest_study_index.toString()
+					: '...  waiting for client and/or contract connection'
+			}</span>
 		</div>
 	);
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useId, useState } from 'react';
+import { useCallback, useEffect, useId, useState } from 'react';
 import { useReadContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
 import ZorpStudyAddressInput from '@/components/contracts/ZorpStudyAddressInput';
@@ -12,12 +12,19 @@ export default function ZorpStudyReadParticipantIndex() {
 
 	const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
 	const [addressParticipant, setAddressParticipant] = useState<`0x${string}`>('0x70997970C51812dc3A010C7d01b50e0d17dc79C8');
+	const [message, setMessage] = useState<string>('Waiting for client connection or contract response');
 
 	const addressParticipantId = useId();
 
 	const { IZorpStudy } = useContracts();
 
-	const { data: participant_index, isFetching } = useReadContract({
+	const { data: participant_index, isFetching } = useReadContract<
+		typeof IZorpStudy.abi,
+		'participant_index',
+		[`0x${string}`],
+		typeof config.wagmiConfig,
+		bigint | number
+	>({
 		abi: IZorpStudy.abi,
 		address: IZorpStudy.address,
 		functionName: 'participant_index',
@@ -32,6 +39,16 @@ export default function ZorpStudyReadParticipantIndex() {
 						&& !!IZorpStudy?.address.length,
 		},
 	});
+
+	useEffect(() => {
+		if (!!participant_index?.toString().length) {
+			if (participant_index == BigInt(0) || participant_index == 0) {
+				setMessage('ZorpStudy participation not detected');
+			} else {
+				setMessage(`ZorpStudy participant index: ${participant_index}`);
+			}
+		}
+	}, [ participant_index ]);
 
 	const handleChangeParticipantAddress = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
 		setAddressParticipant(event.target.value as `0x${string}`);
@@ -59,7 +76,7 @@ export default function ZorpStudyReadParticipantIndex() {
 				disabled={isFetching}
 			/>
 
-			<span>ZorpStudy participant index: {participant_index as string}</span>
+			<span>{message}</span>
 		</div>
 	);
 }

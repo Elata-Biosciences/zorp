@@ -14,7 +14,13 @@ export default function ZorpStudyReadStudyStatus() {
 
 	const { IZorpStudy } = useContracts();
 
-	const { data: study_status, isFetching } = useReadContract({
+	const { data: study_status, isFetching } = useReadContract<
+		typeof IZorpStudy.abi,
+		'study_status',
+		[`0x${string}`],
+		typeof config.wagmiConfig,
+		bigint | 0 | 1 | 2
+	>({
 		abi: IZorpStudy.abi,
 		address: IZorpStudy.address,
 		functionName: 'study_status',
@@ -39,7 +45,7 @@ export default function ZorpStudyReadStudyStatus() {
 				setState={setAddressStudy}
 			/>
 
-			<span>ZorpStudy status: {study_status as string}</span>
+			<span>ZorpStudy status: {study_status?.toString()}</span>
 		</div>
 	);
 }

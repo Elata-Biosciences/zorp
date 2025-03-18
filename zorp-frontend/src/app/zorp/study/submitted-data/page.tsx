@@ -17,7 +17,13 @@ export default function ZorpStudyReadSubmittedData() {
 
 	const { IZorpStudy } = useContracts();
 
-	const { data: submitted_data, isFetching } = useReadContract({
+	const { data: submitted_data, isFetching } = useReadContract<
+		typeof IZorpStudy.abi,
+		'submitted_data',
+		[bigint | number],
+		typeof config.wagmiConfig,
+		string
+	>({
 		abi: IZorpStudy.abi,
 		address: IZorpStudy.address,
 		functionName: 'submitted_data',

@@ -14,7 +14,13 @@ export default function ZorpStudyReadSubmissions() {
 
 	const { IZorpStudy } = useContracts();
 
-	const { data: submissions, isFetching } = useReadContract({
+	const { data: submissions, isFetching } = useReadContract<
+		typeof IZorpStudy.abi,
+		'submissions',
+		never[],
+		typeof config.wagmiConfig,
+		bigint
+	>({
 		abi: IZorpStudy.abi,
 		address: IZorpStudy.address,
 		functionName: 'submissions',
@@ -42,7 +48,7 @@ export default function ZorpStudyReadSubmissions() {
 				setState={setAddressStudy}
 			/>
 
-			<span>ZorpStudy submissions count: {submissions as string}</span>
+			<span>ZorpStudy submissions count: {submissions?.toString()}</span>
 		</div>
 	);
 }

@@ -31,7 +31,13 @@ export default function ZorpStudyWriteEndStudy() {
 		addressStudyAnvil,
 	])
 
-	const { data: owner, isFetching: isFetchingOwner } = useReadContract({
+	const { data: owner, isFetching: isFetchingOwner } = useReadContract<
+		typeof IZorpStudy.abi,
+		'owner',
+		never[],
+		typeof config.wagmiConfig,
+		`0x${string}`
+	>({
 		abi: IZorpStudy.abi,
 		address: IZorpStudy.address,
 		functionName: 'owner',
@@ -41,7 +47,13 @@ export default function ZorpStudyWriteEndStudy() {
 		},
 	});
 
-	const { data: study_status, isFetching: isFetchingStudyStatus } = useReadContract({
+	const { data: study_status, isFetching: isFetchingStudyStatus } = useReadContract<
+		typeof IZorpStudy.abi,
+		'study_status',
+		[`0x${string}`],
+		typeof config.wagmiConfig,
+		bigint | 0 | 1 | 2
+	>({
 		abi: IZorpStudy.abi,
 		address: IZorpStudy.address,
 		functionName: 'study_status',

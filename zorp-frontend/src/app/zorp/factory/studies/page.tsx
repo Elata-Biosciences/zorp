@@ -25,7 +25,13 @@ export default function ZorpFactoryReadStudyAddress() {
 												&& !Number.isNaN(studyIndex)
 												&& studyIndex > 0
 
-	const { data: studyAddress, isFetching } = useReadContract({
+	const { data: studyAddress, isFetching } = useReadContract<
+		typeof IZorpFactory.abi,
+		'studies',
+		[number],
+		typeof config.wagmiConfig,
+		bigint
+	>({
 		abi: IZorpFactory.abi,
 		address: IZorpFactory.address,
 		functionName: 'studies',

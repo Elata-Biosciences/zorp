@@ -19,7 +19,13 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 
 	const { IZorpFactory } = useContracts();
 
-	const { data: studyAddresses, isFetching, refetch } = useReadContract({
+	const { data: studyAddresses, isFetching, refetch } = useReadContract<
+		typeof IZorpFactory.abi,
+		'paginateStudies',
+		[number, number],
+		typeof config.wagmiConfig,
+		Array<`0x${string}`>
+	>({
 		abi: IZorpFactory.abi,
 		address: IZorpFactory.address,
 		functionName: 'paginateStudies',
