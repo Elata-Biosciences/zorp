@@ -1,31 +1,36 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useState } from 'react';
 import { useReadContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
+import ZorpStudyAddressInput from '@/components/contracts/ZorpStudyAddressInput';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
 export default function ZorpStudyReadSubmissions() {
-	const addressStudyAnvil = config.anvil.contracts.ZorpStudy[31337].address;
+	const addressStudyAnvil = config.anvil.contracts.IZorpStudy[31337].address;
 
 	const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
 
-	const addressStudyId = useId();
+	const { IZorpStudy } = useContracts();
 
-	const { ZorpStudy } = useContracts();
-
-	const { data: submissions, isFetching } = useReadContract({
-		abi: ZorpStudy.abi,
-		address: ZorpStudy.address,
+	const { data: submissions, isFetching } = useReadContract<
+		typeof IZorpStudy.abi,
+		'submissions',
+		never[],
+		typeof config.wagmiConfig,
+		bigint
+	>({
+		abi: IZorpStudy.abi,
+		address: IZorpStudy.address,
 		functionName: 'submissions',
 		args: [],
 		query: {
 			enabled: addressStudy.length === addressStudyAnvil.length
 						&& addressStudy.startsWith('0x')
-						&& !!ZorpStudy?.abi
-						&& !!Object.keys(ZorpStudy.abi).length
-						&& !!ZorpStudy?.address.length,
+						&& !!IZorpStudy?.abi
+						&& !!Object.keys(IZorpStudy.abi).length
+						&& !!IZorpStudy?.address.length,
 		},
 	});
 
@@ -38,17 +43,12 @@ export default function ZorpStudyReadSubmissions() {
 				<ThemeSwitch />
 			</div>
 
-			<label htmlFor={addressStudyId}>ZORP Study Address:</label>
-			<input
-				id={addressStudyId}
-				value={addressStudy}
-				onChange={(event) => {
-					setAddressStudy(event.target.value as `0x${string}`);
-				}}
+			<ZorpStudyAddressInput
 				disabled={isFetching}
+				setState={setAddressStudy}
 			/>
 
-			<span>ZorpStudy submissions count: {submissions as string}</span>
+			<span>ZorpStudy submissions count: {submissions?.toString()}</span>
 		</div>
 	);
 }

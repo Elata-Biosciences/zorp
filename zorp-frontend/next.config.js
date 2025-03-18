@@ -17,7 +17,7 @@ const nextConfigDefaults = {
 };
 
 /**
- * @param {any} phase
+ * @param {"phase-test"|"phase-development-server"|string} phase
  * @param {NextConfig} config
  *
  * @see https://nextjs.org/docs/pages/api-reference/config/next-config-js
@@ -28,50 +28,37 @@ async function hook(phase, { nextConfigCustom }) {
 	console.log('START -- next.config.js -- hook(phase, { nextConfigCustom }) ->', { phase, nextConfigCustom, nextConfig });
 
 	/**
-	 * @see https://d.sh/cli/getting-started
+	 * Copy and transmute contract ABI JSON files from `../zorp-contracts/out/`
+	 * to `./src/lib/constants/wagmiContractConfig/`
 	 */
-	const foundryResult = foundry({
-		project: path.join(path.dirname(__dirname), 'zorp-contracts'),
-		include: [
-			'IZorpFactory.json',
-			'IZorpStudy.json',
-		],
-	});
+	const abiNames = [ 'IZorpFactory', 'IZorpStudy' ];
+	const abiPathSourceDir = path.join(path.dirname(process.cwd()), 'zorp-contracts', 'out');
 	const contractOutDir = path.join(__dirname, 'src', 'lib', 'constants', 'wagmiContractConfig');
-	for (const contract of await foundryResult.contracts()) {
-		const contractPathDest = path.join(contractOutDir, `${contract.name}.ts`);
+	for (const abiName of abiNames) {
+		const abiPathSource = path.join(abiPathSourceDir, `${abiName}.sol`, `${abiName}.json`);
+		if (!fs.existsSync(abiPathSource)) {
+			console.error(`Source ABI file does not exists ->`, {abiPathSource});
+			continue;
+		}
+
+		const contractPathDest = path.join(contractOutDir, `${abiName}.ts`);
 		if (fs.existsSync(contractPathDest)) {
 			console.warn(`Output contract config file already exists ->`, {contractPathDest});
 			continue;
 		}
 
-		const contractOutputText = `export const ${contract.name} = ${JSON.stringify(contract, null, 2)} as const;`;
+		console.log('Coping contract ABI', {
+			path_source: abiPathSource,
+			path_destination: contractPathDest,
+		});
+		const contractJson = JSON.parse(fs.readFileSync(abiPathSource, 'utf8'));
+		const contractData = {
+			abi: contractJson.abi,
+		};
+		// TODO: if contract sizes become really large, consider filtering
+		//       unnecessary bits, such as doc-comments, around here
+		const contractOutputText = `export const ${abiName} = ${JSON.stringify(contractData, null, 2)} as const;`;
 		fs.writeFileSync(contractPathDest, contractOutputText, { encoding: 'utf-8', mode: '440' });
-	}
-
-	// Copy select ABIs from `../zorp-contracts/out/` to `public/assets/abi/`
-	//
-	// Results in `../zorp-contracts/out/IZorpFactory.sol/IZorpFactory.json`
-	//            `public/assets/abi/IZorpFactory.json`
-	//            integration
-	const abiOutDir = path.join(process.cwd(), 'public', 'assets', 'abi');
-	if (!fs.existsSync(abiOutDir)) {
-		fs.mkdirSync(abiOutDir, { recursive: true });
-	}
-	const abiNames = [ 'IZorpFactory', 'IZorpStudy' ];
-	for (const abiName of abiNames) {
-		const abiPathSource = path.join(path.dirname(process.cwd()), 'zorp-contracts', 'out', `${abiName}.sol`, `${abiName}.json`);
-		const abiPathDest = path.join(abiOutDir, `${abiName}.json`);
-
-		if (!fs.existsSync(abiPathSource)) {
-			throw new Error(`Missing: ${abiPathSource}\n\tDid you forget -> forge build`);
-		}
-		if (fs.existsSync(abiPathDest)) {
-			console.warn(`Output ABI file already exists ->`, {abiPathDest});
-			continue;
-		}
-
-		fs.copyFileSync(abiPathSource, abiPathDest);
 	}
 
 	// Detect if deploying to GitHub Pages
@@ -83,6 +70,22 @@ async function hook(phase, { nextConfigCustom }) {
 			output: 'export',
 			basePath: PAGES_BASE_PATH,
 		});
+	}
+
+	/**
+	 * @see {@link https://nextjs.org/docs/messages/swc-disabled}
+	 * TLDR: ignore `./babel.config.js` because be for satisfying test tooling
+	 */
+	nextConfig.experimental = {
+		forceSwcTransforms: true,
+	};
+
+	if (phase === 'phase-test') {
+		console.log('Detected phase is test');
+		if (!nextConfig.transpilePackages || !Array.isArray(nextConfig.transpilePackages)) {
+			nextConfig.transpilePackages = [];
+		}
+		nextConfig.transpilePackages.push( 'wagmi' );
 	}
 
 	console.log('END -- next.config.js -- hook(phase, { nextConfigCustom }) ->', { phase, nextConfigCustom, nextConfig });

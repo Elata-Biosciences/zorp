@@ -5,10 +5,11 @@ import type { BigNumber } from 'bignumber.js';
 import type { Key } from 'openpgp';
 import { useAccount, useWriteContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
-import InputFileToEncryptedMessage from '@/components/features/InputFileToEncryptedMessage';
-import InputFileToGpgEncryptionKey from '@/components/features/InputFileToGpgEncryptionKey';
+import EncryptedMessageFromInputFile from '@/components/features/EncryptedMessageFromInputFile';
+import GpgEncryptionKeyFromInputFile from '@/components/features/GpgEncryptionKeyFromInputFile';
 import IrysBalanceGet from '@/components/features/IrysBalanceGet';
 import IrysFetchFileGpgKey from '@/components/features/IrysFetchFileGpgKey';
+import IrysUploadFileEncryptedMessage from '@/components/features/IrysUploadFileEncryptedMessage'
 import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
@@ -18,7 +19,7 @@ export default function ZorpStudySubmitData() {
 	// TODO: consider reducing need of keeping both `Key` and `File` in memory at same time
 	const [gpgKey, setGpgKey] = useState<null | { file: File; key: Key; }>(null);
 
-	const [irysBalance, setIrysBalance] = useState<null | number | BigNumber>(null);
+	const [irysBalance, setIrysBalance] = useState<null | bigint | number | BigNumber>(null);
 
 	const [irysUploadData, setIrysUploadData] = useState<null | { receipt: unknown; cid: string; }>(null);
 
@@ -32,7 +33,7 @@ export default function ZorpStudySubmitData() {
 	});
 
 	const { address, isConnected } = useAccount();
-	const { ZorpStudy } = useContracts();
+	const { IZorpStudy } = useContracts();
 
 	const handleZorpStudySubmitData = useCallback(() => {
 		if (!isConnected) {
@@ -41,19 +42,22 @@ export default function ZorpStudySubmitData() {
 			setMessage(message)
 			return;
 		}
+
 		if (!address?.toString().length) {
 			const message = 'Warn: waiting on client to connect an account with an address';
 			console.warn('ZorpStudySubmitData', {message});
 			setMessage(message)
 			return;
 		}
+
 		if (!irysUploadData || !irysUploadData.cid || !irysUploadData.receipt) {
 			const message = 'Warn: for Irys upload to report success';
 			console.warn('ZorpStudySubmitData', {message});
 			setMessage(message)
 			return;
 		}
-		if (!ZorpStudy?.abi || !Object.keys(ZorpStudy.abi).length || !ZorpStudy?.address.length) {
+
+		if (!IZorpStudy?.abi || !Object.keys(IZorpStudy.abi).length || !IZorpStudy?.address.length) {
 			const message = 'Error: no contracts found for current chain';
 			console.error('ZorpStudySubmitData', {message});
 			setMessage(message)
@@ -61,8 +65,8 @@ export default function ZorpStudySubmitData() {
 		}
 
 		writeContractAsync({
-			abi: ZorpStudy.abi,
-			address: ZorpStudy.address,
+			abi: IZorpStudy.abi,
+			address: IZorpStudy.address,
 			functionName: 'submitData',
 			args: [
 				address.toString(),
@@ -73,7 +77,13 @@ export default function ZorpStudySubmitData() {
 			console.warn('ZorpStudySubmitData', {message});
 			setMessage(message)
 		});
-	}, [isConnected, address, irysUploadData, writeContractAsync, ZorpStudy]);
+	}, [
+		IZorpStudy,
+		address,
+		irysUploadData,
+		isConnected,
+		writeContractAsync,
+	]);
 
 	return (
 		<div className="w-full flex flex-col">
@@ -86,7 +96,7 @@ export default function ZorpStudySubmitData() {
 
 			<hr />
 
-			<InputFileToGpgEncryptionKey
+			<GpgEncryptionKeyFromInputFile
 				labelText="Public GPG key"
 				setState={setGpgKey}
 			/>
@@ -104,11 +114,20 @@ export default function ZorpStudySubmitData() {
 
 			<hr />
 
-			<InputFileToEncryptedMessage
+			<EncryptedMessageFromInputFile
 				labelText='Data to encrypt and submit'
 				setState={setEncryptedMessage}
 				gpgKey={gpgKey}
 				encryptionKey={encryptionKey}
+			/>
+
+			<hr />
+
+			<IrysUploadFileEncryptedMessage
+				labelText='Irys upload public encrypted message'
+				setState={setIrysUploadData}
+				encryptedMessage={encryptedMessage}
+				irysBalance={irysBalance}
 			/>
 
 			<hr />

@@ -26,12 +26,12 @@ const eslintConfig = [
       }
     }
   },
-  
+
   // Global settings e language options
   ...compat.extends("next/core-web-vitals"),
   ...compat.extends("plugin:@typescript-eslint/recommended"),
   ...compat.extends("plugin:react/recommended"),
-  
+
   // Plugin configurations
   {
     settings: {
@@ -48,16 +48,16 @@ const eslintConfig = [
         "allowTernary": true,
         "allowShortCircuit": true
       }],
-      
+
       // Typescript
       "@typescript-eslint/no-unused-vars": "warn",
       "@typescript-eslint/no-explicit-any": "error",
-      
+
       // General
       "no-console": ["warn", { allow: ["warn", "error"] }],
       "no-var": "error",
       "prefer-const": "warn",
-      
+
       // Restricts `./` and `../` imports to enforce consistent use of absolute imports with aliases.
       "no-restricted-imports": ["error", {
         patterns: [

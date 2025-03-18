@@ -1,33 +1,45 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useReadContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
+import ZorpStudyAddressInput from '@/components/contracts/ZorpStudyAddressInput';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
 export default function ZorpStudyReadParticipantPayoutAmount() {
-	const addressStudyAnvil = config.anvil.contracts.ZorpStudy[31337].address;
+	const addressStudyAnvil = config.anvil.contracts.IZorpStudy[31337].address;
 
 	const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
+	const [message, setMessage] = useState<string>('Waiting for client wallet connection and/or contract response');
 
-	const addressStudyId = useId();
+	const { IZorpStudy } = useContracts();
 
-	const { ZorpStudy } = useContracts();
-
-	const { data: participant_payout_amount, isFetching } = useReadContract({
-		abi: ZorpStudy.abi,
-		address: ZorpStudy.address,
+	const { data: participant_payout_amount, isFetching } = useReadContract<
+		typeof IZorpStudy.abi,
+		'participant_payout_amount',
+		never[],
+		typeof config.wagmiConfig,
+		bigint
+	>({
+		abi: IZorpStudy.abi,
+		address: IZorpStudy.address,
 		functionName: 'participant_payout_amount',
 		args: [],
 		query: {
 			enabled: addressStudy.length === addressStudyAnvil.length
 						&& addressStudy.startsWith('0x')
-						&& !!ZorpStudy?.abi
-						&& !!Object.keys(ZorpStudy.abi).length
-						&& !!ZorpStudy?.address.length,
+						&& !!IZorpStudy?.abi
+						&& !!Object.keys(IZorpStudy.abi).length
+						&& !!IZorpStudy?.address.length,
 		},
 	});
+
+	useEffect(() => {
+		if (!!participant_payout_amount?.toString().length) {
+			setMessage(`ZorpStudy per-participant payout: ${participant_payout_amount}`);
+		}
+	}, [ participant_payout_amount ]);
 
 	return (
 		<div className="w-full flex flex-col">
@@ -38,17 +50,12 @@ export default function ZorpStudyReadParticipantPayoutAmount() {
 				<ThemeSwitch />
 			</div>
 
-			<label htmlFor={addressStudyId}>ZORP Study Address:</label>
-			<input
-				id={addressStudyId}
-				value={addressStudy}
-				onChange={(event) => {
-					setAddressStudy(event.target.value as `0x${string}`);
-				}}
+			<ZorpStudyAddressInput
 				disabled={isFetching}
+				setState={setAddressStudy}
 			/>
 
-			<span>ZorpStudy per-participant payout: {participant_payout_amount as string}</span>
+			<span>{message}</span>
 		</div>
 	);
 }

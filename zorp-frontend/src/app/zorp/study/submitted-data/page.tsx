@@ -1,37 +1,50 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useCallback, useId, useState } from 'react';
 import { useReadContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
+import ZorpStudyAddressInput from '@/components/contracts/ZorpStudyAddressInput';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
 export default function ZorpStudyReadSubmittedData() {
-	const addressStudyAnvil = config.anvil.contracts.ZorpStudy[31337].address;
+	const addressStudyAnvil = config.anvil.contracts.IZorpStudy[31337].address;
 
 	const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
 	const [index, setIndex] = useState<number>(0);
 
-	const addressStudyId = useId();
 	const indexId = useId();
 
-	const { ZorpStudy } = useContracts();
+	const { IZorpStudy } = useContracts();
 
-	const { data: submitted_data, isFetching } = useReadContract({
-		abi: ZorpStudy.abi,
-		address: ZorpStudy.address,
+	const { data: submitted_data, isFetching } = useReadContract<
+		typeof IZorpStudy.abi,
+		'submitted_data',
+		[bigint | number],
+		typeof config.wagmiConfig,
+		string
+	>({
+		abi: IZorpStudy.abi,
+		address: IZorpStudy.address,
 		functionName: 'submitted_data',
 		args: [index],
 		query: {
 			enabled: addressStudy.length === addressStudyAnvil.length
 						&& addressStudy.startsWith('0x')
-						&& !!ZorpStudy?.abi
-						&& !!Object.keys(ZorpStudy.abi).length
-						&& !!ZorpStudy?.address.length
+						&& !!IZorpStudy?.abi
+						&& !!Object.keys(IZorpStudy.abi).length
+						&& !!IZorpStudy?.address.length
 						&& !!index
 						&& index > 0
 		},
 	});
+
+	const handleChangeDataIndex = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+		const value = Number.parseInt(event.target.value);
+		if (!isNaN(value)) {
+			setIndex(value);
+		}
+	}, [ setIndex ]);
 
 	return (
 		<div className="w-full flex flex-col">
@@ -42,26 +55,16 @@ export default function ZorpStudyReadSubmittedData() {
 				<ThemeSwitch />
 			</div>
 
-			<label htmlFor={addressStudyId}>ZORP Study Address:</label>
-			<input
-				id={addressStudyId}
-				value={addressStudy}
-				onChange={(event) => {
-					setAddressStudy(event.target.value as `0x${string}`);
-				}}
+			<ZorpStudyAddressInput
 				disabled={isFetching}
+				setState={setAddressStudy}
 			/>
 
 			<label htmlFor={indexId}>ZORP data index:</label>
 			<input
 				id={indexId}
 				value={index}
-				onChange={(event) => {
-					const value = Number.parseInt(event.target.value);
-					if (!isNaN(value)) {
-						setIndex(value);
-					}
-				}}
+				onChange={handleChangeDataIndex}
 				disabled={isFetching}
 			/>
 
