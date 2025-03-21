@@ -57,7 +57,7 @@ contract ZorpFactory is Ownable, ReentrancyGuard, IZorpFactory_Functions {
     }
 
     /// @inheritdoc IZorpFactory_Functions
-    function withdraw(address payable to, uint256 amount) external payable onlyOwner nonReentrant {
+    function withdraw(address payable to, uint256 amount) external payable nonReentrant onlyOwner {
         (bool success, ) = to.call{value: amount}("");
         require(success, "ZorpFactory: Failed withdraw");
     }

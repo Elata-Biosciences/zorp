@@ -93,7 +93,7 @@ contract ZorpStudy is IZorpStudy_Functions, Ownable, ReentrancyGuard {
     }
 
     /// @inheritdoc IZorpStudy_Functions
-    function endStudy() external payable onlyOwner nonReentrant {
+    function endStudy() external payable nonReentrant onlyOwner {
         require(study_status == STUDY_STATUS__ACTIVE, "ZorpStudy: Study not active");
         study_status = STUDY_STATUS__FINISHED;
 
