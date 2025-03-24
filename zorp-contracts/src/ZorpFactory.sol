@@ -3,7 +3,11 @@ pragma solidity ^0.8.17;
 
 import { ZorpStudy } from "./ZorpStudy.sol";
 import { IZorpStudy } from "./IZorpStudy.sol";
-import { IZorpFactory_Functions, StudyCreated } from "./IZorpFactory.sol";
+import {
+    IZorpFactory_Functions,
+    FactoryUpdated,
+    StudyCreated
+} from "./IZorpFactory.sol";
 
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
@@ -52,6 +56,7 @@ contract ZorpFactory is Ownable, ReentrancyGuard, IZorpFactory_Functions {
     function setRefFactoryNext(address ref) external payable onlyOwner {
         require(ref_factory_next == address(0), "ZorpFactory: next factory reference already set");
         ref_factory_next = ref;
+        emit FactoryUpdated(address(this), ref);
     }
 
     /// @inheritdoc IZorpFactory_Functions

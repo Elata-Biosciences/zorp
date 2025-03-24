@@ -3,6 +3,7 @@ pragma solidity ^0.8.17;
 
 import { IOwnable } from "./IOwnable.sol";
 
+event FactoryUpdated(address indexed ref_old, address indexed ref_new);
 event StudyCreated(address indexed studyAddress);
 
 /// @title Publicly accessible stored states within `ZorpFactory`
