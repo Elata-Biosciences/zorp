@@ -99,9 +99,10 @@ contract ZorpStudy is IZorpStudy_Functions, Ownable, ReentrancyGuard {
 
         uint256 balance = address(this).balance;
         if (submissions > invalidated) {
-            participant_payout_amount = balance / (submissions - invalidated);
+            uint256 valid_submissions = submissions - invalidated;
+            participant_payout_amount = balance / valid_submissions;
 
-            uint256 remainder = balance - participant_payout_amount;
+            uint256 remainder = balance - (participant_payout_amount * valid_submissions);
             if (remainder > 0) {
                 (bool success, ) = msg.sender.call{value: remainder}("");
                 require(success, "ZorpStudy: Failed trasfering remainder");
