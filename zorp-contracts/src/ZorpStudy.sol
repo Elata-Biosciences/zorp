@@ -70,7 +70,7 @@ contract ZorpStudy is IZorpStudy_Functions, Ownable, ReentrancyGuard {
 
         participant_status[msg.sender] = PARTICIPANT_STATUS__PAID;
 
-        (bool success, ) = msg.sender.call{value: participant_payout_amount}("");
+        (bool success, ) = msg.sender.call{ value: participant_payout_amount }("");
         require(success, "ZorpStudy: Failed participant payout");
     }
 
@@ -97,18 +97,18 @@ contract ZorpStudy is IZorpStudy_Functions, Ownable, ReentrancyGuard {
         require(study_status == STUDY_STATUS__ACTIVE, "ZorpStudy: Study not active");
         study_status = STUDY_STATUS__FINISHED;
 
-        uint256 balance = address(this).balance;
         if (submissions > invalidated) {
+            uint256 balance = address(this).balance;
             uint256 valid_submissions = submissions - invalidated;
             participant_payout_amount = balance / valid_submissions;
 
             uint256 remainder = balance - (participant_payout_amount * valid_submissions);
             if (remainder > 0) {
-                (bool success, ) = msg.sender.call{value: remainder}("");
+                (bool success, ) = msg.sender.call{ value: remainder }("");
                 require(success, "ZorpStudy: Failed trasfering remainder");
             }
         } else {
-            (bool success, ) = msg.sender.call{value: balance}("");
+            (bool success, ) = msg.sender.call{ value: address(this).balance }("");
             require(success, "ZorpStudy: Failed trasfering balance");
         }
     }
