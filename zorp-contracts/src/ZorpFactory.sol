@@ -28,7 +28,7 @@ contract ZorpFactory is Ownable, ReentrancyGuard, IZorpFactory_Functions {
     mapping(uint256 => address) public studies;
 
     /// @dev see `IZorpFactory_Storage.ref_factory_previous()`
-    address public constant ref_factory_previous = address(0);
+    address public ref_factory_previous = address(0);
 
     /// @dev see `IZorpFactory_Storage.ref_factory_next()`
     address public ref_factory_next;
