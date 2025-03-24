@@ -84,4 +84,7 @@ contract ZorpFactory is Ownable, ReentrancyGuard, IZorpFactory_Functions {
         }
         return results;
     }
+
+    receive() external payable {}
+    fallback() external payable {}
 }

@@ -111,4 +111,7 @@ contract ZorpStudy is IZorpStudy_Functions, Ownable, ReentrancyGuard {
             require(success, "ZorpStudy: Failed trasfering balance");
         }
     }
+
+    receive() external payable {}
+    fallback() external payable {}
 }
