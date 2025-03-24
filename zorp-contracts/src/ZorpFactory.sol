@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 import { ZorpStudy } from "./ZorpStudy.sol";
 import { IZorpStudy } from "./IZorpStudy.sol";
-import { IZorpFactory_Functions } from "./IZorpFactory.sol";
+import { IZorpFactory_Functions, StudyCreated } from "./IZorpFactory.sol";
 
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
@@ -28,8 +28,6 @@ contract ZorpFactory is Ownable, ReentrancyGuard, IZorpFactory_Functions {
 
     /// @dev see `IZorpFactory_Storage.ref_factory_next()`
     address public ref_factory_next;
-
-    event StudyCreated(address indexed studyAddress);
 
     constructor (address payable initialOwner_) Ownable(initialOwner_) {}
 

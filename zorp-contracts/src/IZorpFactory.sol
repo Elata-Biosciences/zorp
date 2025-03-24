@@ -3,6 +3,8 @@ pragma solidity ^0.8.17;
 
 import { IOwnable } from "./IOwnable.sol";
 
+event StudyCreated(address indexed studyAddress);
+
 /// @title Publicly accessible stored states within `ZorpFactory`
 interface IZorpFactory_Storage {
     /* Constants {{{ */
