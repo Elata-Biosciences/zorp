@@ -18,6 +18,7 @@ import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.s
 contract ZorpFactory_FakeUpdate is ZorpFactory {
     constructor (address payable initialOwner_, address _ref_factory_previous) ZorpFactory(initialOwner_) {
         ref_factory_previous = _ref_factory_previous;
+        VERSION = IZorpFactory(_ref_factory_previous).VERSION() + 1;
     }
 }
 

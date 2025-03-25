@@ -21,7 +21,7 @@ import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.s
 /// @custom:link https://github.com/Elata-Biosciences/zorp
 contract ZorpFactory is Ownable, ReentrancyGuard, IZorpFactory_Functions {
     /// @dev see `IZorpFactory_Storage.VERSION()`
-    uint256 public constant VERSION = 1;
+    uint256 public immutable VERSION = 1;
 
     /// @dev see `IZorpFactory_Storage.latest_study_index()`
     uint256 public latest_study_index;
