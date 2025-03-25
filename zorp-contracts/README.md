@@ -165,7 +165,56 @@ anvil --help
 cast --help
 ```
 
+## Privacy
+
+Most public blockchains are **not** private, or anonyms, and the best anyone can realistically hope for is pseudonymity!
+
+For this project in particular that means; calling an instance of `ZorpStudy.submitData(string)` (and/or any other function that mutates on-chain state) will record **publicly** the account submitting the and, ever more, allow anyone to associate past and future transactions with the data submitted.
+
+Two key technologies are recommended to mitigate privacy risks; off-chain encryption of data via PGP, and on-chain mixer/tumbler.
+
+### On-chain mixer or tumbler
+
+This project, for reasons, may not be able to provide up-to-date instructions and/or suggestions on what crypto mixer/tumbler is best to use.  Current state-of-the-art are non-custodial systems that leverage [ZK Proofs][wikipedia__non_interactive_zero_knowledge_proof] with fixed currency amounts for deposit/withdraw, and waiting some amount of time between deposit and withdraw actions.
+
+At a high-level the following steps are what can be expected to mitigate privacy risks;
+
+0. Generate a **private** note and deposit funds into a pool
+1. **Wait** some amount of time, longer the better
+2. Withdraw funds to a **different** account using private note
+3. Use account withdraw to **only** for intended actions, eg. `ZorpStudy.submitData(string)` and `ZorpStudy.claimReward()`
+
+...  Later, to withdraw funds accumulated via `ZorpStudy.claimReward()`, use a similar set of steps to withdraw to an account intended for non-ZorpStudy related actions.
+
+### Off-chain encryption via PGP / GPG
+
+The `zorp-frontend/` provides endpoints which uses two public PGP encryption keys as recipients to encrypt data with, one provided by data submitter and the other from `ZorpStudy.owner()`, prior to attempting to submit that data to any network.
+
+Creating a new PGP/GPG key-pair **only** for use with `ZorpStudy` contract interactions with little, to no meta-data, is recommended.  For example to create a new key-pair indented for use with a specific crypto-wallet;
+
+```bash
+#### Set your public wallet id within double-quotes
+_wallet_id="0xDEADBEEF"
+
+#### Copy/paste the whole block to test, then remove "--dry-run" to commit
+GPG_TTY="$(tty)" gpg --dry-run --full-generate-key --batch <<EOF
+Key-Type: ECDSA
+Key-Curve: secp256k1
+Subkey-Type: ECDH
+Subkey-Curve: secp256k1
+Name-Real: ZorpStudy
+Name-Comment: Use to call ZorpStudy with submitData or claimReward functions
+Name-Email: noreply+${_wallet_id}@example.com
+Creation-Date: $(TZ=UTC date --date='00:00:00 UTC' +'%F')
+Expire-Date: $(TZ=UTC date --date='00:00:00 UTC +2 years' +'%F')
+EOF
+```
+
+> Tip: check [GnuPG -- 4.5.4 Unattended key generation][gnupg__unattended_gpg_key_generation] for more options
+
 
 [gitfoundry__forge_create]: https://book.getfoundry.sh/reference/forge/forge-create
 [gitfoundry__cast]: https://book.getfoundry.sh/cast/
+[wikipedia__non_interactive_zero_knowledge_proof]: https://en.wikipedia.org/wiki/Non-interactive_zero-knowledge_proof
+[gnupg__unattended_gpg_key_generation]: https://www.gnupg.org/documentation/manuals/gnupg-devel/Unattended-GPG-key-generation.html
 
