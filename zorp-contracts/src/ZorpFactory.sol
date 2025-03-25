@@ -4,9 +4,11 @@ pragma solidity ^0.8.17;
 import { ZorpStudy } from "./ZorpStudy.sol";
 import { IZorpStudy } from "./IZorpStudy.sol";
 import {
-    IZorpFactory_Functions,
     FactoryUpdated,
-    StudyCreated
+    FactoryUpdatedAlready,
+    IZorpFactory_Functions,
+    StudyCreated,
+    WithdrawFailed
 } from "./IZorpFactory.sol";
 
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
@@ -37,11 +39,10 @@ contract ZorpFactory is Ownable, ReentrancyGuard, IZorpFactory_Functions {
 
     /// @inheritdoc IZorpFactory_Functions
     /// @dev see `./ZorpStudy.sol` -> `constructor`
-    /// @custom:todo double-check if this really needs to be `nonReentrant`
     function createStudy(
         address payable initialOwner,
         string memory encryptionKey
-    ) external payable nonReentrant returns (address) {
+    ) external payable returns (address) {
         address newStudy = address((new ZorpStudy){value: msg.value}(
             initialOwner,
             encryptionKey
@@ -54,7 +55,10 @@ contract ZorpFactory is Ownable, ReentrancyGuard, IZorpFactory_Functions {
 
     /// @inheritdoc IZorpFactory_Functions
     function setRefFactoryNext(address ref) external payable onlyOwner {
-        require(ref_factory_next == address(0), "ZorpFactory: next factory reference already set");
+        if (ref_factory_next != address(0)) {
+            revert FactoryUpdatedAlready(ref_factory_next, ref);
+        }
+
         ref_factory_next = ref;
         emit FactoryUpdated(address(this), ref);
     }
@@ -62,7 +66,9 @@ contract ZorpFactory is Ownable, ReentrancyGuard, IZorpFactory_Functions {
     /// @inheritdoc IZorpFactory_Functions
     function withdraw(address payable to, uint256 amount) external payable nonReentrant onlyOwner {
         (bool success, ) = to.call{value: amount}("");
-        require(success, "ZorpFactory: Failed withdraw");
+        if (!success) {
+            revert WithdrawFailed(to, amount, address(this).balance);
+        }
     }
 
     /// @inheritdoc IZorpFactory_Functions

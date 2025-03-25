@@ -4,7 +4,15 @@ pragma solidity ^0.8.17;
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
-import { IZorpStudy_Functions } from "./IZorpStudy.sol";
+import {
+    IZorpStudy_Functions,
+    InvalidIPFSCID,
+    InvalidMessageValue,
+    InvalidParticipantState,
+    InvalidStudyState,
+    ParticipantPayoutFailed,
+    RemainderTransferFailed
+} from "./IZorpStudy.sol";
 
 /// @title Track state of study and participant data
 /// @author S0AndS0.eth
@@ -39,8 +47,10 @@ contract ZorpStudy is IZorpStudy_Functions, Ownable, ReentrancyGuard {
         address payable initialOwner_,
         string memory encryption_key_
     ) payable Ownable(initialOwner_) {
-        require(msg.value > 0, "ZorpStudy: Invalid message value");
         // TODO: consider setting a constant minimum
+        if (msg.value < 1) {
+            revert InvalidMessageValue(msg.value, 1);
+        }
 
         // Future: accept constructor args (e.g. merkleRoot, externalNullifier).
         encryption_key = encryption_key_;
@@ -51,12 +61,17 @@ contract ZorpStudy is IZorpStudy_Functions, Ownable, ReentrancyGuard {
 
     /// @inheritdoc IZorpStudy_Functions
     function submitData(string memory ipfs_cid) external {
-        require(study_status == STUDY_STATUS__ACTIVE, "ZorpStudy: Study not active");
+        if (study_status != STUDY_STATUS__ACTIVE) {
+            revert InvalidStudyState(study_status, STUDY_STATUS__ACTIVE);
+        }
 
-        // TODO: Investigate IPFS min/max byte lengths
-        require(bytes(ipfs_cid).length > 0, "ZorpStudy: Invalid IPFS CID");
+        if (bytes(ipfs_cid).length < 1) {
+            revert InvalidIPFSCID();
+        }
 
-        require(participant_status[msg.sender] == PARTICIPANT_STATUS__NA, "ZorpStudy: Invalid message sender status");
+        if (participant_status[msg.sender] != PARTICIPANT_STATUS__NA) {
+            revert InvalidParticipantState(participant_status[msg.sender], PARTICIPANT_STATUS__NA);
+        }
 
         submitted_data[++submissions] = ipfs_cid;
         participant_status[msg.sender] = PARTICIPANT_STATUS__SUBMITTED;
@@ -65,19 +80,31 @@ contract ZorpStudy is IZorpStudy_Functions, Ownable, ReentrancyGuard {
 
     /// @inheritdoc IZorpStudy_Functions
     function claimReward() external payable nonReentrant {
-        require(study_status == STUDY_STATUS__FINISHED, "ZorpStudy: Study not finished");
-        require(participant_status[msg.sender] == PARTICIPANT_STATUS__SUBMITTED, "ZorpStudy: Invalid message sender status");
+        if (study_status != STUDY_STATUS__FINISHED) {
+            revert InvalidStudyState(study_status, STUDY_STATUS__FINISHED);
+        }
+
+        if (participant_status[msg.sender] != PARTICIPANT_STATUS__SUBMITTED) {
+            revert InvalidParticipantState(participant_status[msg.sender], PARTICIPANT_STATUS__SUBMITTED);
+        }
 
         participant_status[msg.sender] = PARTICIPANT_STATUS__PAID;
 
         (bool success, ) = msg.sender.call{ value: participant_payout_amount }("");
-        require(success, "ZorpStudy: Failed participant payout");
+        if (!success) {
+            revert ParticipantPayoutFailed(msg.sender, participant_payout_amount, address(this).balance);
+        }
     }
 
     /// @inheritdoc IZorpStudy_Functions
     function flagInvalidSubmission(address participant) external payable onlyOwner {
-        require(study_status == STUDY_STATUS__ACTIVE, "ZorpStudy: Study not active");
-        require(participant_status[participant] == PARTICIPANT_STATUS__SUBMITTED, "ZorpStudy: Invalid participant status");
+        if (study_status != STUDY_STATUS__ACTIVE) {
+            revert InvalidStudyState(study_status, STUDY_STATUS__ACTIVE);
+        }
+
+        if (participant_status[participant] != PARTICIPANT_STATUS__SUBMITTED) {
+            revert InvalidParticipantState(participant_status[participant], PARTICIPANT_STATUS__SUBMITTED);
+        }
 
         participant_status[participant] = PARTICIPANT_STATUS__INVALID;
         delete submitted_data[participant_index[participant]];
@@ -88,13 +115,19 @@ contract ZorpStudy is IZorpStudy_Functions, Ownable, ReentrancyGuard {
 
     /// @inheritdoc IZorpStudy_Functions
     function startStudy() external payable onlyOwner {
-        require(study_status == STUDY_STATUS__NA, "ZorpStudy: Study was previously activated");
+        if (study_status != STUDY_STATUS__NA) {
+            revert InvalidStudyState(study_status, STUDY_STATUS__NA);
+        }
+
         study_status = STUDY_STATUS__ACTIVE;
     }
 
     /// @inheritdoc IZorpStudy_Functions
     function endStudy() external payable nonReentrant onlyOwner {
-        require(study_status == STUDY_STATUS__ACTIVE, "ZorpStudy: Study not active");
+        if (study_status != STUDY_STATUS__ACTIVE) {
+            revert InvalidStudyState(study_status, STUDY_STATUS__ACTIVE);
+        }
+
         study_status = STUDY_STATUS__FINISHED;
 
         if (submissions > invalidated) {
@@ -109,11 +142,15 @@ contract ZorpStudy is IZorpStudy_Functions, Ownable, ReentrancyGuard {
             uint256 remainder = balance - (participant_payout_amount * valid_submissions);
             if (remainder > 0) {
                 (bool success, ) = msg.sender.call{ value: remainder }("");
-                require(success, "ZorpStudy: Failed trasfering remainder");
+                if (!success) {
+                    revert RemainderTransferFailed(msg.sender, remainder, address(this).balance);
+                }
             }
         } else {
             (bool success, ) = msg.sender.call{ value: address(this).balance }("");
-            require(success, "ZorpStudy: Failed trasfering balance");
+            if (!success) {
+                revert RemainderTransferFailed(msg.sender, address(this).balance, address(this).balance);
+            }
         }
     }
 
