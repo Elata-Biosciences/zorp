@@ -212,6 +212,18 @@ EOF
 
 > Tip: check [GnuPG -- 4.5.4 Unattended key generation][gnupg__unattended_gpg_key_generation] for more options
 
+## Upgrades
+
+New versions of `ZorpFactory` may be published with new features or fixes.  The `ZorpFactory.ref_factory_previous()(address)` and `ZorpFactory.ref_factory_next()(address)` view functions, like a doubly-linked list, point to previous and next versions of `ZorpFactory` contracts;
+
+- When `ZorpFactory.ref_factory_previous()(address)` returns `address(0)`, then it may be assumed the current address is the **first** of its line.
+- When `ZorpFactory.ref_factory_next()(address)` returns `address(0)`, then it may be assumed the current address is the **last** of its line.
+
+Prior to calling `ZorpFactory.createStudy(address,string)` it is encouraged, but not required, to check for updates because each instance tracks it's own series of `ZorpStudy` contracts which may have feature/fix differences too.
+
+> :warning: **No** `event` or `error` will be emitted/reverted by the blockchain if using an older version!
+
+
 
 [gitfoundry__forge_create]: https://book.getfoundry.sh/reference/forge/forge-create
 [gitfoundry__cast]: https://book.getfoundry.sh/cast/
