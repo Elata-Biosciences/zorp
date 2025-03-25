@@ -3,6 +3,13 @@ pragma solidity ^0.8.17;
 
 import { IOwnable } from "./IOwnable.sol";
 
+error InvalidIPFSCID();
+error InvalidMessageValue(uint256 value, uint256 minimum);
+error InvalidParticipantState(uint256 current_state, uint256 required_state);
+error InvalidStudyState(uint256 current_state, uint256 required_state);
+error ParticipantPayoutFailed(address to, uint256 amount, uint256 balance);
+error RemainderTransferFailed(address to, uint256 amount, uint256 balance);
+
 /// @title Publicly accessible stored states within `ZorpStudy`
 interface IZorpStudy_Storage {
     /* Constants {{{ */

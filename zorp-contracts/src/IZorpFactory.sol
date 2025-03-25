@@ -3,7 +3,10 @@ pragma solidity ^0.8.17;
 
 import { IOwnable } from "./IOwnable.sol";
 
-event FactoryUpdated(address indexed ref_old, address indexed ref_new);
+error FactoryUpdatedAlready(address ref_current, address ref_new);
+error WithdrawFailed(address to, uint256 amount, uint256 balance);
+
+event FactoryUpdated(address ref_current, address indexed ref_new);
 event StudyCreated(address indexed studyAddress);
 
 /// @title Publicly accessible stored states within `ZorpFactory`
