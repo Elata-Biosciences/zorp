@@ -32,9 +32,38 @@ forge build
 
 ### Test
 
-```bash
-forge test
-```
+- Run all tests
+   ```bash
+   forge test
+   ```
+- Run specific test file
+   ```bash
+   forge test --match-path test/ZorpFactory_Success.t.sol
+   ```
+- Run tests and gather coverage statistics, while ignoring `script/` and `test/` sub-directories
+   ```bash
+   forge coverage --no-match-coverage '(script|test)'
+   ```
+- Run tests and gather gas statistics
+   ```bash
+   forge test --gas-report
+   ```
+
+**Notes about testing philosophy**
+
+- Test contracts will _mostly_ follow a naming convention of `<parent>_<topic>_<mutation>_Test`, ex `ZorpFactory_Revert_Write_Test` tests certain `Write` mutations will `Revert` for `ZorpFactory` parent
+- All test functions must be independent, I.E. no shared or persistent state
+- Test functions are generally ordered as they are defined within the contract being tested
+- Test function names generally follow a pattern similar to `test_<action>__<name>__<description>`, and `__<description>` is optional when sufficiently self explanatory, ex. `test_write__setRefFactoryNext__rejects_when_previously_upgraded`
+- Code within test functions are generally ordered as; `<setup>`, `<execute>`, then `<assert>`
+- Assertions of values are generally ordered as; `<expected>`, `<got>`, then `<message>`
+- Assertions of events ordered as; `<listener>`, `<expected>`, then `<execute>`
+- Assertions of error ordered as; `<listener>`, `<expected>`, then `<execute>`
+
+**Useful test writing resources**
+
+- [Foundry -- Cheetcodes -- `expectEmit`](https://book.getfoundry.sh/cheatcodes/expect-emit)
+- [Foundry -- Cheetcodes -- `expectRevert`](https://book.getfoundry.sh/cheatcodes/expect-revert)
 
 ### Format
 
