@@ -137,7 +137,7 @@ jobs:
 
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment_github-pages.outputs.page_url }}
 
     runs-on: ubuntu-latest
     if: github.ref_name == 'main'
@@ -145,5 +145,52 @@ jobs:
     steps:
       - name: Deploy GitHub Pages site
         uses: actions/deploy-pages@v4.0.5
-        id: deployment
+        id: deployment_github-pages
+
+  ##
+  # @see https://vercel.com/guides/how-can-i-use-github-actions-with-vercel
+  # @see https://github.com/orgs/community/discussions/26726
+  ##
+  # deploy-vercel:
+  #   needs: build-frontend
+
+  #   environment:
+  #     name: vercel
+  #     url: ${{ steps.deployment_vercel.outputs.page_url }}
+  #     VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+  #   runs-on: ubuntu-latest
+  #   if: ${{ github.ref_name == 'main' && env.VERCEL_TOKEN != null }}
+
+  #   steps:
+  #     - name: Selective checkout of frontend
+  #       uses: actions/checkout@v4
+  #       with:
+  #         # fetch-depth: 2
+  #         sparse-checkout: |
+  #           zorp-frontend
+
+  #     - name: Install Vercel CLI
+  #       run: npm install --global vercel@latest
+
+  #     - name: Pull Vercel Environment Information
+  #       run: pushd zorp-frontend && vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }} ; popd
+
+  #     - name: Restore cached NextJS stuff
+  #       id: cache-primes-restore
+  #       uses: actions/cache/restore@v4.2.2
+  #       with:
+  #         key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+  #         path: |
+  #           ~/.npm
+  #           ${{ github.workspace }}/.next/cache
+
+  #     - name: Build Project Artifacts
+  #       run: pushd zorp-frontend && vercel build --token=${{ secrets.VERCEL_TOKEN }} ; popd
+
+  #     - name: Deploy Project Artifacts to Vercel
+  #       run: pushd zorp-frontend && vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} ; popd
+  #       id: deployment_vercel
 
