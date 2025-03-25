@@ -133,6 +133,22 @@ contract ZorpFactory_Success_Write_Test is Test {
         }
     }
 
+    function test_write__paginateParticipantStatus() public {
+        address payable initialOwner = payable(address(68));
+        string memory encryptionKey = "wat";
+        uint256 msg_value = 1;
+
+        address ref_study = IZorpFactory(ref_factory).createStudy{ value: msg_value }(initialOwner, encryptionKey);
+
+        uint256[] memory results = new uint256[](10);
+        results = IZorpFactory(ref_factory).paginateParticipantStatus(ref_study, 1, 10);
+
+        for (uint256 i; i < results.length;) {
+            vm.assertEq(0, results[i], "Unexpected: `results[i]` from `ZorpFactory.paginateParticipantStatus(ref_study, 1, 10)`");
+            unchecked { ++i; }
+        }
+    }
+
     function test_write__paginateStudies() public {
         address payable initialOwner = payable(address(68));
         string memory encryptionKey = "wat";

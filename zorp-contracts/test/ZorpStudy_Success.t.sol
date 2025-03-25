@@ -119,6 +119,7 @@ contract ZorpStudy_Success_Write_Test is Test {
         uint256 index_submitter = IZorpStudy(ref_study).participant_index(address(this));
 
         vm.assertEq(1, index_submitter, "Unexpected: `IZorpStudy(ref_study).participant_index(address(this))`");
+        vm.assertEq(address(this), IZorpStudy(ref_study).index_participant(index_submitter), "Unexpected: `IZorpStudy(ref_study).index_participant(index_submitter)`");
         vm.assertEq(1, IZorpStudy(ref_study).submissions(), "Unexpected: `ZorpStudy.submissions()`");
         vm.assertEq(ZORP_STUDY__IPFS_CID, IZorpStudy(ref_study).submitted_data(index_submitter), "Unexpected: `IZorpStudy(ref_study).submitted_data(index_submitter)`");
         vm.assertEq(IZorpStudy(ref_study).PARTICIPANT_STATUS__SUBMITTED(), IZorpStudy(ref_study).participant_status(ZORP_STUDY__PARTICIPANT), "Unexpected: `IZorpStudy(ref_study).participant_status(ZORP_STUDY__PARTICIPANT)`");
@@ -232,10 +233,12 @@ contract ZorpStudy_Success_Write_Test is Test {
         IZorpStudy(ref_study).startStudy();
         IZorpStudy(ref_study).submitData(ZORP_STUDY__IPFS_CID);
 
+        uint256 index = IZorpStudy(ref_study).participant_index(ZORP_STUDY__PARTICIPANT);
         IZorpStudy(ref_study).flagInvalidSubmission(address(this));
 
         vm.assertEq(IZorpStudy(ref_study).PARTICIPANT_STATUS__INVALID(), IZorpStudy(ref_study).participant_status(ZORP_STUDY__PARTICIPANT), "Unexpected: `IZorpStudy(ref_study).participant_status(ZORP_STUDY__PARTICIPANT)`");
         vm.assertEq(0, IZorpStudy(ref_study).participant_index(ZORP_STUDY__PARTICIPANT), "Unexpected: `IZorpStudy(ref_study).participant_index(ZORP_STUDY__PARTICIPANT)`");
+        vm.assertEq(address(0), IZorpStudy(ref_study).index_participant(index), "Unexpected: `IZorpStudy(ref_study).index_participant(index)`");
         vm.assertEq("", IZorpStudy(ref_study).submitted_data(1), "Unexpected: `IZorpStudy(ref_study).submitted_data(1)`");
         vm.assertEq(1, IZorpStudy(ref_study).invalidated(), "Unexpected: `ZorpStudy.invalidated()`");
 

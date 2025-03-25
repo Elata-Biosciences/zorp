@@ -673,6 +673,97 @@ interface IZorpStudy_Storage {
         /// ```
         function participant_index(address participant) external view returns (uint256);
 
+        /// @notice Maybe get an address of given participant from provided index
+        /// @param index Key of possible `ZorpStudy` participant
+        /// @return Address pointing into `participant_status` and `participant_index` mappings
+        ///
+        /// @dev Index `0` should always point to nonexistent participant(s)
+        /// @dev Index `0` should always point to flagged participant(s)
+        /// @dev Address `0` should always point to nonexistent and/or flagged participant(s)
+        ///
+        /// ## Off-chain example with cast
+        ///
+        /// ```bash
+        /// zorp_study_address="0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+        /// zorp_study_good_participant="0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
+        ///
+        /// cast call "${zorp_study_address}" \
+        ///     --rpc-url 127.0.0.1:8545 \
+        ///     'participant_index(address)(uint256)' \
+        ///         "${zorp_study_good_participant}";
+        /// ```
+        ///
+        /// ## Off-chain example with wagmi
+        ///
+        /// ```tsx
+        /// 'use client';
+        ///
+        /// import { useId, useState } from 'react';
+        /// import { useReadContract } from 'wagmi';
+        /// import { abi as zorpStudyAbi } from 'abi/IZorpStudy.json';
+        ///
+        /// export default function ZorpStudyReadIndexParticipant() {
+        ///   const addressStudyAnvil = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'
+        ///   const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
+        ///   const [indexParticipant, setIndexParticipant] = useState<bigint | number>(0);
+        ///
+        ///   const addressStudyId = useId();
+        ///   const indexParticipantId = useId();
+        ///
+        ///   const { data: participant, isFetching } = useReadContract({
+        ///     address: addressStudy,
+        ///     abi: zorpStudyAbi,
+        ///     functionName: 'index_participant',
+        ///     args: [indexParticipant],
+        ///     query: {
+        ///       enabled: addressStudy.length === addressStudyAnvil.length
+        ///             && addressStudy.startsWith('0x')
+        ///             && !Number.isNaN(indexParticipant),
+        ///     },
+        ///   });
+        ///
+        ///   return (
+        ///     <>
+        ///       <label htmlFor={addressStudyId}>ZORP Study Address:</label>
+        ///       <input
+        ///         id={addressStudyId}
+        ///         value={addressStudy}
+        ///         onChange={(event) => {
+        ///           setAddressStudy(event.target.value as `0x${string}`);
+        ///         }}
+        ///         disabled={isFetching}
+        ///       />
+        ///
+        ///       <label htmlFor={indexParticipantId}>ZORP Participant Index:</label>
+        ///       <input
+        ///         id={indexParticipantId}
+        ///         value={
+        ///           indexParticipant == null
+        ///             ? 'NaN'
+        ///             : indexParticipant.toString()
+        ///         }
+        ///         onChange={(event) => {
+        ///           if (!(new RegExp('^[0-9]+$')).test(event.target.value))
+        ///             return;
+        ///           }
+        ///
+        ///           const value = BigInt(event.target.value);
+        ///           if (Number.isNaN(value)) {
+        ///             return;
+        ///           }
+        ///
+        ///           setIndexParticipant(value);
+        ///         }}
+        ///         disabled={isFetching}
+        ///       />
+        ///
+        ///       <span>ZorpStudy participant address: {participant as `0x${string}`}</span>
+        ///     </>
+        ///   );
+        /// }
+        /// ```
+        function index_participant(uint256 index) external view returns (address);
+
         /// @notice Get submitted data for given participant address
         /// @param index Key into mapping to attempt getting data from
         /// @return IPFS CID string

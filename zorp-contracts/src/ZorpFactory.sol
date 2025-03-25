@@ -82,6 +82,18 @@ contract ZorpFactory is Ownable, ReentrancyGuard, IZorpFactory_Functions {
     }
 
     /// @inheritdoc IZorpFactory_Functions
+    function paginateParticipantStatus(address study, uint256 start, uint256 limit) external view returns (uint256[] memory) {
+        uint256[] memory results = new uint256[](limit);
+        for (uint256 i; i < limit;) {
+            results[i] = IZorpStudy(study).participant_status(
+                IZorpStudy(study).index_participant(start++)
+            );
+            unchecked { ++i; }
+        }
+        return results;
+    }
+
+    /// @inheritdoc IZorpFactory_Functions
     function paginateStudies(uint256 start, uint256 limit) external view returns (address[] memory) {
         address[] memory results = new address[](limit);
         for (uint256 i; i < limit;) {

@@ -39,6 +39,7 @@ contract ZorpStudy is IZorpStudy_Functions, Ownable, ReentrancyGuard {
 
     mapping(address => uint256) public participant_status;
     mapping(address => uint256) public participant_index;
+    mapping(uint256 => address) public index_participant;
     mapping(uint256 => string) public submitted_data;
 
     /// @param initialOwner_ owner or admin of study
@@ -76,6 +77,7 @@ contract ZorpStudy is IZorpStudy_Functions, Ownable, ReentrancyGuard {
         submitted_data[++submissions] = ipfs_cid;
         participant_status[msg.sender] = PARTICIPANT_STATUS__SUBMITTED;
         participant_index[msg.sender] = submissions;
+        index_participant[submissions] = msg.sender;
     }
 
     /// @inheritdoc IZorpStudy_Functions
@@ -107,7 +109,9 @@ contract ZorpStudy is IZorpStudy_Functions, Ownable, ReentrancyGuard {
         }
 
         participant_status[participant] = PARTICIPANT_STATUS__INVALID;
-        delete submitted_data[participant_index[participant]];
+        uint256 index = participant_index[participant];
+        delete submitted_data[index];
+        delete index_participant[index];
         delete participant_index[participant];
 
         ++invalidated;
