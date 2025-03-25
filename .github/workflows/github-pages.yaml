@@ -34,8 +34,8 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
 
-      - name: Run tests
-        run: pushd zorp-contracts && forge test -vvv ; popd
+      - name: Run tests with coverage
+        run: pushd zorp-contracts && forge coverage -vvv --no-match-coverage '(script|test)' ; popd
 
       - name: Run snapshot
         run: pushd zorp-contracts && NO_COLOR=1 forge snapshot >> $GITHUB_STEP_SUMMARY
