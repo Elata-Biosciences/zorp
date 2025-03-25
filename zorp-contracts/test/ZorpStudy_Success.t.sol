@@ -6,6 +6,8 @@ import { Test } from "forge-std/Test.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
+import { WithdrawFailed } from "../src/IZorpFactory.sol";
+
 import { IZorpStudy } from "../src/IZorpStudy.sol";
 import { ZorpStudy } from "../src/ZorpStudy.sol";
 
@@ -13,7 +15,6 @@ contract ZorpStudy_Success_Read_Test is Test {
     address payable immutable ZORP_STUDY__OWNER;
     address payable immutable ZORP_STUDY__PARTICIPANT;
     string ZORP_STUDY__IPFS_CID;
-    string ZORP_STUDY__DATA;
     address ref_study;
 
     constructor() {
@@ -75,13 +76,15 @@ contract ZorpStudy_SubmitterProxy is Ownable, ReentrancyGuard {
         IZorpStudy(ref_study).submitData(ipfs_cid);
     }
 
-    function claimReward(address ref_study) external payable {
+    function claimReward(address ref_study) external payable onlyOwner {
         IZorpStudy(ref_study).claimReward();
     }
 
     function withdraw(address payable to, uint256 amount) external payable nonReentrant onlyOwner {
         (bool success, ) = to.call{value: amount}("");
-        require(success, "ZorpFactory: Failed withdraw");
+        if (!success) {
+            revert WithdrawFailed(to, amount, address(this).balance);
+        }
     }
 
     receive() external payable {}
@@ -92,14 +95,13 @@ contract ZorpStudy_Success_Write_Test is Test {
     address payable immutable ZORP_STUDY__OWNER;
     address payable immutable ZORP_STUDY__PARTICIPANT;
     string ZORP_STUDY__IPFS_CID;
-    string ZORP_STUDY__DATA;
     address ref_study;
 
     constructor() {
         ZORP_STUDY__OWNER = payable(address(this));
         ZORP_STUDY__PARTICIPANT = payable(address(this));
         ZORP_STUDY__IPFS_CID = "0xDEADBEEF";
-        ZORP_STUDY__DATA = "0xCAFEBABE";
+        ZORP_STUDY__IPFS_CID = "0xCAFEBABE";
     }
 
     function setUp() public {
@@ -112,20 +114,20 @@ contract ZorpStudy_Success_Write_Test is Test {
     function test_write__submitData() public {
         IZorpStudy(ref_study).startStudy();
 
-        IZorpStudy(ref_study).submitData(ZORP_STUDY__DATA);
+        IZorpStudy(ref_study).submitData(ZORP_STUDY__IPFS_CID);
 
         uint256 index_submitter = IZorpStudy(ref_study).participant_index(address(this));
 
         vm.assertEq(1, index_submitter, "Unexpected: `IZorpStudy(ref_study).participant_index(address(this))`");
         vm.assertEq(1, IZorpStudy(ref_study).submissions(), "Unexpected: `ZorpStudy.submissions()`");
-        vm.assertEq(ZORP_STUDY__DATA, IZorpStudy(ref_study).submitted_data(index_submitter), "Unexpected: `IZorpStudy(ref_study).submitted_data(index_submitter)`");
+        vm.assertEq(ZORP_STUDY__IPFS_CID, IZorpStudy(ref_study).submitted_data(index_submitter), "Unexpected: `IZorpStudy(ref_study).submitted_data(index_submitter)`");
         vm.assertEq(IZorpStudy(ref_study).PARTICIPANT_STATUS__SUBMITTED(), IZorpStudy(ref_study).participant_status(ZORP_STUDY__PARTICIPANT), "Unexpected: `IZorpStudy(ref_study).participant_status(ZORP_STUDY__PARTICIPANT)`");
     }
 
     function test_write__claimReward() public {
         IZorpStudy(ref_study).startStudy();
 
-        IZorpStudy(ref_study).submitData(ZORP_STUDY__DATA);
+        IZorpStudy(ref_study).submitData(ZORP_STUDY__IPFS_CID);
 
         IZorpStudy(ref_study).endStudy();
 
@@ -155,7 +157,7 @@ contract ZorpStudy_Success_Write_Test is Test {
             ZorpStudy_SubmitterProxy submiter_proxy = new ZorpStudy_SubmitterProxy(ZORP_STUDY__PARTICIPANT);
             submiter_proxies[i] = submiter_proxy;
 
-            submiter_proxy.submitData(ref_study, ZORP_STUDY__DATA);
+            submiter_proxy.submitData(ref_study, ZORP_STUDY__IPFS_CID);
 
             unchecked { ++i; }
         }
@@ -195,7 +197,7 @@ contract ZorpStudy_Success_Write_Test is Test {
             ZorpStudy_SubmitterProxy submiter_proxy = new ZorpStudy_SubmitterProxy(ZORP_STUDY__PARTICIPANT);
             submiter_proxies[i] = submiter_proxy;
 
-            submiter_proxy.submitData(ref_study, ZORP_STUDY__DATA);
+            submiter_proxy.submitData(ref_study, ZORP_STUDY__IPFS_CID);
 
             unchecked { ++i; }
         }
@@ -228,7 +230,7 @@ contract ZorpStudy_Success_Write_Test is Test {
 
     function test_write__flagInvalidSubmission() public {
         IZorpStudy(ref_study).startStudy();
-        IZorpStudy(ref_study).submitData(ZORP_STUDY__DATA);
+        IZorpStudy(ref_study).submitData(ZORP_STUDY__IPFS_CID);
 
         IZorpStudy(ref_study).flagInvalidSubmission(address(this));
 
@@ -266,7 +268,7 @@ contract ZorpStudy_Success_Write_Test is Test {
             ZorpStudy_SubmitterProxy submiter_proxy = new ZorpStudy_SubmitterProxy(ZORP_STUDY__PARTICIPANT);
             submiter_proxies[i] = submiter_proxy;
 
-            submiter_proxy.submitData(ref_study, ZORP_STUDY__DATA);
+            submiter_proxy.submitData(ref_study, ZORP_STUDY__IPFS_CID);
 
             unchecked { ++i; }
         }
@@ -294,7 +296,7 @@ contract ZorpStudy_Success_Write_Test is Test {
             ZorpStudy_SubmitterProxy submiter_proxy = new ZorpStudy_SubmitterProxy(ZORP_STUDY__PARTICIPANT);
             submiter_proxies[i] = submiter_proxy;
 
-            submiter_proxy.submitData(ref_study, ZORP_STUDY__DATA);
+            submiter_proxy.submitData(ref_study, ZORP_STUDY__IPFS_CID);
 
             unchecked { ++i; }
         }
