@@ -135,8 +135,6 @@ contract ZorpStudy is IZorpStudy_Functions, Ownable, ReentrancyGuard {
             uint256 valid_submissions = submissions - invalidated;
             if (valid_submissions > 0) {
                 participant_payout_amount = balance / valid_submissions;
-            } else {
-                participant_payout_amount = balance;
             }
 
             uint256 remainder = balance - (participant_payout_amount * valid_submissions);
