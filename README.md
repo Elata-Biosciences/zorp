@@ -1,6 +1,6 @@
-# ZORP – Zero-Knowledge On-chain Research Protocol
+# ZORP – ZORP Onchain Research Protocol
 
-ZORP is a privacy-preserving data collection and reward distribution platform built on [Semaphore](https://semaphore.appliedzkp.org/). It allows participants to submit data (e.g., EEG or survey results) pseudonymously, while enabling administrators to moderate submissions and distribute rewards in ETH or a native token.
+ZORP is a privacy-preserving data collection and reward distribution platform. It allows participants to submit data (e.g., EEG or survey results) pseudonymously, while enabling administrators to moderate submissions and distribute rewards in ETH or a native token.
 
 ## Project Overview
 
