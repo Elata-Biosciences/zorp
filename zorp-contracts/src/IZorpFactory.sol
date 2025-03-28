@@ -373,7 +373,7 @@ interface IZorpFactory_Functions {
         /// @param encryptionKey pointer to public GPG/PGP key
         /// @return Address of new `ZorpStudy` contract
         ///
-        /// @custom:throws "ZorpStudy: Invalid message value"
+        /// @custom:throws `InvalidMessageValue(uint256 value, uint256 minimum)`
         ///
         /// @dev see `./IZorpStudy.sol`
         /// @dev see `./ZorpStudy.sol` → `constructor`
@@ -398,7 +398,7 @@ interface IZorpFactory_Functions {
         /// @notice Restricted to `IZorpFactory.owner()` and may be written to **only** once
         /// @param ref Address of new `ZorpFactory` instance that may contain more features, bug fixes, etc.
         ///
-        /// @custom:throws "ZorpFactory: next factory reference already set"
+        /// @custom:throws `FactoryUpdatedAlready(address ref_current, address ref_new)`
         ///
         /// ## On-chain example
         ///
@@ -415,7 +415,7 @@ interface IZorpFactory_Functions {
         /// @param to Address that should be paid from this contract with the native currency used by Blockchain
         /// @param amount Native currency for Blockchain to transfer from this contract to recipient
         ///
-        /// @custom:throws "ZorpFactory: Failed withdraw"
+        /// @custom:throws `WithdrawFailed(address to, uint256 amount, uint256 balance)`
         ///
         /// ## On-chain example
         ///

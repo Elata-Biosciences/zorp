@@ -853,9 +853,9 @@ interface IZorpStudy_Functions {
     /* Public {{{ */
         /// @notice Store `ipfs_cid` in `ZorpStudy.submitted_data`
         ///
-        /// @custom:throw `ZorpStudy: Study not active`
-        /// @custom:throw `ZorpStudy: Invalid IPFS CID`
-        /// @custom:throw `ZorpStudy: Invalid message sender status`
+        /// @custom:throws `InvalidStudyState(uint256 current_state, uint256 required_state)`
+        /// @custom:throws `InvalidIPFSCID()`
+        /// @custom:throws `InvalidParticipantState(uint256 current_state, uint256 required_state)`
         ///
         /// ## Off-chain example with cast
         ///
@@ -916,9 +916,9 @@ interface IZorpStudy_Functions {
 
         /// @notice Pay `ZorpStudy.participant_payout_amount` to `msg.sender`
         ///
-        /// @custom:throw `ZorpStudy: Study not finished`
-        /// @custom:throw `ZorpStudy: Invalid message sender status`
-        /// @custom:throw `ZorpStudy: Failed participant payout`
+        /// @custom:throws `InvalidStudyState(uint256 current_state, uint256 required_state)`
+        /// @custom:throws `InvalidParticipantState(uint256 current_state, uint256 required_state)`
+        /// @custom:throws `ParticipantPayoutFailed(address to, uint256 amount, uint256 balance)`
         ///
         /// ## Off-chain example with cast
         ///
@@ -1056,8 +1056,8 @@ interface IZorpStudy_Functions {
     /* Owner {{{ */
         /// @notice Set `PARTICIPANT_STATUS__INVALID` for address, then delete associated storage in `participant_index` and `submitted_data`
         ///
-        /// @custom:throw `ZorpStudy: Study not active`
-        /// @custom:throw `ZorpStudy: Invalid participant status`
+        /// @custom:throws `InvalidStudyState(uint256 current_state, uint256 required_state)`
+        /// @custom:throws `InvalidParticipantState(uint256 current_state, uint256 required_state)`
         ///
         /// ## Off-chain example with cast
         ///
@@ -1237,7 +1237,7 @@ interface IZorpStudy_Functions {
 
         /// @notice Set `STUDY_STATUS__ACTIVE` in `ZorpStudy.study_status`
         ///
-        /// @custom:throw `ZorpStudy: Study was previously activated`
+        /// @custom:throws `InvalidStudyState(uint256 current_state, uint256 required_state)`
         ///
         /// ## Off-chain example with cast
         ///
@@ -1385,9 +1385,8 @@ interface IZorpStudy_Functions {
 
         /// @notice Set `STUDY_STATUS__FINISHED` in `ZorpStudy.study_status`
         ///
-        /// @custom:throw `ZorpStudy: Study not active`
-        /// @custom:throw `ZorpStudy: Failed trasfering remainder`
-        /// @custom:throw `ZorpStudy: Failed trasfering balance`
+        /// @custom:throws `InvalidStudyState(uint256 current_state, uint256 required_state)`
+        /// @custom:throws `RemainderTransferFailed(address to, uint256 amount, uint256 balance)`
         ///
         /// ## Off-chain example with cast
         ///
