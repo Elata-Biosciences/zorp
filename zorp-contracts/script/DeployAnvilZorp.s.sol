@@ -37,7 +37,7 @@ import { IZorpFactory } from "../src/IZorpFactory.sol";
 /// @custom:link https://github.com/foundry-rs/foundry/blob/54af8693b8fcc7a3f65136c1188e89661155955d/crates/cast/tests/cli/main.rs#L419
 /// @custom:link https://book.getfoundry.sh/reference/anvil/
 /// @custom:link https://github.com/foundry-rs/foundry/issues/2519
-contract DeployAnvil is Script {
+contract DeployAnvilZorp is Script {
     address payable public constant ZorpFactory_Owner = payable(address(0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266));
 
     address[] public ZorpStudy_OwnerList = [

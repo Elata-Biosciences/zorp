@@ -28,7 +28,7 @@ forge script \
 	--broadcast \
 	--rpc-url "${_test_net_url}" \
 	--private-key "${_test_private_key0}" \
-	script/DeployAnvil.s.sol:DeployAnvil;
+	script/DeployAnvilZorp.s.sol:DeployAnvilZorp;
 
 popd 1>/dev/null 2>&1;
 
