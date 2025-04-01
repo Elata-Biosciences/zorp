@@ -1,19 +1,27 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useReadContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
+import ZorpFactoryAddressInput from '@/components/contracts/ZorpFactoryAddressInput';
+import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
 export default function ZorpFactoryReadRefFactoryPrevious() {
 	const addressFactoryAnvil = config.anvil.contracts.IZorpFactory[31337].address;
 
 	const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
-	const addressFactoryId = useId();
+	const [message, setMessage] = useState<string | `0x${string}`>('...  waiting for client and/or contract connection');
 
 	const { IZorpFactory } = useContracts();
 
-	const { data: ref_factory_previous, isFetching } = useReadContract({
+	const { data: ref_factory_previous, isFetching } = useReadContract<
+		typeof IZorpFactory.abi,
+		'ref_factory_previous',
+		never[],
+		typeof config.wagmiConfig,
+		`0x${string}`
+	>({
 		abi: IZorpFactory.abi,
 		address: IZorpFactory.address,
 		functionName: 'ref_factory_previous',
@@ -27,18 +35,33 @@ export default function ZorpFactoryReadRefFactoryPrevious() {
 		},
 	});
 
+	useEffect(() => {
+		if (!!ref_factory_previous && ref_factory_previous.startsWith('0x')) {
+			if (ref_factory_previous === '0x0000000000000000000000000000000000000000') {
+				setMessage('ZorpFactory is first ever of its line!');
+			} else {
+				setMessage(`ZorpFactory previous address: ${ref_factory_previous}`);
+			}
+		}
+	}, [ ref_factory_previous ]);
+
 	return (
-		<>
-			<label htmlFor={addressFactoryId}>ZORP Factory Address:</label>
-			<input
-				id={addressFactoryId}
-				value={addressFactory}
-				onChange={(event) => {
-					setAddressFactory(event.target.value as `0x${string}`);
-				}}
+		<div className="w-full flex flex-col">
+			<h1 className="flex flex-col sm:flex-row justify-center items-center text-4xl font-bold">
+				Zorp Factory -- Latest study index
+			</h1>
+			<div className="flex justify-center mt-8">
+				<ThemeSwitch />
+			</div>
+
+			<hr />
+
+			<ZorpFactoryAddressInput
 				disabled={isFetching}
+				setState={setAddressFactory}
 			/>
-			<span>ZorpFactory previous address: {ref_factory_previous as string}</span>
-		</>
+
+			<span>{message}</span>
+		</div>
 	);
 }

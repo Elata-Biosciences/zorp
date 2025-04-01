@@ -1,8 +1,9 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useReadContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
+import ZorpFactoryAddressInput from '@/components/contracts/ZorpFactoryAddressInput';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
@@ -10,8 +11,7 @@ export default function ZorpFactoryReadVersion() {
 	const addressFactoryAnvil = config.anvil.contracts.IZorpFactory[31337].address;
 
 	const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
-
-	const addressFactoryId = useId();
+	const [message, setMessage] = useState<string>('...  waiting for client and/or contract connection');
 
 	const { IZorpFactory } = useContracts();
 
@@ -21,7 +21,13 @@ export default function ZorpFactoryReadVersion() {
 												&& addressFactory.length === addressFactoryAnvil.length
 												&& addressFactory.startsWith('0x');
 
-	const { data: version, isFetching } = useReadContract({
+	const { data: version, isFetching } = useReadContract<
+		typeof IZorpFactory.abi,
+		'VERSION',
+		never[],
+		typeof config.wagmiConfig,
+		bigint
+	>({
 		abi: IZorpFactory.abi,
 		address: IZorpFactory.address,
 		functionName: 'VERSION',
@@ -30,6 +36,16 @@ export default function ZorpFactoryReadVersion() {
 			enabled,
 		},
 	});
+
+	useEffect(() => {
+		if (!!version) {
+			if (version > 0) {
+				setMessage(`ZorpFactory version: ${version}`);
+			} else {
+				setMessage('Error reading version from ZorpFactory');
+			}
+		}
+	}, [ version ])
 
 	return (
 		<div className="w-full flex flex-col">
@@ -40,16 +56,12 @@ export default function ZorpFactoryReadVersion() {
 				<ThemeSwitch />
 			</div>
 
-			<label htmlFor={addressFactoryId}>ZORP Factory Address:</label>
-			<input
-				id={addressFactoryId}
-				value={addressFactory}
-				onChange={(event) => {
-					setAddressFactory(event.target.value as `0x${string}`);
-				}}
+			<ZorpFactoryAddressInput
 				disabled={isFetching}
+				setState={setAddressFactory}
 			/>
-			<span>ZorpFactory version: {version as string}</span>
+
+			<span>{message}</span>
 		</div>
 	);
 }

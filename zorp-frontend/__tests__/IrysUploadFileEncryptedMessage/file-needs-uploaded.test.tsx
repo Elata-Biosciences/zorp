@@ -62,8 +62,6 @@ describe('IrysUploadFileEncryptedMessage attempts to uploade new encrypted file'
 				lastModified: Date.now(),
 			},
 		);
-		/* @ts-ignore */
-		file.arrayBuffer = async () => new ArrayBuffer(file);
 
 		cid = await cidFromFile(file);
 

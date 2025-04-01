@@ -9,6 +9,7 @@ export default defineConfig({
 		/* CI/CD needs more time to cook */
 		testTimeout: 900141968,
 		setupFiles: [
+			'.vitest/setupJsDomFile.ts',
 			'.vitest/setupTextEncoding.ts',
 		],
 	},

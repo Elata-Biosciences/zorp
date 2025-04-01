@@ -1,8 +1,9 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useCallback, useId, useState } from 'react';
 import { useReadContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
+import ZorpFactoryAddressInput from '@/components/contracts/ZorpFactoryAddressInput';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
@@ -13,13 +14,18 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 	const [start, setStart] = useState<number>(1);
 	const [limit, setLimit] = useState<number>(10);
 
-	const addressFactoryId = useId();
 	const startId = useId();
 	const limitId = useId();
 
 	const { IZorpFactory } = useContracts();
 
-	const { data: studyAddresses, isFetching, refetch } = useReadContract({
+	const { data: studyAddresses, isFetching, refetch } = useReadContract<
+		typeof IZorpFactory.abi,
+		'paginateStudies',
+		[number, number],
+		typeof config.wagmiConfig,
+		Array<`0x${string}`>
+	>({
 		abi: IZorpFactory.abi,
 		address: IZorpFactory.address,
 		functionName: 'paginateStudies',
@@ -28,6 +34,49 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 			enabled: false,
 		},
 	});
+
+	const handleChangePaginateStart = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+		const value = Number.parseInt(event.target.value);
+		if (!isNaN(value)) {
+			setStart(value);
+		}
+	}, [ setStart ]);
+
+	const handleChangePaginateLimit = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+		const value = Number.parseInt(event.target.value);
+		if (!isNaN(value)) {
+			setLimit(value);
+		}
+	}, [ setLimit ]);
+
+	const handleClickPaginateRead = useCallback(async () => {
+		const enabled: boolean = !isFetching
+													&& !!IZorpFactory?.abi
+													&& !!Object.keys(IZorpFactory.abi).length
+													&& !!IZorpFactory?.address.length
+													&& addressFactory.length === addressFactoryAnvil.length
+													&& addressFactory.startsWith('0x');
+
+		if (!enabled) {
+			console.warn('Missing required input(s) ->', {
+				IZorpFactory,
+				addressFactory,
+				start,
+				limit,
+			});
+			return;
+		}
+
+		await refetch();
+	}, [
+		addressFactoryAnvil,
+		refetch,
+		isFetching,
+		IZorpFactory,
+		addressFactory,
+		start,
+		limit,
+	]);
 
 	return (
 		<div className="w-full flex flex-col">
@@ -39,13 +88,10 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 			</div>
 
 			<hr />
-			<label htmlFor={addressFactoryId}>ZORP Factory Address:</label>
-			<input
-				id={addressFactoryId}
-				value={addressFactory}
-				onChange={(event) => {
-					setAddressFactory(event.target.value as `0x${string}`);
-				}}
+
+			<ZorpFactoryAddressInput
+				disabled={isFetching}
+				setState={setAddressFactory}
 			/>
 
 			<label htmlFor={startId}>Start</label>
@@ -54,12 +100,7 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 				type="number"
 				min="1"
 				value={start}
-				onChange={(event) => {
-					const value = Number.parseInt(event.target.value);
-					if (!isNaN(value)) {
-						setStart(value);
-					}
-				}}
+				onChange={handleChangePaginateStart}
 				disabled={isFetching}
 			/>
 
@@ -69,37 +110,15 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 				type="number"
 				min="1"
 				value={limit}
-				onChange={(event) => {
-					const value = Number.parseInt(event.target.value);
-					if (!isNaN(value)) {
-						setLimit(value);
-					}
-				}}
+				onChange={handleChangePaginateLimit}
 				disabled={isFetching}
 			/>
 
 			<button
-				onClick={(event) => {
+				onClick={async (event) => {
 					event.preventDefault();
 					event.stopPropagation();
-					const enabled: boolean = !isFetching
-																&& !!IZorpFactory?.abi
-																&& !!Object.keys(IZorpFactory.abi).length
-																&& !!IZorpFactory?.address.length
-																&& addressFactory.length === addressFactoryAnvil.length
-																&& addressFactory.startsWith('0x');
-
-					if (!enabled) {
-						console.warn('Missing required input(s) ->', {
-							IZorpFactory,
-							addressFactory,
-							start,
-							limit,
-						});
-						return;
-					}
-
-					refetch();
+					await handleClickPaginateRead()
 				}}
 				disabled={isFetching}
 			>Get Study Addresses</button>
@@ -115,4 +134,3 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 		</div>
 	);
 }
-

@@ -1,8 +1,9 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useReadContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
+import ZorpStudyAddressInput from '@/components/contracts/ZorpStudyAddressInput';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
@@ -10,8 +11,6 @@ export default function ZorpStudyReadEncryptionKeyCid() {
 	const addressStudyAnvil = config.anvil.contracts.IZorpStudy[31337].address;
 
 	const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
-
-	const addressStudyId = useId();
 
 	const { IZorpStudy } = useContracts();
 
@@ -21,7 +20,13 @@ export default function ZorpStudyReadEncryptionKeyCid() {
 								&& !!Object.keys(IZorpStudy.abi).length
 								&& !!IZorpStudy?.address.length;
 
-	const { data: encryption_key_cid, isFetching, refetch } = useReadContract({
+	const { data: encryption_key_cid, isFetching, refetch } = useReadContract<
+		typeof IZorpStudy.abi,
+		'encryption_key',
+		never[],
+		typeof config.wagmiConfig,
+		string
+	>({
 		abi: IZorpStudy.abi,
 		address: IZorpStudy.address,
 		functionName: 'encryption_key',
@@ -30,6 +35,17 @@ export default function ZorpStudyReadEncryptionKeyCid() {
 			enabled: false,
 		},
 	});
+
+	const handleOnClick = useCallback(async () => {
+		if (!enabled) {
+			return;
+		}
+
+		await refetch();
+	}, [
+		enabled,
+		refetch,
+	]);
 
 	return (
 		<div className="w-full flex flex-col">
@@ -40,29 +56,16 @@ export default function ZorpStudyReadEncryptionKeyCid() {
 				<ThemeSwitch />
 			</div>
 
-			<label htmlFor={addressStudyId}>ZORP Study Address:</label>
-			<input
-				id={addressStudyId}
-				value={addressStudy}
-				onChange={(event) => {
-					setAddressStudy(event.target.value as `0x${string}`);
-					console.warn('ZorpStudyReadEncryptionKeyCid input ->', {  enabled, addressStudy });
-				}}
+			<ZorpStudyAddressInput
 				disabled={isFetching}
+				setState={setAddressStudy}
 			/>
 
 			<button
-				onClick={(event) => {
+				onClick={async (event) => {
 					event.stopPropagation();
 					event.preventDefault();
-					console.warn('ZorpStudyReadEncryptionKeyCid button ->', { enabled, addressStudy });
-					if (!enabled) {
-						console.warn('ZorpStudyReadEncryptionKeyCid button ->', { enabled });
-						return;
-					}
-					console.warn('ZorpStudyReadEncryptionKeyCid button ->', { event });
-
-					refetch();
+					await handleOnClick()
 				}}
 			>Request GPG key CID</button>
 

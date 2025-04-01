@@ -5,7 +5,7 @@ import type { BigNumber } from 'bignumber.js';
 import type { Key } from 'openpgp';
 import { useAccount, useWriteContract, useTransactionReceipt } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
-import InputFileToGpgEncryptionKey from '@/components/features/InputFileToGpgEncryptionKey';
+import GpgEncryptionKeyFromInputFile from '@/components/features/GpgEncryptionKeyFromInputFile';
 import IrysBalanceGet from '@/components/features/IrysBalanceGet';
 import IrysUploadFileGpgKey from '@/components/features/IrysUploadFileGpgKey';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
@@ -23,7 +23,7 @@ export default function ZorpFactoryWriteCreateStudy() {
 	const [irysBalance, setIrysBalance] = useState<null | bigint | number | BigNumber>(null);
 	const [irysUploadData, setIrysUploadData] = useState<null | { receipt: unknown; cid: string; }>(null);
 	const [message, setMessage] = useState<string>('Info: connected wallet/provider required');
-	const [ammount, setAmmount] = useState<null | bigint>(null);
+	const [amount, setAmount] = useState<null | bigint>(null);
 
 	const { writeContractAsync } = useWriteContract({
 		config: config.wagmiConfig,
@@ -32,14 +32,14 @@ export default function ZorpFactoryWriteCreateStudy() {
 	const { address, isConnected } = useAccount();
 	const { IZorpFactory } = useContracts();
 
-	const handleZorpFactoryCreateStudyAmmount = useCallback((ammount: bigint) => {
-		if (!ammount || ammount < 1) {
-			setMessage('Waiting for positive study deposit ammount');
-			setAmmount(null);
+	const handleZorpFactoryCreateStudyAmount = useCallback((amount: bigint) => {
+		if (!amount || amount < 1) {
+			setMessage('Waiting for positive study deposit amount');
+			setAmount(null);
 			return;
 		}
 
-		setAmmount(ammount);
+		setAmount(amount);
 	}, []);
 
 	const handleZorpFactoryWriteCreateStudy = useCallback(() => {
@@ -57,9 +57,9 @@ export default function ZorpFactoryWriteCreateStudy() {
 			return;
 		}
 
-		if (!ammount || ammount < 1) {
-			setMessage('Waiting for positive study deposit ammount');
-			setAmmount(null);
+		if (!amount || amount < 1) {
+			setMessage('Waiting for positive study deposit amount');
+			setAmount(null);
 			return;
 		}
 
@@ -92,14 +92,14 @@ export default function ZorpFactoryWriteCreateStudy() {
 				address.toString(),
 				irysUploadData.cid.toString(),
 			],
-			value: ammount,
+			value: amount,
 		}).then((hash) => {
 			setHash(hash);
 			setMessage('Transaction sent!');
 		});
 	}, [
 		IZorpFactory,
-		ammount,
+		amount,
 		address,
 		irysUploadData,
 		isConnected,
@@ -110,7 +110,7 @@ export default function ZorpFactoryWriteCreateStudy() {
 		query: {
 			enabled: !!hash
 						&& !!IZorpFactory
-						&& !!ammount
+						&& !!amount
 						&& !!address
 						&& !!irysUploadData
 						&& !!isConnected,
@@ -129,7 +129,7 @@ export default function ZorpFactoryWriteCreateStudy() {
 			</div>
 
 			<hr />
-			<InputFileToGpgEncryptionKey
+			<GpgEncryptionKeyFromInputFile
 				labelText="Public GPG key"
 				setState={setGpgKey}
 			/>
@@ -155,7 +155,7 @@ export default function ZorpFactoryWriteCreateStudy() {
 				onChange={(event) => {
 					event.stopPropagation();
 					event.preventDefault();
-					handleZorpFactoryCreateStudyAmmount(BigInt(event.target.value));
+					handleZorpFactoryCreateStudyAmount(BigInt(event.target.value));
 				}}
 			/>
 

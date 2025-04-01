@@ -1,8 +1,9 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useCallback, useId, useState } from 'react';
 import { useReadContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
+import ZorpFactoryAddressInput from '@/components/contracts/ZorpFactoryAddressInput';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
@@ -12,7 +13,6 @@ export default function ZorpFactoryReadStudyAddress() {
 	const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
 	const [studyIndex, setStudyIndex] = useState<number>(1);
 
-	const addressFactoryId = useId();
 	const addressFactoryStudyIndexId = useId();
 
 	const { IZorpFactory } = useContracts();
@@ -25,7 +25,13 @@ export default function ZorpFactoryReadStudyAddress() {
 												&& !Number.isNaN(studyIndex)
 												&& studyIndex > 0
 
-	const { data: studyAddress, isFetching } = useReadContract({
+	const { data: studyAddress, isFetching } = useReadContract<
+		typeof IZorpFactory.abi,
+		'studies',
+		[number],
+		typeof config.wagmiConfig,
+		`0x${string}`
+	>({
 		abi: IZorpFactory.abi,
 		address: IZorpFactory.address,
 		functionName: 'studies',
@@ -34,6 +40,13 @@ export default function ZorpFactoryReadStudyAddress() {
 			enabled,
 		},
 	});
+
+	const handleChangeStudyIndex = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+		const value = Number.parseInt(event.target.value);
+		if (!isNaN(value)) {
+			setStudyIndex(value);
+		}
+	}, [ setStudyIndex ]);
 
 	return (
 		<div className="w-full flex flex-col">
@@ -44,28 +57,16 @@ export default function ZorpFactoryReadStudyAddress() {
 				<ThemeSwitch />
 			</div>
 
-			<label htmlFor={addressFactoryId}>ZORP Factory Address:</label>
-			<input
-				id={addressFactoryId}
-				value={addressFactory}
-				onChange={(event) => {
-					setAddressFactory(event.target.value as `0x${string}`);
-				}}
+			<ZorpFactoryAddressInput
 				disabled={isFetching}
+				setState={setAddressFactory}
 			/>
 
 			<label htmlFor={addressFactoryStudyIndexId}>ZORP Study index:</label>
 			<input
 				id={addressFactoryStudyIndexId}
 				value={studyIndex}
-				onChange={(event) => {
-					const value = Number.parseInt(event.target.value);
-					if (Number.isNaN(value) || value < 1) {
-						console.error('Input value was not an intager greater than 1');
-						return;
-					}
-					setStudyIndex(value);
-				}}
+				onChange={handleChangeStudyIndex}
 				disabled={isFetching}
 			/>
 

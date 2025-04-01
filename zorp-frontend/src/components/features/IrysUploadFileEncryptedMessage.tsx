@@ -69,8 +69,6 @@ export default function IrysUploadFileEncryptedMessage({
 			return;
 		}
 
-		/* @TODO: attempt to download before checking if upload is needed/possible */
-
 		try {
 			setMessage('Info: attempting to generate CID from encrypted message as file');
 			const cid = await cidFromFile(file);
@@ -122,7 +120,7 @@ export default function IrysUploadFileEncryptedMessage({
 				message += `Novel error detected -> ${error}`;
 			}
 
-			console.error('IrysUploadFileEncryptedMessage ...', { message, error });
+			console.error('IrysUploadFileEncryptedMessage ->', { message, error });
 			setMessage(message);
 			setState(null);
 			return error;

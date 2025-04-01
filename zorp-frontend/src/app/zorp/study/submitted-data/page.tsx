@@ -1,8 +1,9 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useCallback, useId, useState } from 'react';
 import { useReadContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
+import ZorpStudyAddressInput from '@/components/contracts/ZorpStudyAddressInput';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
@@ -12,12 +13,17 @@ export default function ZorpStudyReadSubmittedData() {
 	const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
 	const [index, setIndex] = useState<number>(0);
 
-	const addressStudyId = useId();
 	const indexId = useId();
 
 	const { IZorpStudy } = useContracts();
 
-	const { data: submitted_data, isFetching } = useReadContract({
+	const { data: submitted_data, isFetching } = useReadContract<
+		typeof IZorpStudy.abi,
+		'submitted_data',
+		[bigint | number],
+		typeof config.wagmiConfig,
+		string
+	>({
 		abi: IZorpStudy.abi,
 		address: IZorpStudy.address,
 		functionName: 'submitted_data',
@@ -33,6 +39,13 @@ export default function ZorpStudyReadSubmittedData() {
 		},
 	});
 
+	const handleChangeDataIndex = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+		const value = Number.parseInt(event.target.value);
+		if (!isNaN(value)) {
+			setIndex(value);
+		}
+	}, [ setIndex ]);
+
 	return (
 		<div className="w-full flex flex-col">
 			<h1 className="flex flex-col sm:flex-row justify-center items-center text-4xl font-bold">
@@ -42,26 +55,16 @@ export default function ZorpStudyReadSubmittedData() {
 				<ThemeSwitch />
 			</div>
 
-			<label htmlFor={addressStudyId}>ZORP Study Address:</label>
-			<input
-				id={addressStudyId}
-				value={addressStudy}
-				onChange={(event) => {
-					setAddressStudy(event.target.value as `0x${string}`);
-				}}
+			<ZorpStudyAddressInput
 				disabled={isFetching}
+				setState={setAddressStudy}
 			/>
 
 			<label htmlFor={indexId}>ZORP data index:</label>
 			<input
 				id={indexId}
 				value={index}
-				onChange={(event) => {
-					const value = Number.parseInt(event.target.value);
-					if (!isNaN(value)) {
-						setIndex(value);
-					}
-				}}
+				onChange={handleChangeDataIndex}
 				disabled={isFetching}
 			/>
 

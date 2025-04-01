@@ -47,8 +47,6 @@ describe('IrysFetchFileGpgKey', () => {
 				lastModified: Date.now(),
 			},
 		);
-		/* @ts-ignore */
-		file.arrayBuffer = async () => new ArrayBuffer(file);
 
 		gpgKey = { file, key };
 

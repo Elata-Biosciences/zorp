@@ -56,6 +56,9 @@ type ProvidersProps = {
   children: JSX.Element | JSX.Element[] | string | null;
 };
 
+/**
+ * @TODO maybe find a way to allow view/read even when `useAccount` isn't connected
+ */
 export function ContractsProvider({ children }: ProvidersProps) {
 	const { chain, chainId } = useAccount();
 	const [contracts, setContracts] = useState(contractsAnvil);

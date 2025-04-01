@@ -4,9 +4,9 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import * as openpgp from 'openpgp';
 import type { Key, Subkey } from 'openpgp';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import InputFileToGpgEncryptionKey from '@/components/features/InputFileToGpgEncryptionKey';
+import GpgEncryptionKeyFromInputFile from '@/components/features/GpgEncryptionKeyFromInputFile';
 
-describe('InputFileToGpgEncryptionKey', () => {
+describe('GpgEncryptionKeyFromInputFile', () => {
 	const queryClient = new QueryClient();
 
 	afterEach(() => {
@@ -28,8 +28,8 @@ describe('InputFileToGpgEncryptionKey', () => {
 
 		render(
 			<QueryClientProvider client={queryClient}>
-				<InputFileToGpgEncryptionKey
-					labelText={'Mocked -- InputFileToGpgEncryptionKey'}
+				<GpgEncryptionKeyFromInputFile
+					labelText={'Mocked -- GpgEncryptionKeyFromInputFile'}
 					setState={async (state) => {
 						expect(state?.file).toBeDefined();
 						expect(state?.key).toBeDefined();

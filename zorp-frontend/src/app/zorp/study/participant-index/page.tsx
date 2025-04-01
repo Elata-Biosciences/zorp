@@ -1,8 +1,9 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useCallback, useEffect, useId, useState } from 'react';
 import { useReadContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
+import ZorpStudyAddressInput from '@/components/contracts/ZorpStudyAddressInput';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
@@ -11,13 +12,19 @@ export default function ZorpStudyReadParticipantIndex() {
 
 	const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
 	const [addressParticipant, setAddressParticipant] = useState<`0x${string}`>('0x70997970C51812dc3A010C7d01b50e0d17dc79C8');
+	const [message, setMessage] = useState<string>('Waiting for client connection or contract response');
 
-	const addressStudyId = useId();
 	const addressParticipantId = useId();
 
 	const { IZorpStudy } = useContracts();
 
-	const { data: participant_index, isFetching } = useReadContract({
+	const { data: participant_index, isFetching } = useReadContract<
+		typeof IZorpStudy.abi,
+		'participant_index',
+		[`0x${string}`],
+		typeof config.wagmiConfig,
+		bigint | number
+	>({
 		abi: IZorpStudy.abi,
 		address: IZorpStudy.address,
 		functionName: 'participant_index',
@@ -33,6 +40,20 @@ export default function ZorpStudyReadParticipantIndex() {
 		},
 	});
 
+	useEffect(() => {
+		if (!!participant_index?.toString().length) {
+			if (participant_index == BigInt(0) || participant_index == 0) {
+				setMessage('ZorpStudy participation not detected');
+			} else {
+				setMessage(`ZorpStudy participant index: ${participant_index}`);
+			}
+		}
+	}, [ participant_index ]);
+
+	const handleChangeParticipantAddress = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+		setAddressParticipant(event.target.value as `0x${string}`);
+	}, [ setAddressParticipant ]);
+
 	return (
 		<div className="w-full flex flex-col">
 			<h1 className="flex flex-col sm:flex-row justify-center items-center text-4xl font-bold">
@@ -42,27 +63,20 @@ export default function ZorpStudyReadParticipantIndex() {
 				<ThemeSwitch />
 			</div>
 
-			<label htmlFor={addressStudyId}>ZORP Study Address:</label>
-			<input
-				id={addressStudyId}
-				value={addressStudy}
-				onChange={(event) => {
-					setAddressStudy(event.target.value as `0x${string}`);
-				}}
+			<ZorpStudyAddressInput
 				disabled={isFetching}
+				setState={setAddressStudy}
 			/>
 
 			<label htmlFor={addressParticipantId}>ZORP Participant Address:</label>
 			<input
 				id={addressParticipantId}
 				value={addressParticipant}
-				onChange={(event) => {
-					setAddressParticipant(event.target.value as `0x${string}`);
-				}}
+				onChange={handleChangeParticipantAddress}
 				disabled={isFetching}
 			/>
 
-			<span>ZorpStudy participant index: {participant_index as string}</span>
+			<span>{message}</span>
 		</div>
 	);
 }

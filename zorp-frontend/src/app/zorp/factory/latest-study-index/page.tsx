@@ -1,8 +1,9 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useState } from 'react';
 import { useReadContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
+import ZorpFactoryAddressInput from '@/components/contracts/ZorpFactoryAddressInput';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
@@ -10,8 +11,6 @@ export default function ZorpFactoryReadLatestStudyIndex() {
 	const addressFactoryAnvil = config.anvil.contracts.IZorpFactory[31337].address;
 
 	const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
-
-	const addressFactoryId = useId();
 
 	const { IZorpFactory } = useContracts();
 
@@ -21,7 +20,13 @@ export default function ZorpFactoryReadLatestStudyIndex() {
 												&& addressFactory.length === addressFactoryAnvil.length
 												&& addressFactory.startsWith('0x');
 
-	const { data: latest_study_index, isFetching } = useReadContract({
+	const { data: latest_study_index, isFetching } = useReadContract<
+		typeof IZorpFactory.abi,
+		'latest_study_index',
+		never[],
+		typeof config.wagmiConfig,
+		bigint
+	>({
 		abi: IZorpFactory.abi,
 		address: IZorpFactory.address,
 		functionName: 'latest_study_index',
@@ -41,18 +46,17 @@ export default function ZorpFactoryReadLatestStudyIndex() {
 			</div>
 
 			<hr />
-			<section>
-				<label htmlFor={addressFactoryId}>ZORP Factory Address:</label>
-				<input
-					id={addressFactoryId}
-					value={addressFactory}
-					onChange={(event) => {
-						setAddressFactory(event.target.value as `0x${string}`);
-					}}
-					disabled={isFetching}
-				/>
-			</section>
-			<span>ZorpFactory latest study index: {latest_study_index as string}</span>
+
+			<ZorpFactoryAddressInput
+				disabled={isFetching}
+				setState={setAddressFactory}
+			/>
+
+			<span>ZorpFactory latest study index: {
+				!!latest_study_index
+					? latest_study_index.toString()
+					: '...  waiting for client and/or contract connection'
+			}</span>
 		</div>
 	);
 }

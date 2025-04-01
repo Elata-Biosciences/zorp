@@ -1,8 +1,9 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useCallback, useId, useState } from 'react';
 import { useAccount, useWriteContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
+import ZorpFactoryAddressInput from '@/components/contracts/ZorpFactoryAddressInput';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
@@ -11,19 +12,97 @@ export default function ZorpFactoryWriteWithdraw() {
 
 	const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
 	const [addressTo, setAddressTo] = useState<`0x${string}` | undefined>(undefined);
-	const [ammount, setAmmount] = useState<number>(0);
+	const [amount, setAmount] = useState<number>(0);
 	const [isFetching, setIsFetching] = useState<boolean>(false);
 	const [receipt, setReceipt] = useState<string>('... pending');
 
-	const addressFactoryId = useId();
 	const addressToId = useId();
-	const ammountId = useId();
+	const amountId = useId();
 
 	const { isConnected } = useAccount();
 
 	const { writeContractAsync } = useWriteContract();
 
 	const { IZorpFactory } = useContracts();
+
+	const handleChangeAddressTo = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+		setAddressTo(event.target.value as `0x${string}`);
+	}, [ setAddressTo ]);
+
+	const handleChangeAmount = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+		const value = Number.parseInt(event.target.value);
+		if (Number.isNaN(value) || value < 1) {
+			console.error('Input value was not an intager greater than 1');
+			return;
+		}
+		setAmount(value);
+	}, [ setAmount ]);
+
+	const handleZorpFactoryWriteWithdraw = useCallback(async () => {
+		const enabled: boolean = isConnected
+													&& !isFetching
+													&& !!IZorpFactory?.abi
+													&& !!Object.keys(IZorpFactory.abi).length
+													&& !!IZorpFactory?.address.length
+													&& addressFactory.length === addressFactoryAnvil.length
+													&& addressFactory.startsWith('0x')
+													&& !!addressTo
+													&& addressTo.length === addressFactoryAnvil.length
+													&& addressTo.startsWith('0x')
+													&& !Number.isNaN(amount)
+													&& amount > 0;
+
+		if (!enabled) {
+			console.warn('Missing required state', { addressFactory, addressTo, amount });
+			return;
+		}
+
+		setIsFetching(true);
+
+		try {
+			const response = await writeContractAsync({
+				abi: IZorpFactory.abi,
+				address: IZorpFactory.address,
+				functionName: 'withdraw',
+				args: [addressTo, amount],
+			});
+			if (!!response) {
+				setReceipt(response);
+			} else {
+				setReceipt(`...  error with receipt response -> ${response}`);
+			}
+		} catch (error) {
+			let message = 'Error: ';
+			if (!!error && typeof error == 'object') {
+				if ('message' in error) {
+					message += error.message;
+				} else if ('toString' in error) {
+					message += error.toString();
+				} else {
+					message += `Novel error detected -> ${error}`;
+				}
+			} else {
+				message += `Novel error detected -> ${error}`;
+			}
+
+			console.error('ZorpFactoryWriteWithdraw ...', { message, error });
+			setReceipt(message);
+			return error;
+		} finally {
+			setIsFetching(false);
+		}
+	}, [
+		IZorpFactory,
+		addressFactory,
+		addressFactoryAnvil,
+		addressTo,
+		amount,
+		isConnected,
+		isFetching,
+		setIsFetching,
+		setReceipt,
+		writeContractAsync,
+	]);
 
 	return (
 		<div className="w-full flex flex-col">
@@ -34,81 +113,32 @@ export default function ZorpFactoryWriteWithdraw() {
 				<ThemeSwitch />
 			</div>
 
-			<label htmlFor={addressFactoryId}>ZORP Factory Address:</label>
-			<input
-				id={addressFactoryId}
-				value={addressFactory}
-				onChange={(event) => {
-					setAddressFactory(event.target.value as `0x${string}`);
-				}}
+			<ZorpFactoryAddressInput
 				disabled={isFetching}
+				setState={setAddressFactory}
 			/>
 
 			<label htmlFor={addressToId}>ZORP Factory withdraw address:</label>
 			<input
 				id={addressToId}
 				value={addressTo as `0x${string}`}
-				onChange={(event) => {
-					setAddressTo(event.target.value as `0x${string}`);
-				}}
+				onChange={handleChangeAddressTo}
 				disabled={isFetching}
 			/>
 
-			<label htmlFor={ammountId}>ZORP Factory withdraw amount:</label>
+			<label htmlFor={amountId}>ZORP Factory withdraw amount:</label>
 			<input
-				id={ammountId}
-				value={ammount}
-				onChange={(event) => {
-					const value = Number.parseInt(event.target.value);
-					if (Number.isNaN(value) || value < 1) {
-						console.error('Input value was not an intager greater than 1');
-						return;
-					}
-					setAmmount(value);
-				}}
+				id={amountId}
+				value={amount}
+				onChange={handleChangeAmount}
 				disabled={isFetching}
 			/>
 
 			<button
-				onClick={(event) => {
+				onClick={async (event) => {
 					event.preventDefault();
 					event.stopPropagation();
-
-					const enabled: boolean = isConnected
-																&& !!IZorpFactory?.abi
-																&& !!Object.keys(IZorpFactory.abi).length
-																&& !!IZorpFactory?.address.length
-																&& addressFactory.length === addressFactoryAnvil.length
-																&& addressFactory.startsWith('0x')
-																&& !!addressTo
-																&& addressTo.length === addressFactoryAnvil.length
-																&& addressTo.startsWith('0x')
-																&& !Number.isNaN(ammount)
-																&& ammount > 0;
-
-					if (!enabled) {
-						console.warn('Missing required state', { addressFactory, addressTo, ammount });
-						return;
-					}
-
-					setIsFetching(true);
-					writeContractAsync({
-						abi: IZorpFactory.abi,
-						address: IZorpFactory.address,
-						functionName: 'withdraw',
-						args: [addressTo, ammount],
-					}).then((response) => {
-						if (!!response) {
-							setReceipt(response);
-						} else {
-							setReceipt(`...  error with receipt response -> ${response}`);
-						}
-					}).catch((error) => {
-						console.error(error);
-						setReceipt(`...  error with writeContractAsync error -> ${error}`);
-					}).finally(() => {
-						setIsFetching(false);
-					});
+					await handleZorpFactoryWriteWithdraw();
 				}}
 			>Withdraw</button>
 

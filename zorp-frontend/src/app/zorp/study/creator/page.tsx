@@ -1,8 +1,9 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useState } from 'react';
 import { useReadContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
+import ZorpStudyAddressInput from '@/components/contracts/ZorpStudyAddressInput';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
@@ -10,11 +11,15 @@ export default function ZorpStudyReadCreator() {
 	const addressStudyAnvil = config.anvil.contracts.IZorpStudy[31337].address;
 	const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
 
-	const addressStudyId = useId();
-
 	const { IZorpStudy } = useContracts();
 
-	const { data: creator, isFetching } = useReadContract({
+	const { data: creator, isFetching } = useReadContract<
+		typeof IZorpStudy.abi,
+		'creator',
+		never[],
+		typeof config.wagmiConfig,
+		`0x${string}`
+	>({
 		abi: IZorpStudy.abi,
 		address: IZorpStudy.address,
 		functionName: 'creator',
@@ -37,14 +42,9 @@ export default function ZorpStudyReadCreator() {
 				<ThemeSwitch />
 			</div>
 
-			<label htmlFor={addressStudyId}>ZORP Study Address:</label>
-			<input
-				id={addressStudyId}
-				value={addressStudy}
-				onChange={(event) => {
-					setAddressStudy(event.target.value as `0x${string}`);
-				}}
+			<ZorpStudyAddressInput
 				disabled={isFetching}
+				setState={setAddressStudy}
 			/>
 
 			<span>ZorpStudy creator address: {creator as `0x${string}`}</span>

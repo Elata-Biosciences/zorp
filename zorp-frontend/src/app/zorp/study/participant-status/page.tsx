@@ -1,8 +1,9 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useCallback, useEffect, useId, useState } from 'react';
 import { useReadContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
+import ZorpStudyAddressInput from '@/components/contracts/ZorpStudyAddressInput';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
@@ -11,13 +12,19 @@ export default function ZorpStudyReadParticipantStatus() {
 
 	const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
 	const [addressParticipant, setAddressParticipant] = useState<`0x${string}`>('0x70997970C51812dc3A010C7d01b50e0d17dc79C8');
+	const [message, setMessage] = useState<string>('Waiting for client wallet connection and/or contract response');
 
-	const addressStudyId = useId();
 	const addressParticipantId = useId();
 
 	const { IZorpStudy } = useContracts();
 
-	const { data: participant_status, isFetching } = useReadContract({
+	const { data: participant_status, isFetching } = useReadContract<
+		typeof IZorpStudy.abi,
+		'participant_status',
+		[`0x${string}`],
+		typeof config.wagmiConfig,
+		bigint | 0 | 1 | 2 | 3
+	>({
 		abi: IZorpStudy.abi,
 		address: IZorpStudy.address,
 		functionName: 'participant_status',
@@ -33,6 +40,29 @@ export default function ZorpStudyReadParticipantStatus() {
 		},
 	});
 
+	useEffect(() => {
+		if (!!participant_status?.toString().length) {
+			let messageText = 'ZorpStudy participant status: ';
+			if (participant_status == 0) {
+				messageText += 'NA';
+			} else if (participant_status == 1) {
+				messageText += 'Submitted';
+			} else if (participant_status == 2) {
+				messageText += 'Paid';
+			} else if (participant_status == 3) {
+				messageText += 'Invalid';
+			} else {
+				messageText += 'Error unrecognized state';
+			}
+			setMessage(messageText)
+		}
+	}, [ participant_status ])
+
+	const handleChangeParticipantAddress = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+		setAddressParticipant(event.target.value as `0x${string}`);
+	}, [ setAddressParticipant ]);
+
+
 	return (
 		<div className="w-full flex flex-col">
 			<h1 className="flex flex-col sm:flex-row justify-center items-center text-4xl font-bold">
@@ -42,27 +72,20 @@ export default function ZorpStudyReadParticipantStatus() {
 				<ThemeSwitch />
 			</div>
 
-			<label htmlFor={addressStudyId}>ZORP Study Address:</label>
-			<input
-				id={addressStudyId}
-				value={addressStudy}
-				onChange={(event) => {
-					setAddressStudy(event.target.value as `0x${string}`);
-				}}
+			<ZorpStudyAddressInput
 				disabled={isFetching}
+				setState={setAddressStudy}
 			/>
 
 			<label htmlFor={addressParticipantId}>ZORP Participant Address:</label>
 			<input
 				id={addressParticipantId}
 				value={addressParticipant}
-				onChange={(event) => {
-					setAddressParticipant(event.target.value as `0x${string}`);
-				}}
+				onChange={handleChangeParticipantAddress}
 				disabled={isFetching}
 			/>
 
-			<span>ZorpStudy participant status: {participant_status as string}</span>
+			<span>{message}</span>
 		</div>
 	);
 }
