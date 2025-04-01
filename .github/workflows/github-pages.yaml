@@ -1,7 +1,7 @@
 on:
   push:
-    branches:
-      - main
+    # branches:
+    #   - main
     # paths:
     #   - zorp-contracts/src/**/*
     #   - zorp-contracts/test/**/*
@@ -78,13 +78,6 @@ jobs:
           cache: 'npm'
           node-version: 23.x
 
-      ##
-      # Note: I don't like having to reinstall this in a separate `jobs` to
-      # satisfy an NPM dev-dependency, so the `zorp-frontend/next.config.js`
-      # may need more edits to remove this funkiness
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-
       - name: Install dependencies
         run: pushd zorp-frontend && npm install ; popd
 
@@ -108,6 +101,9 @@ jobs:
           PAGES_BASE_PATH: ${{ steps.configure_pages.outputs.base_path }}
         run: pushd zorp-frontend && npm run build ; popd
 
+      - name: Test frontend
+        run: pushd zorp-frontend && npm test ; popd
+
       ##
       # @see https://nextjs.org/docs/app/building-your-application/deploying/static-exports
       - name: Upload frontend stuff
@@ -119,6 +115,7 @@ jobs:
       ##
       # @see https://nextjs.org/docs/pages/building-your-application/deploying/ci-build-caching#github-actions
       - name: Cache
+        if: github.ref_name == 'main'
         uses: actions/cache@v4.2.2
         id: cache-frontend-next
         with:
@@ -143,6 +140,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     runs-on: ubuntu-latest
+    if: github.ref_name == 'main'
 
     steps:
       - name: Deploy GitHub Pages site

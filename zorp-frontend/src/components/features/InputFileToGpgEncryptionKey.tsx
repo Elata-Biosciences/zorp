@@ -2,11 +2,17 @@
 
 import { useCallback, useState } from 'react';
 import type { ChangeEvent } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import * as openpgp from 'openpgp';
 import type { Key } from 'openpgp';
+import promiseFromFileReader from '@/lib/utils/promiseFromFileReader';
 
 /**
  * @see https://github.com/openpgpjs/openpgpjs?tab=readme-ov-file#browser-webpack
+ *
+ * @warning `Key` is _really_ of type `Subkey` **but** OpenPGP JS has kinda
+ * funky `Key | Subkey` hint that MicroSoft™ TypeScript® doesn't take kindly to
+ * attached on `await openpgp.readKey().then((key) => key.getEncryptionKey())`
  */
 export default function InputFileToGpgEncryptionKey({
 	className = '',
@@ -21,40 +27,27 @@ export default function InputFileToGpgEncryptionKey({
 	}) => void;
 }) {
 	const [message, setMessage] = useState<string>('Info: GPG public encryption key required');
+	const [file, setFile] = useState<null | File>(null);
 
-	const handleOnChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
-		event.stopPropagation();
-		event.preventDefault();
-		console.warn('InputFileToGpgEncryptionKey', {event});
-
-		if (!event.target.files?.length) {
-			setMessage('Warn: No GPG public encrypt key selected');
-			setState(null);
-			return;
-		}
-
-		const file = event.target.files.item(0);
-		if (!file) {
-			setMessage('Warn: No GPG public encrypt key selected');
-			setState(null);
-			return;
-		}
-
-		const reader = new FileReader();
-
-		reader.onload = async (event) => {
-			if (!reader.result?.toString().length) {
-				const message = 'Error: problem detected while reading file';
-				console.error('reader.onload', {message, event});
+	useQuery({
+		enabled: !!setState && !!file,
+		queryKey: ['Participant_GPG_Key'],
+		queryFn: async () => {
+			if (!file) {
+				const message = 'Warn: need a public GPG key as input file';
 				setMessage(message);
 				return;
 			}
 
 			try {
-				setMessage('Info: attempting to parse file as gpg key');
-				const readKeys = await openpgp.readKey({ armoredKey: reader.result.toString() });
+				const { result: armoredKey } = await promiseFromFileReader({
+					file: file,
+					readerMethod: ({ reader, file, encoding }) => {
+						reader.readAsText(file, encoding);
+					},
+				}) as { result: string };
 
-				setMessage('Info: attempting to recover GPG encryption key');
+				const readKeys = await openpgp.readKey({ armoredKey });
 				const encryption_key = await readKeys.getEncryptionKey();
 
 				if (encryption_key) {
@@ -64,6 +57,8 @@ export default function InputFileToGpgEncryptionKey({
 				} else {
 					setState(null);
 				}
+
+				return encryption_key;
 			} catch (error: unknown) {
 				let message = 'Error: ';
 				if (!!error && typeof error == 'object') {
@@ -77,27 +72,34 @@ export default function InputFileToGpgEncryptionKey({
 				} else {
 					message += `Novel error detected -> ${error}`;
 				}
+
+				console.error('InputFileToEncryptedMessage', {message, error});
 				setMessage(message);
 				setState(null);
+
+				return error;
 			}
-		};
+		},
+	});
 
-		reader.onerror = () => {
-			const message = 'Error: reading file failed';
-			console.error(message);
-			setMessage(message)
-			setState(null);
+	const onChangeHandler = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+		event.stopPropagation();
+		event.preventDefault();
+		if (!!event.target.files?.length) {
+			setFile(event.target.files[0]);
+			// TODO: update test(s) to allow for _proper_ usage
+			// setFile(event.target.files.item(0));
+		} else {
+			setFile(null);
 		}
-
-		reader.readAsText(file);
-	}, [ setState ]);
+	}, [ setFile ]);
 
 	return (
 		<>
 			<label className={`file_upload file_upload__label file_upload__label__gpg_key ${className}`}>{labelText}</label>
 			<input className={`file_upload file_upload__input file_upload__input__gpg_key ${className}`}
 				type="file"
-				onChange={handleOnChange}
+				onChange={onChangeHandler}
 			/>
 			<span className={`file_upload file_upload__span file_upload__span__gpg_key ${className}`}>{message}</span>
 		</>

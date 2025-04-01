@@ -1,14 +1,16 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import { WebIrys } from '@irys/sdk';
 import type { BigNumber } from 'bignumber.js';
 import { useAccount } from 'wagmi';
-import { webIrysOpts } from '@/lib/constants/irysConfig';
+import { useIrysWebUploaderBuilderBaseEth } from '@/hooks/useIrys';
 
 /**
- * @see https://github.com/Irys-xyz/provenance-toolkit/blob/master/app/utils/getIrys.ts#L107
- * @see https://github.com/Irys-xyz/provenance-toolkit/blob/master/app/utils/fundAndUpload.ts#L33
+ * @see {@link https://github.com/Irys-xyz/provenance-toolkit/blob/master/app/utils/fundAndUpload.ts#L33}
+ * @see {@link https://github.com/Irys-xyz/provenance-toolkit/blob/master/app/utils/getIrys.ts#L107}
+ * @see {@link https://github.com/wevm/wagmi/discussions/2405}
+ * @see {@link https://docs.irys.xyz/build/d/sdk/setup#base-ethereum}
+ * @see {@link https://docs.irys.xyz/build/programmability/connecting-to-testnet}
  */
 export default function IrysBalanceGet({
 	className = '',
@@ -17,29 +19,34 @@ export default function IrysBalanceGet({
 }: {
 	className?: string;
 	labelText: string;
-	setState: (balance: null | number | BigNumber) => void;
+	setState: (balance: null | number | BigNumber | bigint) => void;
 }) {
 	const [message, setMessage] = useState<string>('Info: connected wallet/provider required');
 	const { address } = useAccount();
+	const irysWebUploaderBuilderBaseEth = useIrysWebUploaderBuilderBaseEth();
 
-	const handleIrysBalanceGet = useCallback(async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-		console.warn('IrysBalance', {event});
-
+	const handleIrysBalanceGet = useCallback(async () => {
 		if (!address) {
-			const message = 'Info: waiting for client to connect wallet with an address';
-			console.warn('IrysBalance', {message, address});
-			setMessage(message);
+			setMessage('Info: waiting for client to connect wallet with an address');
+			setState(null);
+			return;
+		}
+
+		if (!irysWebUploaderBuilderBaseEth) {
+			setMessage('Info: waiting for Irys Web Uploader Builder to connect');
+			setState(null);
 			return;
 		}
 
 		try {
-			const webIrys = await (new WebIrys(webIrysOpts)).ready();
-			const balance = await webIrys.getBalance(address);
-			console.warn('new WebIrys(webIrysOpts).ready().getLoadedBalance()', {message, balance});
-			setMessage(message);
+			const irysUploaderWebBaseEth = await irysWebUploaderBuilderBaseEth.build();
+			const balance = await irysUploaderWebBaseEth.getBalance(address);
+			setMessage(`Irys balance: ${balance}`);
 			setState(balance);
-		} catch (error: unknown) {
+			return balance;
+		} catch (error) {
 			let message = 'Error: ';
+
 			if (!!error && typeof error == 'object') {
 				if ('message' in error) {
 					message += error.message;
@@ -52,11 +59,11 @@ export default function IrysBalanceGet({
 				message += `Novel error detected -> ${error}`;
 			}
 
-			console.error('new WebIrys(webIrysOpts).ready() ...', {message, error});
 			setMessage(message);
-			setState(null);
+			console.error('IrysBaseShowBalance ->', { error, message });
+			return error;
 		}
-	}, [ address, message, setState ]);
+	}, [ address, irysWebUploaderBuilderBaseEth, setState ]);
 
 	return (
 		<>
@@ -64,10 +71,10 @@ export default function IrysBalanceGet({
 
 			<button
 				className={`irys_balance irys_balance__button ${className}`}
-				onClick={(event) => {
+				onClick={async (event) => {
 					event.stopPropagation();
 					event.preventDefault();
-					handleIrysBalanceGet(event);
+					await handleIrysBalanceGet();
 				}}
 			>Get Irys balance</button>
 

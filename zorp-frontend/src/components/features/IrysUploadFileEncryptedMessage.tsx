@@ -2,10 +2,9 @@
 
 import { useCallback, useState } from 'react';
 import type { BigNumber } from 'bignumber.js';
-import type { Subkey, Key } from 'openpgp';
-import { useAccount } from 'wagmi';
+import { fileFromUint8Array } from '@/lib/utils/file';
 import { cidFromFile } from '@/lib/utils/ipfs';
-import { getGpgKeyFromCid } from '@/lib/utils/irys';
+import { getIrysResponseFromCid } from '@/lib/utils/irys';
 import { useIrysWebUploaderBuilderBaseEth } from '@/hooks/useIrys';
 import * as irysConfig from '@/lib/constants/irysConfig';
 
@@ -16,11 +15,11 @@ import * as irysConfig from '@/lib/constants/irysConfig';
  * @see {@link https://wagmi.sh/react/ethers-adapters}
  * @see {@link https://docs.irys.xyz/build/d/sdk/upload/uploadFile}
  */
-export default function IrysUploadFileGpgKey({
+export default function IrysUploadFileEncryptedMessage({
 	className = '',
-	labelText = 'Irys upload public GPG encryption key',
+	labelText = 'Irys upload public encrypted message',
 	setState,
-	gpgKey,
+	encryptedMessage,
 	irysBalance,
 }: {
 	className?: string;
@@ -29,37 +28,34 @@ export default function IrysUploadFileGpgKey({
 		receipt: unknown;
 		cid: string;
 	}) => void;
-	gpgKey: null | { file: File; key: Subkey | Key; };
+	encryptedMessage: null | Uint8Array;
 	irysBalance: null | (number | bigint | BigNumber);
 }) {
 	const [cid, setCid] = useState<null | string>(null);
-	const [maybePreexistingGpgKeyFile, setMaybePreexistingGpgKeyFile] = useState<null | (Key | Subkey)>(null);
 	const [message, setMessage] = useState<string>('Info: connected wallet/provider required');
+	const [maybePreexistingEncryptedMessageFile, setMaybePreexistingEncryptedMessageFile] = useState<null | Blob>(null);
 	const irysWebUploaderBuilderBaseEth = useIrysWebUploaderBuilderBaseEth();
 
-	const { address } = useAccount();
-
 	const handleOnClick = useCallback(async () => {
-		if (!address) {
-			setMessage('Info: waiting for client to connect wallet with an address');
-			setState(null);
-			return;
-		}
-
-		if (!!maybePreexistingGpgKeyFile && !!cid) {
+		if (!!maybePreexistingEncryptedMessageFile && !!cid) {
 			const url = `${irysConfig.gatewayUrl.irys}/ipfs/${cid}`;
-			setMessage(`Info: GPG key already uploaded at -> ${url}`);
+			setMessage(`Info: encrypted file already uploaded at -> ${url}`);
 			setState({ cid, receipt: undefined });
 			return;
 		};
 
-		if (!gpgKey) {
-			setMessage('Info: waiting for client to provide GPG key');
+		if (!encryptedMessage) {
+			setMessage('Info: waiting for client to provide encrypted message');
 			setState(null);
 			return;
 		}
 
-		if (gpgKey.file.size >= irysConfig.irysThreshold.fileSizeMaxFree) {
+		const file = fileFromUint8Array({
+			array: encryptedMessage,
+			name: 'study-data',
+		});
+
+		if (file.size >= irysConfig.irysThreshold.fileSizeMaxFree) {
 			if (!irysBalance || irysBalance <= irysConfig.irysThreshold.minimumBalance) {
 				setMessage('Info: waiting for client to fund Irys for upload');
 				setState(null);
@@ -76,38 +72,39 @@ export default function IrysUploadFileGpgKey({
 		/* @TODO: attempt to download before checking if upload is needed/possible */
 
 		try {
-			setMessage('Info: attempting to generate CID from GPG key file');
-			const cid = await cidFromFile(gpgKey.file);
+			setMessage('Info: attempting to generate CID from encrypted message as file');
+			const cid = await cidFromFile(file);
 			setCid(cid);
 
 			const url = `${irysConfig.gatewayUrl.irys}/ipfs/${cid}`;
-			setMessage(`Info: attempting to download key from ${url}`);
+			setMessage(`Info: attempting to download file from ${url}`);
 
-			const { key } = await getGpgKeyFromCid(cid);
-			if (!!key) {
-				setMessage(`Info: GPG key already uploaded at -> ${url}`);
+			const response = await getIrysResponseFromCid(cid);
+			if (response.ok) {
+				setMessage(`Info: encrypted file already uploaded at -> ${url}`);
 				setState({ cid, receipt: undefined });
-				setMaybePreexistingGpgKeyFile(key);
-				return key;
+				const blob = await response.blob();
+				setMaybePreexistingEncryptedMessageFile(blob);
+				return blob;
 			}
 
 			setMessage('Info: attempting to initalize Irys Web Uploader');
 			const irysUploaderWebBaseEth = await irysWebUploaderBuilderBaseEth.build();
 
-			setMessage('Info: attempting to upload GPG key to Irys');
-			const buffer = await gpgKey.file.arrayBuffer();
+			setMessage('Info: attempting to upload encrypted file to Irys');
+			const buffer = await file.arrayBuffer();
 			// TODO: maybe configure `opts` AKA CreateAndUploadOptions
 			const receipt = await irysUploaderWebBaseEth.uploader.uploadData(
 				Buffer.from(buffer),
 				{
 					tags: [
-						{ name: 'Content-Type', value: 'application/pgp-encrypted' },
+						{ name: 'Content-Type', value: 'application/octet-stream' },
 						{ name: 'IPFS-CID', value: cid },
 					]
 				},
 			);
 
-			setMessage(`Success: Uploded GPG key to Irys?! JSON: '{ "id": "${receipt.id}", "cid": "${cid}", "url": "${url}" }'`);
+			setMessage(`Success: Uploded encrypted file to Irys?! JSON: '{ "id": "${receipt.id}", "cid": "${cid}", "url": "${url}" }'`);
 			const state = { receipt, cid };
 			setState(state);
 			return state;
@@ -125,18 +122,17 @@ export default function IrysUploadFileGpgKey({
 				message += `Novel error detected -> ${error}`;
 			}
 
-			console.error('IrysUploadFileGpgKey ...', {message, error});
+			console.error('IrysUploadFileEncryptedMessage ...', { message, error });
 			setMessage(message);
 			setState(null);
 			return error;
 		}
 	}, [
-		address,
 		cid,
-		gpgKey,
+		encryptedMessage,
 		irysBalance,
 		irysWebUploaderBuilderBaseEth,
-		maybePreexistingGpgKeyFile,
+		maybePreexistingEncryptedMessageFile,
 		setState,
 	]);
 
@@ -151,7 +147,7 @@ export default function IrysUploadFileGpgKey({
 					event.preventDefault();
 					handleOnClick();
 				}}
-			>Upload GPG key to Irys</button>
+			>Upload Encrypted file to Irys</button>
 
 			<span className={`irys_upload_file irys_upload_file__span ${className}`}>{message}</span>
 		</>

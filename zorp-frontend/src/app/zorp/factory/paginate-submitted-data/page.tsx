@@ -9,7 +9,7 @@ import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
 
 export default function ZorpFactoryReadPaginateSubmittedData() {
-	const addressFactoryAnvil = config.anvil.contracts.ZorpFactory[31337].address;
+	const addressFactoryAnvil = config.anvil.contracts.IZorpFactory[31337].address;
 
 	const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
 	const [addressStudy, setAddressStudy] = useState<`0x${string}`>('0xa16E02E87b7454126E5E10d957A927A7F5B5d2be');
@@ -21,11 +21,11 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 	const startId = useId();
 	const limitId = useId();
 
-	const { ZorpFactory } = useContracts();
+	const { IZorpFactory } = useContracts();
 
 	const { data: cids, isFetching, refetch } = useReadContract({
-		abi: ZorpFactory.abi,
-		address: ZorpFactory.address,
+		abi: IZorpFactory.abi,
+		address: IZorpFactory.address,
 		functionName: 'paginateSubmittedData',
 		args: [addressStudy, start, limit],
 		query: {
@@ -100,9 +100,9 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 												&& addressFactory.startsWith('0x')
 												&& addressStudy.length === addressFactoryAnvil.length
 												&& addressStudy.startsWith('0x')
-												&& !!ZorpFactory?.abi
-												&& !!Object.keys(ZorpFactory.abi).length
-												&& !!ZorpFactory?.address.length;
+												&& !!IZorpFactory?.abi
+												&& !!Object.keys(IZorpFactory.abi).length
+												&& !!IZorpFactory?.address.length;
 
 					if (!enabled) {
 						console.warn('Missing required input(s) ->', {
