@@ -60,6 +60,14 @@ contract ZorpStudy is IZorpStudy_Functions, Ownable, ReentrancyGuard {
         creator = msg.sender;
     }
 
+    /// @notice Useful for `receive` and `fallback` to prevent locking funds after study has finished
+    modifier onlyUnfinished() {
+        if (study_status == STUDY_STATUS__FINISHED) {
+            revert InvalidStudyState(study_status, STUDY_STATUS__ACTIVE);
+        }
+        _;
+    }
+
     /// @inheritdoc IZorpStudy_Functions
     function submitData(string memory ipfs_cid) external {
         if (study_status != STUDY_STATUS__ACTIVE) {
@@ -156,6 +164,6 @@ contract ZorpStudy is IZorpStudy_Functions, Ownable, ReentrancyGuard {
         }
     }
 
-    receive() external payable {}
-    fallback() external payable {}
+    receive() external payable onlyUnfinished {}
+    fallback() external payable onlyUnfinished {}
 }

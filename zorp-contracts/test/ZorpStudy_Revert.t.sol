@@ -318,3 +318,55 @@ contract ZorpStudy_Revert_Write_Test is Test {
     receive() external payable {}
     fallback() external payable {}
 }
+
+contract ZorpStudy_Revert_Payable_Test is Test {
+    address payable immutable ZORP_STUDY__OWNER;
+    address payable immutable ZORP_STUDY__PARTICIPANT;
+    string ZORP_STUDY__IPFS_CID;
+    address ref_study;
+
+    constructor() {
+        ZORP_STUDY__OWNER = payable(address(this));
+        ZORP_STUDY__PARTICIPANT = payable(address(this));
+        ZORP_STUDY__IPFS_CID = "0xDEADBEEF";
+    }
+
+    function setUp() public {
+        vm.deal(address(this), 1000 ether);
+
+        uint256 amount = 1 ether;
+        // Deploy a fresh study for each test
+        ref_study = address(new ZorpStudy{ value: amount }(ZORP_STUDY__OWNER, ZORP_STUDY__IPFS_CID));
+    }
+
+    function test_write__receive__rejects_payment_when_study_is_finished() public {
+        IZorpStudy(ref_study).startStudy();
+        IZorpStudy(ref_study).endStudy();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                InvalidStudyState.selector,
+                IZorpStudy(ref_study).study_status(),
+                IZorpStudy(ref_study).STUDY_STATUS__FINISHED()
+            ),
+            ref_study
+        );
+        ref_study.call{ value: 419 }("");
+    }
+
+    function test_write__fallback__rejects_payment_when_study_is_finished() public {
+        IZorpStudy(ref_study).startStudy();
+        IZorpStudy(ref_study).endStudy();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                InvalidStudyState.selector,
+                IZorpStudy(ref_study).study_status(),
+                IZorpStudy(ref_study).STUDY_STATUS__FINISHED()
+            ),
+            ref_study
+        );
+        ref_study.call{ value: 68 }("1");
+    }
+
+    receive() external payable {}
+    fallback() external payable {}
+}
