@@ -89,7 +89,7 @@ contract ZorpStudy is IZorpStudy_Functions, Ownable, ReentrancyGuard {
     }
 
     /// @inheritdoc IZorpStudy_Functions
-    function claimReward() external payable nonReentrant {
+    function claimReward() external nonReentrant {
         if (study_status != STUDY_STATUS__FINISHED) {
             revert InvalidStudyState(study_status, STUDY_STATUS__FINISHED);
         }
