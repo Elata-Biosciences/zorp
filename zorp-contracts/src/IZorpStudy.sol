@@ -1050,7 +1050,7 @@ interface IZorpStudy_Functions {
         ///   );
         /// }
         /// ```
-        function claimReward() external payable;
+        function claimReward() external;
     /* Public }}} */
 
     /* Owner {{{ */
