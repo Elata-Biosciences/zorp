@@ -3,6 +3,12 @@ pragma solidity ^0.8.17;
 
 import { IOwnable } from "./IOwnable.sol";
 
+error FactoryUpdatedAlready(address ref_current, address ref_new);
+error WithdrawFailed(address to, uint256 amount, uint256 balance);
+
+event FactoryUpdated(address ref_current, address indexed ref_new);
+event StudyCreated(address indexed studyAddress);
+
 /// @title Publicly accessible stored states within `ZorpFactory`
 interface IZorpFactory_Storage {
     /* Constants {{{ */
@@ -367,7 +373,7 @@ interface IZorpFactory_Functions {
         /// @param encryptionKey pointer to public GPG/PGP key
         /// @return Address of new `ZorpStudy` contract
         ///
-        /// @custom:throws "ZorpStudy: Invalid message value"
+        /// @custom:throws `InvalidMessageValue(uint256 value, uint256 minimum)`
         ///
         /// @dev see `./IZorpStudy.sol`
         /// @dev see `./ZorpStudy.sol` → `constructor`
@@ -392,7 +398,7 @@ interface IZorpFactory_Functions {
         /// @notice Restricted to `IZorpFactory.owner()` and may be written to **only** once
         /// @param ref Address of new `ZorpFactory` instance that may contain more features, bug fixes, etc.
         ///
-        /// @custom:throws "ZorpFactory: next factory reference already set"
+        /// @custom:throws `FactoryUpdatedAlready(address ref_current, address ref_new)`
         ///
         /// ## On-chain example
         ///
@@ -409,7 +415,7 @@ interface IZorpFactory_Functions {
         /// @param to Address that should be paid from this contract with the native currency used by Blockchain
         /// @param amount Native currency for Blockchain to transfer from this contract to recipient
         ///
-        /// @custom:throws "ZorpFactory: Failed withdraw"
+        /// @custom:throws `WithdrawFailed(address to, uint256 amount, uint256 balance)`
         ///
         /// ## On-chain example
         ///
@@ -572,6 +578,35 @@ interface IZorpFactory_Functions {
         /// /* see: f915d9b:zorp-frontend/src/app/zorp/factory/paginate-submitted-data/page.tsx */
         /// ```
         function paginateSubmittedData(address study, uint256 start, uint256 limit) external view returns (string[] memory);
+
+        /// @notice Return a possibly sparse array of participant statuses
+        /// @param study Address of `ZorpStudy` contract
+        /// @param start Index within `ZorpStudy.participant_status` mapping to start paginating data
+        /// @param limit Number of entries to return in paginated data
+        /// @return Array of participant status values
+        ///
+        /// ## Off-chain example with cast
+        ///
+        /// ```bash
+        /// zorp_factory_address="0x5FbDB2315678afecb367f032d93F642f64180aa3";
+        /// zorp_study_address="0xa16E02E87b7454126E5E10d957A927A7F5B5d2be";
+        /// zorp_study_start=1336;
+        /// zorp_study_limit=41;
+        ///
+        /// cast call "${zorp_factory_address}" \
+        ///     --rpc-url 127.0.0.1:8545 \
+        ///     'paginateParticipantStatus(address,uint256,uint256)(uint256[])' \
+        ///         "${zorp_study_address}" \
+        ///         "${zorp_study_start}" \
+        ///         "${zorp_study_limit}";
+        /// ```
+        ///
+        /// ## Off-chain example with wagmi
+        ///
+        /// ```tsx
+        /// /* see: f915d9b:zorp-frontend/src/app/zorp/factory/paginate-participant-status/page.tsx */
+        /// ```
+        function paginateParticipantStatus(address study, uint256 start, uint256 limit) external view returns (uint256[] memory);
 
         /// @notice Intended for off-chain requests for bulk lookup of `ZorpStudy` contract addresses this instance of `ZorpFactory` tracks
         /// @param start Index/key to start getting data from `.studies` mapping

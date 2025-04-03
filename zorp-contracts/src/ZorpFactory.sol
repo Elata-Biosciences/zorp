@@ -3,7 +3,13 @@ pragma solidity ^0.8.17;
 
 import { ZorpStudy } from "./ZorpStudy.sol";
 import { IZorpStudy } from "./IZorpStudy.sol";
-import { IZorpFactory_Functions } from "./IZorpFactory.sol";
+import {
+    FactoryUpdated,
+    FactoryUpdatedAlready,
+    IZorpFactory_Functions,
+    StudyCreated,
+    WithdrawFailed
+} from "./IZorpFactory.sol";
 
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
@@ -15,7 +21,7 @@ import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.s
 /// @custom:link https://github.com/Elata-Biosciences/zorp
 contract ZorpFactory is Ownable, ReentrancyGuard, IZorpFactory_Functions {
     /// @dev see `IZorpFactory_Storage.VERSION()`
-    uint256 public constant VERSION = 1;
+    uint256 public immutable VERSION = 1;
 
     /// @dev see `IZorpFactory_Storage.latest_study_index()`
     uint256 public latest_study_index;
@@ -24,22 +30,19 @@ contract ZorpFactory is Ownable, ReentrancyGuard, IZorpFactory_Functions {
     mapping(uint256 => address) public studies;
 
     /// @dev see `IZorpFactory_Storage.ref_factory_previous()`
-    address public constant ref_factory_previous = address(0);
+    address public ref_factory_previous = address(0);
 
     /// @dev see `IZorpFactory_Storage.ref_factory_next()`
     address public ref_factory_next;
-
-    event StudyCreated(address indexed studyAddress);
 
     constructor (address payable initialOwner_) Ownable(initialOwner_) {}
 
     /// @inheritdoc IZorpFactory_Functions
     /// @dev see `./ZorpStudy.sol` -> `constructor`
-    /// @custom:todo double-check if this really needs to be `nonReentrant`
     function createStudy(
         address payable initialOwner,
         string memory encryptionKey
-    ) external payable nonReentrant returns (address) {
+    ) external payable returns (address) {
         address newStudy = address((new ZorpStudy){value: msg.value}(
             initialOwner,
             encryptionKey
@@ -52,14 +55,20 @@ contract ZorpFactory is Ownable, ReentrancyGuard, IZorpFactory_Functions {
 
     /// @inheritdoc IZorpFactory_Functions
     function setRefFactoryNext(address ref) external payable onlyOwner {
-        require(ref_factory_next == address(0), "ZorpFactory: next factory reference already set");
+        if (ref_factory_next != address(0)) {
+            revert FactoryUpdatedAlready(ref_factory_next, ref);
+        }
+
         ref_factory_next = ref;
+        emit FactoryUpdated(address(this), ref);
     }
 
     /// @inheritdoc IZorpFactory_Functions
-    function withdraw(address payable to, uint256 amount) external payable onlyOwner nonReentrant {
+    function withdraw(address payable to, uint256 amount) external payable nonReentrant onlyOwner {
         (bool success, ) = to.call{value: amount}("");
-        require(success, "ZorpFactory: Failed withdraw");
+        if (!success) {
+            revert WithdrawFailed(to, amount, address(this).balance);
+        }
     }
 
     /// @inheritdoc IZorpFactory_Functions
@@ -67,6 +76,18 @@ contract ZorpFactory is Ownable, ReentrancyGuard, IZorpFactory_Functions {
         string[] memory results = new string[](limit);
         for (uint256 i; i < limit;) {
             results[i] = IZorpStudy(study).submitted_data(start++);
+            unchecked { ++i; }
+        }
+        return results;
+    }
+
+    /// @inheritdoc IZorpFactory_Functions
+    function paginateParticipantStatus(address study, uint256 start, uint256 limit) external view returns (uint256[] memory) {
+        uint256[] memory results = new uint256[](limit);
+        for (uint256 i; i < limit;) {
+            results[i] = IZorpStudy(study).participant_status(
+                IZorpStudy(study).index_participant(start++)
+            );
             unchecked { ++i; }
         }
         return results;
@@ -81,4 +102,7 @@ contract ZorpFactory is Ownable, ReentrancyGuard, IZorpFactory_Functions {
         }
         return results;
     }
+
+    receive() external payable {}
+    fallback() external payable {}
 }

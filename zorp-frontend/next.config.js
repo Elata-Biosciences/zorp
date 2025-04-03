@@ -62,15 +62,20 @@ async function hook(phase, { nextConfigCustom }) {
 	}
 
 	// Detect if deploying to GitHub Pages
-	/** @type {string|undefined} */
-	const PAGES_BASE_PATH = process.env.PAGES_BASE_PATH;
-	if (!!PAGES_BASE_PATH && PAGES_BASE_PATH.length) {
+	if (!!process.env.PAGES_BASE_PATH && process.env.PAGES_BASE_PATH.length) {
 		console.warn('Assuming deployment to GitHub Pages');
 		merge(nextConfig, {
 			output: 'export',
-			basePath: PAGES_BASE_PATH,
+			basePath: process.env.PAGES_BASE_PATH,
 		});
 	}
+	// else if (!!process.env.VERCEL_TOKEN && process.env.VERCEL_TOKEN.length) {
+	// 	console.warn('Assuming deployment to Vercel');
+	// 	merge(nextConfig, {
+	// 		output: 'export',
+	// 		basePath: /* TOOD */,
+	// 	});
+	// }
 
 	/**
 	 * @see {@link https://nextjs.org/docs/messages/swc-disabled}

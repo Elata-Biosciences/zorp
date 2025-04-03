@@ -6,6 +6,15 @@ remappings = [
     "@openzeppelin/=lib/openzeppelin-contracts/"
 ]
 
+## TODO: maybe use a profile for ignoring warnings
+# - https://book.getfoundry.sh/reference/config/solidity-compiler#ignored_warnings_from
+# - https://book.getfoundry.sh/config/
+# [profile.test]
+ignored_warnings_from = [
+    "test/ZorpFactory_Revert.t.sol",
+    "test/ZorpStudy_Revert.t.sol"
+]
+
 [rpc_endpoints]
 anvil = "http://localhost:8545"
 

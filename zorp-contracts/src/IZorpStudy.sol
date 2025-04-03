@@ -3,6 +3,13 @@ pragma solidity ^0.8.17;
 
 import { IOwnable } from "./IOwnable.sol";
 
+error InvalidIPFSCID();
+error InvalidMessageValue(uint256 value, uint256 minimum);
+error InvalidParticipantState(uint256 current_state, uint256 required_state);
+error InvalidStudyState(uint256 current_state, uint256 required_state);
+error ParticipantPayoutFailed(address to, uint256 amount, uint256 balance);
+error RemainderTransferFailed(address to, uint256 amount, uint256 balance);
+
 /// @title Publicly accessible stored states within `ZorpStudy`
 interface IZorpStudy_Storage {
     /* Constants {{{ */
@@ -666,6 +673,97 @@ interface IZorpStudy_Storage {
         /// ```
         function participant_index(address participant) external view returns (uint256);
 
+        /// @notice Maybe get an address of given participant from provided index
+        /// @param index Key of possible `ZorpStudy` participant
+        /// @return Address pointing into `participant_status` and `participant_index` mappings
+        ///
+        /// @dev Index `0` should always point to nonexistent participant(s)
+        /// @dev Index `0` should always point to flagged participant(s)
+        /// @dev Address `0` should always point to nonexistent and/or flagged participant(s)
+        ///
+        /// ## Off-chain example with cast
+        ///
+        /// ```bash
+        /// zorp_study_address="0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+        /// zorp_study_good_participant="0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
+        ///
+        /// cast call "${zorp_study_address}" \
+        ///     --rpc-url 127.0.0.1:8545 \
+        ///     'participant_index(address)(uint256)' \
+        ///         "${zorp_study_good_participant}";
+        /// ```
+        ///
+        /// ## Off-chain example with wagmi
+        ///
+        /// ```tsx
+        /// 'use client';
+        ///
+        /// import { useId, useState } from 'react';
+        /// import { useReadContract } from 'wagmi';
+        /// import { abi as zorpStudyAbi } from 'abi/IZorpStudy.json';
+        ///
+        /// export default function ZorpStudyReadIndexParticipant() {
+        ///   const addressStudyAnvil = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'
+        ///   const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
+        ///   const [indexParticipant, setIndexParticipant] = useState<bigint | number>(0);
+        ///
+        ///   const addressStudyId = useId();
+        ///   const indexParticipantId = useId();
+        ///
+        ///   const { data: participant, isFetching } = useReadContract({
+        ///     address: addressStudy,
+        ///     abi: zorpStudyAbi,
+        ///     functionName: 'index_participant',
+        ///     args: [indexParticipant],
+        ///     query: {
+        ///       enabled: addressStudy.length === addressStudyAnvil.length
+        ///             && addressStudy.startsWith('0x')
+        ///             && !Number.isNaN(indexParticipant),
+        ///     },
+        ///   });
+        ///
+        ///   return (
+        ///     <>
+        ///       <label htmlFor={addressStudyId}>ZORP Study Address:</label>
+        ///       <input
+        ///         id={addressStudyId}
+        ///         value={addressStudy}
+        ///         onChange={(event) => {
+        ///           setAddressStudy(event.target.value as `0x${string}`);
+        ///         }}
+        ///         disabled={isFetching}
+        ///       />
+        ///
+        ///       <label htmlFor={indexParticipantId}>ZORP Participant Index:</label>
+        ///       <input
+        ///         id={indexParticipantId}
+        ///         value={
+        ///           indexParticipant == null
+        ///             ? 'NaN'
+        ///             : indexParticipant.toString()
+        ///         }
+        ///         onChange={(event) => {
+        ///           if (!(new RegExp('^[0-9]+$')).test(event.target.value))
+        ///             return;
+        ///           }
+        ///
+        ///           const value = BigInt(event.target.value);
+        ///           if (Number.isNaN(value)) {
+        ///             return;
+        ///           }
+        ///
+        ///           setIndexParticipant(value);
+        ///         }}
+        ///         disabled={isFetching}
+        ///       />
+        ///
+        ///       <span>ZorpStudy participant address: {participant as `0x${string}`}</span>
+        ///     </>
+        ///   );
+        /// }
+        /// ```
+        function index_participant(uint256 index) external view returns (address);
+
         /// @notice Get submitted data for given participant address
         /// @param index Key into mapping to attempt getting data from
         /// @return IPFS CID string
@@ -755,9 +853,9 @@ interface IZorpStudy_Functions {
     /* Public {{{ */
         /// @notice Store `ipfs_cid` in `ZorpStudy.submitted_data`
         ///
-        /// @custom:throw `ZorpStudy: Study not active`
-        /// @custom:throw `ZorpStudy: Invalid IPFS CID`
-        /// @custom:throw `ZorpStudy: Invalid message sender status`
+        /// @custom:throws `InvalidStudyState(uint256 current_state, uint256 required_state)`
+        /// @custom:throws `InvalidIPFSCID()`
+        /// @custom:throws `InvalidParticipantState(uint256 current_state, uint256 required_state)`
         ///
         /// ## Off-chain example with cast
         ///
@@ -818,9 +916,9 @@ interface IZorpStudy_Functions {
 
         /// @notice Pay `ZorpStudy.participant_payout_amount` to `msg.sender`
         ///
-        /// @custom:throw `ZorpStudy: Study not finished`
-        /// @custom:throw `ZorpStudy: Invalid message sender status`
-        /// @custom:throw `ZorpStudy: Failed participant payout`
+        /// @custom:throws `InvalidStudyState(uint256 current_state, uint256 required_state)`
+        /// @custom:throws `InvalidParticipantState(uint256 current_state, uint256 required_state)`
+        /// @custom:throws `ParticipantPayoutFailed(address to, uint256 amount, uint256 balance)`
         ///
         /// ## Off-chain example with cast
         ///
@@ -958,8 +1056,8 @@ interface IZorpStudy_Functions {
     /* Owner {{{ */
         /// @notice Set `PARTICIPANT_STATUS__INVALID` for address, then delete associated storage in `participant_index` and `submitted_data`
         ///
-        /// @custom:throw `ZorpStudy: Study not active`
-        /// @custom:throw `ZorpStudy: Invalid participant status`
+        /// @custom:throws `InvalidStudyState(uint256 current_state, uint256 required_state)`
+        /// @custom:throws `InvalidParticipantState(uint256 current_state, uint256 required_state)`
         ///
         /// ## Off-chain example with cast
         ///
@@ -1139,7 +1237,7 @@ interface IZorpStudy_Functions {
 
         /// @notice Set `STUDY_STATUS__ACTIVE` in `ZorpStudy.study_status`
         ///
-        /// @custom:throw `ZorpStudy: Study was previously activated`
+        /// @custom:throws `InvalidStudyState(uint256 current_state, uint256 required_state)`
         ///
         /// ## Off-chain example with cast
         ///
@@ -1287,9 +1385,8 @@ interface IZorpStudy_Functions {
 
         /// @notice Set `STUDY_STATUS__FINISHED` in `ZorpStudy.study_status`
         ///
-        /// @custom:throw `ZorpStudy: Study not active`
-        /// @custom:throw `ZorpStudy: Failed trasfering remainder`
-        /// @custom:throw `ZorpStudy: Failed trasfering balance`
+        /// @custom:throws `InvalidStudyState(uint256 current_state, uint256 required_state)`
+        /// @custom:throws `RemainderTransferFailed(address to, uint256 amount, uint256 balance)`
         ///
         /// ## Off-chain example with cast
         ///
