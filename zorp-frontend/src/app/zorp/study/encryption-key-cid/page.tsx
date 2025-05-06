@@ -18,7 +18,7 @@ export default function ZorpStudyReadEncryptionKeyCid() {
 								&& addressStudy.startsWith('0x')
 								&& !!IZorpStudy?.abi
 								&& !!Object.keys(IZorpStudy.abi).length
-								&& !!IZorpStudy?.address.length;
+								&& !!addressStudy.length;
 
 	const { data: encryption_key_cid, isFetching, refetch } = useReadContract<
 		typeof IZorpStudy.abi,
@@ -28,7 +28,7 @@ export default function ZorpStudyReadEncryptionKeyCid() {
 		string
 	>({
 		abi: IZorpStudy.abi,
-		address: IZorpStudy.address,
+		address: addressStudy,
 		functionName: 'encryption_key',
 		args: [],
 		query: {

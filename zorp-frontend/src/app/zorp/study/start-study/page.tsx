@@ -22,7 +22,7 @@ export default function ZorpStudyWriteStartStudy() {
 	const assertsClient = {
 		isAddressStudySet: addressStudy.length === addressStudyAnvil.length && addressStudy.startsWith('0x'),
 		isAddressWalletSet: !!address && address.length === addressStudyAnvil.length && address.startsWith('0x'),
-		isContractStudySet: !!IZorpStudy?.abi && !!Object.keys(IZorpStudy.abi).length && !!IZorpStudy?.address.length,
+		isContractStudySet: !!IZorpStudy?.abi && !!Object.keys(IZorpStudy.abi).length && !!addressStudy.length,
 	};
 
 	const { data: owner, isFetching: isFetchingOwner } = useReadContract<
@@ -33,7 +33,7 @@ export default function ZorpStudyWriteStartStudy() {
 		`0x${string}`
 	>({
 		abi: IZorpStudy.abi,
-		address: IZorpStudy.address,
+		address: addressStudy,
 		functionName: 'owner',
 		args: [],
 		query: {
@@ -49,7 +49,7 @@ export default function ZorpStudyWriteStartStudy() {
 		bigint | 0 | 1 | 2
 	>({
 		abi: IZorpStudy.abi,
-		address: IZorpStudy.address,
+		address: addressStudy,
 		functionName: 'study_status',
 		args: [],
 		query: {
@@ -88,7 +88,7 @@ export default function ZorpStudyWriteStartStudy() {
 		try {
 			const response = await writeContractAsync({
 				abi: IZorpStudy.abi,
-				address: IZorpStudy.address,
+				address: addressStudy,
 				functionName: 'startStudy',
 				args: [],
 			});
@@ -120,6 +120,7 @@ export default function ZorpStudyWriteStartStudy() {
 		}
 	}, [
 		IZorpStudy,
+		addressStudy,
 		enabled,
 		setIsFetching,
 		setReceipt,
