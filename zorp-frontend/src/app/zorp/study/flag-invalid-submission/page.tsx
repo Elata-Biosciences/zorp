@@ -25,7 +25,7 @@ export default function ZorpStudyWriteFlagInvalidSubmission() {
 		isAddressStudySet: addressStudy.length === addressStudyAnvil.length && addressStudy.startsWith('0x'),
 		isAddressParticipantSet: addressParticipant.length === addressStudyAnvil.length && addressParticipant.startsWith('0x'),
 		isAddressWalletSet: !!address && address.length === addressStudyAnvil.length && address.startsWith('0x'),
-		isContractStudySet: !!IZorpStudy?.abi && !!Object.keys(IZorpStudy.abi).length && !!IZorpStudy?.address.length,
+		isContractStudySet: !!IZorpStudy?.abi && !!Object.keys(IZorpStudy.abi).length && !!addressStudy.length,
 	};
 
 	const { data: owner, isFetching: isFetchingOwner } = useReadContract<
@@ -36,7 +36,7 @@ export default function ZorpStudyWriteFlagInvalidSubmission() {
 		`0x${string}`
 	>({
 		abi: IZorpStudy.abi,
-		address: IZorpStudy.address,
+		address: addressStudy,
 		functionName: 'owner',
 		args: [],
 		query: {
@@ -52,7 +52,7 @@ export default function ZorpStudyWriteFlagInvalidSubmission() {
 		bigint | 0 | 1 | 2 | 3
 	>({
 		abi: IZorpStudy.abi,
-		address: IZorpStudy.address,
+		address: addressStudy,
 		functionName: 'participant_status',
 		args: [addressParticipant],
 		query: {
@@ -71,7 +71,7 @@ export default function ZorpStudyWriteFlagInvalidSubmission() {
 		bigint | 0 | 1 | 2
 	>({
 		abi: IZorpStudy.abi,
-		address: IZorpStudy.address,
+		address: addressStudy,
 		functionName: 'study_status',
 		args: [],
 		query: {
@@ -117,7 +117,7 @@ export default function ZorpStudyWriteFlagInvalidSubmission() {
 		try {
 			const response = await writeContractAsync({
 				abi: IZorpStudy.abi,
-				address: IZorpStudy.address,
+				address: addressStudy,
 				functionName: 'flagInvalidSubmission',
 				args: [addressParticipant],
 			});
@@ -152,6 +152,7 @@ export default function ZorpStudyWriteFlagInvalidSubmission() {
 		setIsFetching,
 		IZorpStudy,
 		addressParticipant,
+		addressStudy,
 		setReceipt,
 		writeContractAsync,
 	]);
