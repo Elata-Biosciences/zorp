@@ -23,7 +23,7 @@ export default function ZorpStudyReadParticipantPayoutAmount() {
 		bigint
 	>({
 		abi: IZorpStudy.abi,
-		address: IZorpStudy.address,
+		address: addressStudy,
 		functionName: 'participant_payout_amount',
 		args: [],
 		query: {
@@ -31,7 +31,7 @@ export default function ZorpStudyReadParticipantPayoutAmount() {
 						&& addressStudy.startsWith('0x')
 						&& !!IZorpStudy?.abi
 						&& !!Object.keys(IZorpStudy.abi).length
-						&& !!IZorpStudy?.address.length,
+						&& !!addressStudy.length,
 		},
 	});
 

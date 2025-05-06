@@ -21,7 +21,7 @@ export default function ZorpStudyReadCreator() {
 		`0x${string}`
 	>({
 		abi: IZorpStudy.abi,
-		address: IZorpStudy.address,
+		address: addressStudy,
 		functionName: 'creator',
 		args: [],
 		query: {
@@ -29,7 +29,7 @@ export default function ZorpStudyReadCreator() {
 						&& addressStudy.startsWith('0x')
 						&& !!IZorpStudy?.abi
 						&& !!Object.keys(IZorpStudy.abi).length
-						&& !!IZorpStudy?.address.length,
+						&& !!addressStudy.length,
 		},
 	});
 

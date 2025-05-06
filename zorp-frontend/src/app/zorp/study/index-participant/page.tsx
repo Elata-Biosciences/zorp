@@ -26,7 +26,7 @@ export default function ZorpStudyReadParticipantAddress() {
 		bigint | number
 	>({
 		abi: IZorpStudy.abi,
-		address: IZorpStudy.address,
+		address: addressStudy,
 		functionName: 'participant_address',
 		args: [indexParticipant],
 		query: {
@@ -35,7 +35,7 @@ export default function ZorpStudyReadParticipantAddress() {
 						&& Number.isNaN(indexParticipant)
 						&& !!IZorpStudy?.abi
 						&& !!Object.keys(IZorpStudy.abi).length
-						&& !!IZorpStudy?.address.length,
+						&& !!addressStudy.length,
 		},
 	});
 
