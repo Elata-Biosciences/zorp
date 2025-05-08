@@ -1,0 +1,38 @@
+{
+  "name": "ZORP Dev Environment (Compose)",
+  
+  // Reference the Docker Compose file
+  "dockerComposeFile": "docker-compose.yml",
+
+  // Specify the service VS Code should attach to
+  "service": "dev-base",
+
+  // Specify the workspace folder inside the container
+  "workspaceFolder": "/workspaces/zorp",
+
+  // Keep the postCreateCommand to run setup steps in the dev-base service
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+
+  // Forward ports from the Compose setup (VS Code might pick these up automatically, but explicit is good)
+  "forwardPorts": [
+    3000, // Frontend dev server
+    8545  // Anvil local node
+  ],
+
+  // Configure tool-specific properties.
+  "customizations": {
+    // Configure properties specific to VS Code.
+    "vscode": {
+      // Add the IDs of extensions you want installed when the container is created.
+      "extensions": [
+        "NomicFoundation.hardhat-solidity", // General Solidity support
+        "esbenp.prettier-vscode",      // Code formatter
+        "dbaeumer.vscode-eslint",       // JavaScript/TypeScript linter
+        "ms-azuretools.vscode-docker" // Docker extension can be helpful
+      ]
+    }
+  }
+
+  // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+  // "remoteUser": "root"
+} 
