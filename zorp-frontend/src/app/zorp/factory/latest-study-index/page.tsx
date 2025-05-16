@@ -28,7 +28,7 @@ export default function ZorpFactoryReadLatestStudyIndex() {
 		bigint
 	>({
 		abi: IZorpFactory.abi,
-		address: IZorpFactory.address,
+		address: addressFactory,
 		functionName: 'latest_study_index',
 		args: [],
 		query: {

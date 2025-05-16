@@ -29,7 +29,7 @@ export default function ZorpFactoryReadVersion() {
 		bigint
 	>({
 		abi: IZorpFactory.abi,
-		address: IZorpFactory.address,
+		address: addressFactory,
 		functionName: 'VERSION',
 		args: [],
 		query: {
