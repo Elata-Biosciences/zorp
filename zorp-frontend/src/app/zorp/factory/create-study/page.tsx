@@ -28,7 +28,7 @@ export default function ZorpFactoryWriteCreateStudy() {
 	const [message, setMessage] = useState<string>('Info: connected wallet/provider required');
 	const [amount, setAmount] = useState<null | bigint>(null);
 
-	const { writeContractAsync } = useWriteContract({
+	const { writeContractAsync, isPending } = useWriteContract({
 		config: config.wagmiConfig,
 	});
 
@@ -133,7 +133,7 @@ export default function ZorpFactoryWriteCreateStudy() {
 			</div>
 
 			<ZorpFactoryAddressInput
-				disabled={isFetching}
+				disabled={isPending}
 				setState={setAddressFactory}
 			/>
 
