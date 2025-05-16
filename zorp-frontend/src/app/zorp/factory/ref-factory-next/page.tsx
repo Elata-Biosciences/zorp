@@ -23,7 +23,7 @@ export default function ZorpFactoryReadRefFactoryNext() {
 		`0x${string}`
 	>({
 		abi: IZorpFactory.abi,
-		address: IZorpFactory.address,
+		address: addressFactory,
 		functionName: 'ref_factory_next',
 		args: [],
 		query: {

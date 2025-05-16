@@ -10,9 +10,11 @@ import * as wagmiConfig from '@/lib/constants/wagmiConfig';
 
 export default function IrysFetchFileGpgKey({
 	className = '',
+	addressStudy,
 	setState,
 }: {
 	className?: string;
+	addressStudy: `0x${string}`,
 	setState: (study_encryption_key: null | { key: Key; response: Response; }) => void;
 }) {
 	const [messageReadContract, setMessageReadContract] = useState<string>('Info: Waiting for ZorpStudy.encryptionKey() read to return something...');
@@ -28,7 +30,7 @@ export default function IrysFetchFileGpgKey({
 		string
 	>({
 		abi: IZorpStudy.abi,
-		address: IZorpStudy.address,
+		address: addressStudy,
 		config: wagmiConfig.wagmiConfig,
 		functionName: 'encryption_key',
 	});

@@ -62,7 +62,7 @@ export default function ZorpFactoryWriteWithdraw() {
 		try {
 			const response = await writeContractAsync({
 				abi: IZorpFactory.abi,
-				address: IZorpFactory.address,
+				address: addressFactory,
 				functionName: 'withdraw',
 				args: [addressTo, amount],
 			});

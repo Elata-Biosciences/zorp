@@ -22,7 +22,7 @@ export default function ZorpStudyWriteEndStudy() {
 		return {
 			isAddressStudySet: addressStudy.length === addressStudyAnvil.length && addressStudy.startsWith('0x'),
 			isAddressWalletSet: !!address && address.length === addressStudyAnvil.length && address.startsWith('0x'),
-			isContractStudySet: !!IZorpStudy?.abi && !!Object.keys(IZorpStudy.abi).length && !!IZorpStudy?.address.length,
+			isContractStudySet: !!IZorpStudy?.abi && !!Object.keys(IZorpStudy.abi).length && !!addressStudy.length,
 		};
 	}, [
 		IZorpStudy,
@@ -39,7 +39,7 @@ export default function ZorpStudyWriteEndStudy() {
 		`0x${string}`
 	>({
 		abi: IZorpStudy.abi,
-		address: IZorpStudy.address,
+		address: addressStudy,
 		functionName: 'owner',
 		args: [],
 		query: {
@@ -55,7 +55,7 @@ export default function ZorpStudyWriteEndStudy() {
 		bigint | 0 | 1 | 2
 	>({
 		abi: IZorpStudy.abi,
-		address: IZorpStudy.address,
+		address: addressStudy,
 		functionName: 'study_status',
 		args: [],
 		query: {
@@ -106,7 +106,7 @@ export default function ZorpStudyWriteEndStudy() {
 		try {
 			const response = await writeContractAsync({
 				abi: IZorpStudy.abi,
-				address: IZorpStudy.address,
+				address: addressStudy,
 				functionName: 'endStudy',
 				args: [],
 			});
@@ -137,6 +137,7 @@ export default function ZorpStudyWriteEndStudy() {
 		}
 	}, [
 		IZorpStudy,
+		addressStudy,
 		assertsBlockchain,
 		assertsClient,
 		enabled,
