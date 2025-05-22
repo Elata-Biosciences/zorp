@@ -101,3 +101,16 @@ npm test:watch
 # npm test -- <File_Or_Test_Name>
 npm test -- InputFileToEncryptedMessage
 ```
+
+---
+
+## Deployment tips
+
+### Add chain
+
+The `./src/lib/constants/wagmiConfig.ts` file defines various data structures
+for configuring available chains.  In some cases, such as for `sepolia`, it may
+be possible to extend pre-existing defaults; and in other cases, such as
+`anvil`, more care must be taken to ensure all customizations are correctly
+configured.
+

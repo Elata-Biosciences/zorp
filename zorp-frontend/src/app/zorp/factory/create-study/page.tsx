@@ -5,6 +5,7 @@ import type { BigNumber } from 'bignumber.js';
 import type { Key } from 'openpgp';
 import { useAccount, useWriteContract, useTransactionReceipt } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
+import ZorpFactoryAddressInput from '@/components/contracts/ZorpFactoryAddressInput';
 import GpgEncryptionKeyFromInputFile from '@/components/features/GpgEncryptionKeyFromInputFile';
 import IrysBalanceGet from '@/components/features/IrysBalanceGet';
 import IrysUploadFileGpgKey from '@/components/features/IrysUploadFileGpgKey';
@@ -15,9 +16,11 @@ import * as config from '@/lib/constants/wagmiConfig';
  * @see {@link https://wagmi.sh/react/api/hooks/useTransactionReceipt}
  */
 export default function ZorpFactoryWriteCreateStudy() {
+	const addressFactoryAnvil = config.anvil.contracts.IZorpFactory[31337].address;
 	const className = '';
 
 	// TODO: consider reducing need of keeping bot `Key` and `File` in memory at same time
+	const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
 	const [gpgKey, setGpgKey] = useState<null | { file: File; key: Key; }>(null);
 	const [hash, setHash] = useState<undefined | `0x${string}`>(undefined);
 	const [irysBalance, setIrysBalance] = useState<null | bigint | number | BigNumber>(null);
@@ -25,7 +28,7 @@ export default function ZorpFactoryWriteCreateStudy() {
 	const [message, setMessage] = useState<string>('Info: connected wallet/provider required');
 	const [amount, setAmount] = useState<null | bigint>(null);
 
-	const { writeContractAsync } = useWriteContract({
+	const { writeContractAsync, isPending } = useWriteContract({
 		config: config.wagmiConfig,
 	});
 
@@ -86,7 +89,7 @@ export default function ZorpFactoryWriteCreateStudy() {
 		setMessage('Warn: starting blockchain write request to `ZorpFactory.createStudy`')
 		writeContractAsync({
 			abi: IZorpFactory.abi,
-			address: IZorpFactory.address,
+			address: addressFactory,
 			functionName: 'createStudy',
 			args: [
 				address.toString(),
@@ -99,6 +102,7 @@ export default function ZorpFactoryWriteCreateStudy() {
 		});
 	}, [
 		IZorpFactory,
+		addressFactory,
 		amount,
 		address,
 		irysUploadData,
@@ -127,6 +131,11 @@ export default function ZorpFactoryWriteCreateStudy() {
 			<div className="flex justify-center mt-8">
 				<ThemeSwitch />
 			</div>
+
+			<ZorpFactoryAddressInput
+				disabled={isPending}
+				setState={setAddressFactory}
+			/>
 
 			<hr />
 			<GpgEncryptionKeyFromInputFile

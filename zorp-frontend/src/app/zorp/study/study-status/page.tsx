@@ -22,7 +22,7 @@ export default function ZorpStudyReadStudyStatus() {
 		bigint | 0 | 1 | 2
 	>({
 		abi: IZorpStudy.abi,
-		address: IZorpStudy.address,
+		address: addressStudy,
 		functionName: 'study_status',
 		args: [],
 		query: {

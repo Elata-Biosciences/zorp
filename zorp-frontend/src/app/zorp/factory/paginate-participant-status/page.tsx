@@ -29,7 +29,7 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 		number[]
 	>({
 		abi: IZorpFactory.abi,
-		address: IZorpFactory.address,
+		address: addressFactory,
 		functionName: 'paginateParticipantStatus',
 		args: [addressStudy, start, limit],
 		query: {

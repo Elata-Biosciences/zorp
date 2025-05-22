@@ -5,6 +5,7 @@ import type { BigNumber } from 'bignumber.js';
 import type { Key } from 'openpgp';
 import { useAccount, useWriteContract } from 'wagmi';
 import { useContracts } from '@/contexts/Contracts';
+import ZorpStudyAddressInput from '@/components/contracts/ZorpStudyAddressInput';
 import EncryptedMessageFromInputFile from '@/components/features/EncryptedMessageFromInputFile';
 import GpgEncryptionKeyFromInputFile from '@/components/features/GpgEncryptionKeyFromInputFile';
 import IrysBalanceGet from '@/components/features/IrysBalanceGet';
@@ -15,6 +16,9 @@ import * as config from '@/lib/constants/wagmiConfig';
 
 export default function ZorpStudySubmitData() {
 	const className = '';
+
+	const addressStudyAnvil = config.anvil.contracts.IZorpStudy[31337].address;
+	const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
 
 	// TODO: consider reducing need of keeping both `Key` and `File` in memory at same time
 	const [gpgKey, setGpgKey] = useState<null | { file: File; key: Key; }>(null);
@@ -57,7 +61,7 @@ export default function ZorpStudySubmitData() {
 			return;
 		}
 
-		if (!IZorpStudy?.abi || !Object.keys(IZorpStudy.abi).length || !IZorpStudy?.address.length) {
+		if (!IZorpStudy?.abi || !Object.keys(IZorpStudy.abi).length || !addressStudy.length) {
 			const message = 'Error: no contracts found for current chain';
 			console.error('ZorpStudySubmitData', {message});
 			setMessage(message)
@@ -66,7 +70,7 @@ export default function ZorpStudySubmitData() {
 
 		writeContractAsync({
 			abi: IZorpStudy.abi,
-			address: IZorpStudy.address,
+			address: addressStudy,
 			functionName: 'submitData',
 			args: [
 				address.toString(),
@@ -80,6 +84,7 @@ export default function ZorpStudySubmitData() {
 	}, [
 		IZorpStudy,
 		address,
+		addressStudy,
 		irysUploadData,
 		isConnected,
 		writeContractAsync,
@@ -110,7 +115,14 @@ export default function ZorpStudySubmitData() {
 
 			<hr />
 
-			<IrysFetchFileGpgKey setState={setEncryptionKey} />
+			<ZorpStudyAddressInput
+				disabled={!isConnected}
+				setState={setAddressStudy}
+			/>
+
+			<hr />
+
+			<IrysFetchFileGpgKey addressStudy={addressStudy} setState={setEncryptionKey} />
 
 			<hr />
 
@@ -133,7 +145,7 @@ export default function ZorpStudySubmitData() {
 			<hr />
 
 			<label className={`zorp_study_submit_data zorp_study_submit_data__label ${className}`}>
-				Zorp Factory Create Study
+				Zorp Submit Study Data
 			</label>
 
 			<button
@@ -144,7 +156,8 @@ export default function ZorpStudySubmitData() {
 					console.warn('ZorpStudySubmitData', {event});
 					handleZorpStudySubmitData();
 				}}
-			>Zorp Factory Create Study</button>
+				disabled={!isConnected}
+			>Zorp Submit Study Data</button>
 
 			<span className={`zorp_study_submit_data zorp_study_submit_data__span ${className}`}>{message}</span>
 

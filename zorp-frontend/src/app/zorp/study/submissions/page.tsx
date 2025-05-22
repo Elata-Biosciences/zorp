@@ -22,7 +22,7 @@ export default function ZorpStudyReadSubmissions() {
 		bigint
 	>({
 		abi: IZorpStudy.abi,
-		address: IZorpStudy.address,
+		address: addressStudy,
 		functionName: 'submissions',
 		args: [],
 		query: {
@@ -30,7 +30,7 @@ export default function ZorpStudyReadSubmissions() {
 						&& addressStudy.startsWith('0x')
 						&& !!IZorpStudy?.abi
 						&& !!Object.keys(IZorpStudy.abi).length
-						&& !!IZorpStudy?.address.length,
+						&& !!addressStudy.length,
 		},
 	});
 

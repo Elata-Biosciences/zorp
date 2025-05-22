@@ -27,7 +27,7 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 		Array<`0x${string}`>
 	>({
 		abi: IZorpFactory.abi,
-		address: IZorpFactory.address,
+		address: addressFactory,
 		functionName: 'paginateStudies',
 		args: [start, limit],
 		query: {

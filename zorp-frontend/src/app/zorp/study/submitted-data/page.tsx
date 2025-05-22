@@ -25,7 +25,7 @@ export default function ZorpStudyReadSubmittedData() {
 		string
 	>({
 		abi: IZorpStudy.abi,
-		address: IZorpStudy.address,
+		address: addressStudy,
 		functionName: 'submitted_data',
 		args: [index],
 		query: {
@@ -33,7 +33,7 @@ export default function ZorpStudyReadSubmittedData() {
 						&& addressStudy.startsWith('0x')
 						&& !!IZorpStudy?.abi
 						&& !!Object.keys(IZorpStudy.abi).length
-						&& !!IZorpStudy?.address.length
+						&& !!addressStudy.length
 						&& !!index
 						&& index > 0
 		},
