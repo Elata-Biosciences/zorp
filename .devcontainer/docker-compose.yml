@@ -1,0 +1,72 @@
+# docker-compose.yml
+version: '3.8'
+services:
+  # Base service for development, VS Code attaches here
+  dev-base:
+    image: mcr.microsoft.com/devcontainers/javascript-node:20-bookworm
+    volumes:
+      - ..:/workspaces/zorp:cached # Mount the parent directory (containing both frontend and contracts)
+    command: sleep infinity # Keep container running
+    environment:
+      - NODE_ENV=development
+    # Expose ports if needed directly (though devcontainer.json handles forwarding)
+    # ports:
+    #   - "3000:3000"
+    #   - "8545:8545"
+
+  # Anvil local blockchain node
+  anvil:
+    image: mcr.microsoft.com/devcontainers/javascript-node:20-bookworm # Can use the same base image
+    working_dir: /workspaces/zorp/zorp-contracts
+    volumes:
+      - ..:/workspaces/zorp:cached
+      - contracts_node_modules:/workspaces/zorp/zorp-contracts/node_modules
+    # Run Foundry install and then anvil
+    # Needs foundry installed - could build a dedicated image or run install first
+    # Using a simpler command for now, assuming foundry is available via volume/postCreate
+    command: >
+      bash -c "
+      echo 'Waiting for Foundry setup...' &&
+      while [ ! -f /home/node/.foundry/bin/foundryup ]; do sleep 2; done &&
+      echo 'Foundry detected, starting Anvil...' &&
+      /home/node/.foundry/bin/anvil --host 0.0.0.0 --chain-id 31337
+      "
+    ports:
+      - "8545:8545" # Expose anvil port
+    depends_on:
+      - dev-base # Start after base, though command waits
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8545"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+
+  # Frontend dev server
+  frontend:
+    image: mcr.microsoft.com/devcontainers/javascript-node:20-bookworm # Can use the same base image
+    working_dir: /workspaces/zorp/zorp-frontend
+    volumes:
+      - ..:/workspaces/zorp:cached
+      - frontend_node_modules:/workspaces/zorp/zorp-frontend/node_modules
+    # Run npm install and then start dev server
+    command: >
+      bash -c "
+      echo 'Waiting for node_modules...' &&
+      while [ ! -d node_modules ]; do sleep 2; done &&
+      echo 'node_modules found, starting dev server...' &&
+      npm run dev
+      "
+    ports:
+      - "3000:3000" # Expose frontend port
+    depends_on:
+      - dev-base # Ensure base setup runs first
+    environment:
+      - NODE_ENV=development
+      # Pass necessary env vars if frontend needs them at runtime
+      # - NEXT_PUBLIC_RPC_URL=http://anvil:8545 
+    # env_file:
+    #   - ../.env  # Uncomment and use if you want to load environment variables from a file
+
+volumes:
+  frontend_node_modules:
+  contracts_node_modules: 

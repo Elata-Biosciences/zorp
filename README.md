@@ -33,7 +33,7 @@ zorp/
 - **Key Files**:
   - `foundry.toml`: Foundry configuration (compiler settings, etc.).
   - `src/`: Your main Solidity source files (contracts).
-  - `test/`: Solidity tests using Foundry’s test framework.
+  - `test/`: Solidity tests using Foundry's test framework.
   - `script/`: Scripts for deploying or interacting with the contracts (`.s.sol` files).
   - `lib/`: For external libraries like OpenZeppelin.
 
@@ -97,6 +97,45 @@ zorp/
    # or yarn dev
    ```
 4. **Open** [http://localhost:3000](http://localhost:3000) in your browser to see the app.
+
+## How to Run in Dev Container (Recommended)
+
+ZORP provides a full-featured [VS Code Dev Container](https://code.visualstudio.com/docs/devcontainers/containers) setup for seamless onboarding and reproducible development. This is the easiest way to get started, as it automatically installs all dependencies for both the smart contracts and frontend.
+
+### Prerequisites
+- [Docker](https://www.docker.com/get-started) installed and running
+- [Visual Studio Code](https://code.visualstudio.com/) with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+
+### Quick Start
+1. **Open the project in VS Code**
+   - Use `File > Open Folder...` and select the root `zorp/` directory.
+2. **Reopen in Container**
+   - When prompted, or via the Command Palette (`Ctrl+Shift+P` → "Dev Containers: Reopen in Container"), VS Code will build and start the dev container using `.devcontainer/devcontainer.json` and `docker-compose.yml`.
+3. **Automatic Setup**
+   - On first launch, the container will run `.devcontainer/setup.sh` to:
+     - Install system dependencies (curl, libusb)
+     - Install Foundry and add it to the PATH
+     - Install contract dependencies and build contracts
+     - Install frontend dependencies
+   - All ports (3000 for frontend, 8545 for local blockchain) are forwarded automatically.
+4. **Start Services**
+   - The dev container setup provides three main services:
+     - `dev-base`: Main development shell (where VS Code attaches)
+     - `anvil`: Local blockchain node (auto-starts)
+     - `frontend`: Next.js dev server (auto-starts)
+   - If not started automatically, you can run the following in the VS Code terminal:
+     - To start the local blockchain (Anvil):
+       ```bash
+       docker-compose -f .devcontainer/docker-compose.yml up anvil
+       ```
+     - To start the frontend dev server:
+       ```bash
+       docker-compose -f .devcontainer/docker-compose.yml up frontend
+       ```
+5. **Access the App**
+   - Open [http://localhost:3000](http://localhost:3000) for the frontend.
+   - The local blockchain is available at `http://localhost:8545`.
+
 
 ## Usage
 
