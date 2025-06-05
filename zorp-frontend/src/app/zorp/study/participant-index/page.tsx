@@ -26,7 +26,7 @@ export default function ZorpStudyReadParticipantIndex() {
 		bigint | number
 	>({
 		abi: IZorpStudy.abi,
-		address: IZorpStudy.address,
+		address: addressStudy,
 		functionName: 'participant_index',
 		args: [addressParticipant],
 		query: {
@@ -36,7 +36,7 @@ export default function ZorpStudyReadParticipantIndex() {
 						&& addressParticipant.startsWith('0x')
 						&& !!IZorpStudy?.abi
 						&& !!Object.keys(IZorpStudy.abi).length
-						&& !!IZorpStudy?.address.length,
+						&& !!addressStudy.length,
 		},
 	});
 

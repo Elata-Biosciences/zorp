@@ -26,7 +26,7 @@ export default function ZorpStudyReadParticipantStatus() {
 		bigint | 0 | 1 | 2 | 3
 	>({
 		abi: IZorpStudy.abi,
-		address: IZorpStudy.address,
+		address: addressStudy,
 		functionName: 'participant_status',
 		args: [addressParticipant],
 		query: {
@@ -36,7 +36,7 @@ export default function ZorpStudyReadParticipantStatus() {
 						&& addressParticipant.startsWith('0x')
 						&& !!IZorpStudy?.abi
 						&& !!Object.keys(IZorpStudy.abi).length
-						&& !!IZorpStudy?.address.length,
+						&& !!addressStudy.length,
 		},
 	});
 

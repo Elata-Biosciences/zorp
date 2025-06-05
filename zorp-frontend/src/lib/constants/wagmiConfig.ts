@@ -2,7 +2,7 @@ import '@rainbow-me/rainbowkit/styles.css';
 import { defineChain } from 'viem';
 import { chainConfig } from 'viem/op-stack';
 import { http, fallback } from 'wagmi';
-import { arbitrum, base, mainnet, sepolia } from 'wagmi/chains';
+import { arbitrum, base, mainnet, sepolia as sepoliaDefaults } from 'wagmi/chains';
 import { getDefaultConfig, WalletList } from '@rainbow-me/rainbowkit';
 import {
   coinbaseWallet,
@@ -54,6 +54,12 @@ const RPC_URLS = {
     'http://localhost:8545', // Default RPC
     'http://localhost:8545', // Public Node
     'http://localhost:8545', // Llama
+  ],
+  // TODO: double-check URLs are correct
+  SEPOLIA: [
+    'https://sepolia.base.org', // Default RPC
+    'https://sepolia.base.org', // Public Node
+    'https://sepolia.base.org', // Llama
   ],
 } as const;
 
@@ -158,6 +164,30 @@ export const anvil = /*#__PURE__*/ defineChain({
 	sourceId: 31337,
 });
 
+/**
+ * @see {@link https://docs.base.org/chain/network-information}
+ * @see {@link https://1.x.wagmi.sh/react/chains}
+ */
+export const sepolia = /*#__PURE__*/ defineChain({
+	...sepoliaDefaults,
+	contracts: {
+		IZorpFactory: {
+			84532: {
+				address: '0xD5B17B23c46a3514A2161Db8a405b0688a9d06cC',
+				abi: IZorpFactory.abi,
+			},
+		},
+		IZorpStudy: {
+			84532: {
+				// TODO: update `address` once a test study has been created
+				address: '0xa16E02E87b7454126E5E10d957A927A7F5B5d2be',
+				abi: IZorpStudy.abi,
+			},
+		},
+	},
+	sourceId: 84532,
+});
+
 export const wagmiConfig = getDefaultConfig({
   appName: 'Next dApp Template',
   projectId: projectId,
@@ -167,7 +197,9 @@ export const wagmiConfig = getDefaultConfig({
     arbitrum,
     base,
     anvil,
-    ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === 'true' ? [sepolia] : []),
+    // TODO: re-enable `process` check after testing test-net
+    sepolia,
+    // ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === 'true' ? [sepolia] : []),
   ],
   transports,
   ssr: true, // If your dApp uses server side rendering (SSR)

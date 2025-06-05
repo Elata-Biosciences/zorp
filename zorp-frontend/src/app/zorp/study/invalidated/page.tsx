@@ -23,7 +23,7 @@ export default function ZorpStudyReadInvalidated() {
 		bigint
 	>({
 		abi: IZorpStudy.abi,
-		address: IZorpStudy.address,
+		address: addressStudy,
 		functionName: 'invalidated',
 		args: [],
 		query: {
@@ -31,7 +31,7 @@ export default function ZorpStudyReadInvalidated() {
 						&& addressStudy.startsWith('0x')
 						&& !!IZorpStudy?.abi
 						&& !!Object.keys(IZorpStudy.abi).length
-						&& !!IZorpStudy?.address.length,
+						&& !!addressStudy.length,
 		},
 	});
 
