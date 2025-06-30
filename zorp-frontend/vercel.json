@@ -4,11 +4,5 @@
   "outputDirectory": ".next",
   "installCommand": "npm install",
   "devCommand": "npm run dev",
-  "regions": ["iad1"],
-  "functions": {
-    "app/**/*.js": {
-      "runtime": "@vercel/node@20.x"
-    }
-  },
-  "crons": []
+  "regions": ["iad1"]
 } 
