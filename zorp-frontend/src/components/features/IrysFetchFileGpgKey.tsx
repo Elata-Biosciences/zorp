@@ -22,21 +22,27 @@ export default function IrysFetchFileGpgKey({
 
 	const { IZorpStudy } = useContracts();
 
+	// Add null checks for IZorpStudy
+	const contractAbi = IZorpStudy?.abi;
+
 	const { data: cid } = useReadContract<
-		typeof IZorpStudy.abi,
+		typeof contractAbi,
 		string,
 		unknown[],
 		typeof wagmiConfig.wagmiConfig,
 		string
 	>({
-		abi: IZorpStudy.abi,
+		abi: contractAbi || [],
 		address: addressStudy,
 		config: wagmiConfig.wagmiConfig,
 		functionName: 'encryption_key',
+		query: {
+			enabled: !!contractAbi && !!addressStudy
+		},
 	});
 
 	useQuery({
-		enabled: !!cid?.length,
+		enabled: !!cid?.length && !!contractAbi,
 		queryKey: ['cid', cid],
 		queryFn: async () => {
 			if (!cid) {
@@ -59,11 +65,30 @@ export default function IrysFetchFileGpgKey({
 	});
 
 	useEffect(() => {
+		if (!contractAbi) {
+			setMessageReadContract('Waiting for contract to be available...');
+			return;
+		}
+
 		if (!cid?.length) {
 			return;
 		}
 		setMessageReadContract(`Success: ZorpStudy.encryptionKey() read returned: ${cid}`);
-	}, [cid])
+	}, [cid, contractAbi])
+
+	// Show loading state if contracts aren't ready
+	if (!contractAbi) {
+		return (
+			<>
+				<p className={`irys_fetch_gpg_key irys_fetch_gpg_key__read_contract ${className}`}>
+					Waiting for contract to be available...
+				</p>
+				<p className={`irys_fetch_gpg_key irys_fetch_gpg_key__fetch_status ${className}`}>
+					Please connect your wallet to continue.
+				</p>
+			</>
+		);
+	}
 
 	return (
 		<>

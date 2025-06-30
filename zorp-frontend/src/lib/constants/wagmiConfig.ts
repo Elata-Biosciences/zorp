@@ -2,7 +2,7 @@ import '@rainbow-me/rainbowkit/styles.css';
 import { defineChain } from 'viem';
 import { chainConfig } from 'viem/op-stack';
 import { http, fallback } from 'wagmi';
-import { arbitrum, base, mainnet, sepolia as sepoliaDefaults } from 'wagmi/chains';
+import { arbitrum, base, mainnet, sepolia as ethereumSepolia } from 'wagmi/chains';
 import { getDefaultConfig, WalletList } from '@rainbow-me/rainbowkit';
 import {
   coinbaseWallet,
@@ -55,11 +55,15 @@ const RPC_URLS = {
     'http://localhost:8545', // Public Node
     'http://localhost:8545', // Llama
   ],
-  // TODO: double-check URLs are correct
-  SEPOLIA: [
-    'https://sepolia.base.org', // Default RPC
-    'https://sepolia.base.org', // Public Node
-    'https://sepolia.base.org', // Llama
+  ETHEREUM_SEPOLIA: [
+    'https://eth-sepolia.g.alchemy.com/v2/demo', // Alchemy
+    'https://sepolia.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161', // Infura
+    'https://rpc.ankr.com/eth_sepolia', // Ankr
+  ],
+  BASE_SEPOLIA: [
+    'https://sepolia.base.org', // Base official
+    'https://base-sepolia.blockpi.network/v1/rpc/public', // BlockPI
+    'https://base-sepolia-rpc.publicnode.com', // PublicNode
   ],
 } as const;
 
@@ -72,6 +76,8 @@ const transports = {
   [arbitrum.id]: fallback(RPC_URLS.ARBITRUM.map((url) => http(url))),
   [base.id]: fallback(RPC_URLS.BASE.map((url) => http(url))),
   [31337]: fallback(RPC_URLS.ANVIL.map((url) => http(url))),
+  [ethereumSepolia.id]: fallback(RPC_URLS.ETHEREUM_SEPOLIA.map((url) => http(url))),
+  [84532]: fallback(RPC_URLS.BASE_SEPOLIA.map((url) => http(url))),
 };
 
 //const { wallets } = getDefaultWallets();
@@ -133,43 +139,52 @@ export const anvil = /*#__PURE__*/ defineChain({
 				abi: IZorpStudy.abi,
 			},
 		},
-		// ...chainConfig.contracts,
-		// disputeGameFactory: {
-		//   [sourceId]: {
-		//     address: '0x43edB88C4B80fDD2AdFF2412A7BebF9dF42cB40e',
-		//   },
-		// },
-		// l2OutputOracle: {
-		//   [sourceId]: {
-		//     address: '0x56315b90c40730925ec5485cf004d835058518A0',
-		//   },
-		// },
-		// multicall3: {
-		//   address: '0xca11bde05977b3631167028862be2a173976ca11',
-		//   blockCreated: 5022,
-		// },
-		// portal: {
-		//   [sourceId]: {
-		//     address: '0x49048044D57e1C92A77f79988d21Fa8fAF74E97e',
-		//     blockCreated: 17482143,
-		//   },
-		// },
-		// l1StandardBridge: {
-		//   [sourceId]: {
-		//     address: '0x3154Cf16ccdb4C6d922629664174b904d80F2C35',
-		//     blockCreated: 17482143,
-		//   },
-		// },
 	},
 	sourceId: 31337,
 });
 
 /**
- * @see {@link https://docs.base.org/chain/network-information}
- * @see {@link https://1.x.wagmi.sh/react/chains}
+ * Ethereum Sepolia - Standard Ethereum testnet
  */
-export const sepolia = /*#__PURE__*/ defineChain({
-	...sepoliaDefaults,
+export const ethereumSepoliaWithContracts = /*#__PURE__*/ defineChain({
+	...ethereumSepolia,
+	contracts: {
+		IZorpFactory: {
+			[ethereumSepolia.id]: {
+				address: '0xD5B17B23c46a3514A2161Db8a405b0688a9d06cC',
+				abi: IZorpFactory.abi,
+			},
+		},
+		IZorpStudy: {
+			[ethereumSepolia.id]: {
+				address: '0xa16E02E87b7454126E5E10d957A927A7F5B5d2be',
+				abi: IZorpStudy.abi,
+			},
+		},
+	},
+});
+
+/**
+ * Base Sepolia - Base L2 testnet
+ * @see {@link https://docs.base.org/network-information}
+ */
+export const baseSepolia = /*#__PURE__*/ defineChain({
+	...chainConfig,
+	id: 84532,
+	name: 'Base Sepolia',
+	nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 },
+	rpcUrls: {
+		default: {
+			http: ['https://sepolia.base.org'],
+		},
+	},
+	blockExplorers: {
+		default: {
+			name: 'BaseScan',
+			url: 'https://sepolia.basescan.org',
+			apiUrl: 'https://api-sepolia.basescan.org/api',
+		},
+	},
 	contracts: {
 		IZorpFactory: {
 			84532: {
@@ -179,7 +194,6 @@ export const sepolia = /*#__PURE__*/ defineChain({
 		},
 		IZorpStudy: {
 			84532: {
-				// TODO: update `address` once a test study has been created
 				address: '0xa16E02E87b7454126E5E10d957A927A7F5B5d2be',
 				abi: IZorpStudy.abi,
 			},
@@ -189,7 +203,7 @@ export const sepolia = /*#__PURE__*/ defineChain({
 });
 
 export const wagmiConfig = getDefaultConfig({
-  appName: 'Next dApp Template',
+  appName: 'ZORP Onchain Research Protocol',
   projectId: projectId,
   wallets: wallets,
   chains: [
@@ -197,9 +211,9 @@ export const wagmiConfig = getDefaultConfig({
     arbitrum,
     base,
     anvil,
-    // TODO: re-enable `process` check after testing test-net
-    sepolia,
-    // ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === 'true' ? [sepolia] : []),
+    ethereumSepoliaWithContracts,
+    baseSepolia,
+    // Both Sepolia networks are now properly supported
   ],
   transports,
   ssr: true, // If your dApp uses server side rendering (SSR)

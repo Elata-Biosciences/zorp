@@ -9,7 +9,7 @@ export default function Layout({ children }: PropsWithChildren) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-offCream font-sf-pro">
       <Navbar
         isOpen={isSidebarOpen}
         toggleOpen={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -18,7 +18,11 @@ export default function Layout({ children }: PropsWithChildren) {
         isOpen={isSidebarOpen}
         toggleOpen={() => setIsSidebarOpen(!isSidebarOpen)}
       />
-      <main className="flex-1 px-4 flex items-center w-full">{children}</main>
+      <main className="flex-1 w-full">
+        <div className="w-full animate-fadeInUp">
+          {children}
+        </div>
+      </main>
       <Footer />
     </div>
   );

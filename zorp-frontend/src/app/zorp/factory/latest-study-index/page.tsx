@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useReadContract } from 'wagmi';
-import { useContracts } from '@/contexts/Contracts';
+import { useZorpContract } from '@/contexts/Contracts';
 import ZorpFactoryAddressInput from '@/components/contracts/ZorpFactoryAddressInput';
 import ThemeSwitch from '@/components/features/ThemeSwitch';
 import * as config from '@/lib/constants/wagmiConfig';
@@ -12,22 +12,21 @@ export default function ZorpFactoryReadLatestStudyIndex() {
 
 	const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
 
-	const { IZorpFactory } = useContracts();
+	const { abi: factoryAbi, isReady: isFactoryReady } = useZorpContract('IZorpFactory');
 
-	const enabled: boolean = !!IZorpFactory?.abi
-												&& !!Object.keys(IZorpFactory.abi).length
-												&& !!IZorpFactory?.address.length
+	const enabled: boolean = isFactoryReady
+												&& !!factoryAbi?.length
 												&& addressFactory.length === addressFactoryAnvil.length
 												&& addressFactory.startsWith('0x');
 
 	const { data: latest_study_index, isFetching } = useReadContract<
-		typeof IZorpFactory.abi,
+		typeof factoryAbi,
 		'latest_study_index',
 		never[],
 		typeof config.wagmiConfig,
 		bigint
 	>({
-		abi: IZorpFactory.abi,
+		abi: factoryAbi,
 		address: addressFactory,
 		functionName: 'latest_study_index',
 		args: [],

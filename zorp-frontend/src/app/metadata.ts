@@ -1,20 +1,20 @@
 import type { Metadata, Viewport } from 'next';
 
-const DOMAIN = 'next-dapp-matteocelani.vercel.app';
+const DOMAIN = 'zorp.elata.bio';
 
 const siteConfig = {
-  title: 'Next.js dApp',
+  title: 'ZORP Onchain Research Protocol',
   description:
-    'Next.js dApp template with Tailwind CSS and RainbowKit built in TypeScript.',
+    'Privacy-preserving data collection and reward distribution platform. Submit research data pseudonymously while earning ETH rewards through transparent, decentralized smart contracts.',
   keywords:
-    'React, Next.js, Tailwind CSS, Sass, RainbowKit, Solidity, Hardhat, ethers.js, Blockchain, TypeScript',
-  author: 'Matteo Celani',
+    'Blockchain Research, Data Collection, Privacy, Ethereum, Smart Contracts, EEG, Surveys, Research Protocol, Decentralized Science, DeSci, GPG Encryption, IPFS, Reward Distribution',
+  author: 'Elata Biosciences',
   url: DOMAIN,
   image: `${DOMAIN}/img/logo.png`,
 } as const;
 
 export const viewport: Viewport = {
-  themeColor: '#f2f2f7',
+  themeColor: '#3b82f6',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
