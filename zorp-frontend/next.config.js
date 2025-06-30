@@ -30,35 +30,48 @@ async function hook(phase, { nextConfigCustom }) {
 	/**
 	 * Copy and transmute contract ABI JSON files from `../zorp-contracts/out/`
 	 * to `./src/lib/constants/wagmiContractConfig/`
+	 * Only copy if the destination files don't already exist (e.g., committed to git)
 	 */
 	const abiNames = [ 'IZorpFactory', 'IZorpStudy' ];
-	const abiPathSourceDir = path.join(path.dirname(process.cwd()), 'zorp-contracts', 'out');
 	const contractOutDir = path.join(__dirname, 'src', 'lib', 'constants', 'wagmiContractConfig');
-	for (const abiName of abiNames) {
-		const abiPathSource = path.join(abiPathSourceDir, `${abiName}.sol`, `${abiName}.json`);
-		if (!fs.existsSync(abiPathSource)) {
-			console.error(`Source ABI file does not exists ->`, {abiPathSource});
-			continue;
-		}
-
+	
+	// Check if all destination files already exist
+	const allFilesExist = abiNames.every(abiName => {
 		const contractPathDest = path.join(contractOutDir, `${abiName}.ts`);
-		if (fs.existsSync(contractPathDest)) {
-			console.warn(`Output contract config file already exists ->`, {contractPathDest});
-			continue;
-		}
+		return fs.existsSync(contractPathDest);
+	});
 
-		console.log('Coping contract ABI', {
-			path_source: abiPathSource,
-			path_destination: contractPathDest,
-		});
-		const contractJson = JSON.parse(fs.readFileSync(abiPathSource, 'utf8'));
-		const contractData = {
-			abi: contractJson.abi,
-		};
-		// TODO: if contract sizes become really large, consider filtering
-		//       unnecessary bits, such as doc-comments, around here
-		const contractOutputText = `export const ${abiName} = ${JSON.stringify(contractData, null, 2)} as const;`;
-		fs.writeFileSync(contractPathDest, contractOutputText, { encoding: 'utf-8', mode: '440' });
+	if (allFilesExist) {
+		console.log('All contract ABI files already exist, skipping copy process');
+	} else {
+		console.log('Some contract ABI files missing, attempting to copy from contracts directory');
+		const abiPathSourceDir = path.join(path.dirname(process.cwd()), 'zorp-contracts', 'out');
+		
+		for (const abiName of abiNames) {
+			const contractPathDest = path.join(contractOutDir, `${abiName}.ts`);
+			if (fs.existsSync(contractPathDest)) {
+				console.log(`Output contract config file already exists ->`, {contractPathDest});
+				continue;
+			}
+
+			const abiPathSource = path.join(abiPathSourceDir, `${abiName}.sol`, `${abiName}.json`);
+			if (!fs.existsSync(abiPathSource)) {
+				console.error(`Source ABI file does not exist ->`, {abiPathSource});
+				console.error(`Please build contracts first: cd zorp-contracts && forge build`);
+				continue;
+			}
+
+			console.log('Copying contract ABI', {
+				path_source: abiPathSource,
+				path_destination: contractPathDest,
+			});
+			const contractJson = JSON.parse(fs.readFileSync(abiPathSource, 'utf8'));
+			const contractData = {
+				abi: contractJson.abi,
+			};
+			const contractOutputText = `export const ${abiName} = ${JSON.stringify(contractData, null, 2)} as const;`;
+			fs.writeFileSync(contractPathDest, contractOutputText, { encoding: 'utf-8', mode: '440' });
+		}
 	}
 
 	// Detect if deploying to GitHub Pages
