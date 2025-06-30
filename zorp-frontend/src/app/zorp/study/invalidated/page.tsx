@@ -13,16 +13,11 @@ export default function ZorpStudyReadInvalidated() {
 	const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
 	const [message, setMessage] = useState<string>('Waiting for client wallet connection and/or contract response');
 
-	const { IZorpStudy } = useContracts();
+	const { contracts } = useContracts();
+	const IZorpStudy = contracts?.IZorpStudy;
 
-	const { data: invalidated, isFetching } = useReadContract<
-		typeof IZorpStudy.abi,
-		'invalidated',
-		never[],
-		typeof config.wagmiConfig,
-		bigint
-	>({
-		abi: IZorpStudy.abi,
+	const { data: invalidated, isFetching } = useReadContract({
+		abi: IZorpStudy?.abi || [],
 		address: addressStudy,
 		functionName: 'invalidated',
 		args: [],
@@ -30,7 +25,7 @@ export default function ZorpStudyReadInvalidated() {
 			enabled: addressStudy.length === addressStudyAnvil.length
 						&& addressStudy.startsWith('0x')
 						&& !!IZorpStudy?.abi
-						&& !!Object.keys(IZorpStudy.abi).length
+						&& !!Object.keys(IZorpStudy?.abi || []).length
 						&& !!addressStudy.length,
 		},
 	});

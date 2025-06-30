@@ -15,7 +15,8 @@ export default function ZorpFactoryReadStudyAddress() {
 
 	const addressFactoryStudyIndexId = useId();
 
-	const { IZorpFactory } = useContracts();
+	const { contracts } = useContracts();
+	const IZorpFactory = contracts?.IZorpFactory;
 
 	// Add null checks for IZorpFactory
 	const contractAbi = IZorpFactory?.abi;
@@ -29,13 +30,7 @@ export default function ZorpFactoryReadStudyAddress() {
 												&& !Number.isNaN(studyIndex)
 												&& studyIndex > 0
 
-	const { data: studyAddress, isFetching } = useReadContract<
-		typeof contractAbi,
-		'studies',
-		[number],
-		typeof config.wagmiConfig,
-		`0x${string}`
-	>({
+	const { data: studyAddress, isFetching } = useReadContract({
 		abi: contractAbi || [],
 		address: addressFactory,
 		functionName: 'studies',
@@ -101,7 +96,7 @@ export default function ZorpFactoryReadStudyAddress() {
 					<div className="font-mono text-sm break-all">
 						{isFetching ? (
 							<span className="text-gray-500">Loading...</span>
-						) : studyAddress ? (
+						) : studyAddress && typeof studyAddress === 'string' ? (
 							<span className="text-blue-600 dark:text-blue-400">{studyAddress}</span>
 						) : (
 							<span className="text-gray-500">No study found at index {studyIndex}</span>

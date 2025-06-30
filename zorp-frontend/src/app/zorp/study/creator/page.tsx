@@ -11,16 +11,11 @@ export default function ZorpStudyReadCreator() {
 	const addressStudyAnvil = config.anvil.contracts.IZorpStudy[31337].address;
 	const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
 
-	const { IZorpStudy } = useContracts();
+	const { contracts } = useContracts();
+	const IZorpStudy = contracts?.IZorpStudy;
 
-	const { data: creator, isFetching } = useReadContract<
-		typeof IZorpStudy.abi,
-		'creator',
-		never[],
-		typeof config.wagmiConfig,
-		`0x${string}`
-	>({
-		abi: IZorpStudy.abi,
+	const { data: creator, isFetching } = useReadContract({
+		abi: IZorpStudy?.abi || [],
 		address: addressStudy,
 		functionName: 'creator',
 		args: [],
@@ -28,7 +23,7 @@ export default function ZorpStudyReadCreator() {
 			enabled: addressStudy.length === addressStudyAnvil.length
 						&& addressStudy.startsWith('0x')
 						&& !!IZorpStudy?.abi
-						&& !!Object.keys(IZorpStudy.abi).length
+						&& !!Object.keys(IZorpStudy?.abi || {}).length
 						&& !!addressStudy.length,
 		},
 	});
@@ -47,7 +42,7 @@ export default function ZorpStudyReadCreator() {
 				setState={setAddressStudy}
 			/>
 
-			<span>ZorpStudy creator address: {creator as `0x${string}`}</span>
+			<span>ZorpStudy creator address: {typeof creator === 'string' ? creator : 'Loading...'}</span>
 		</div>
 	);
 }

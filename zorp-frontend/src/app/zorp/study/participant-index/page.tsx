@@ -16,16 +16,11 @@ export default function ZorpStudyReadParticipantIndex() {
 
 	const addressParticipantId = useId();
 
-	const { IZorpStudy } = useContracts();
+	const { contracts } = useContracts();
+	const IZorpStudy = contracts?.IZorpStudy;
 
-	const { data: participant_index, isFetching } = useReadContract<
-		typeof IZorpStudy.abi,
-		'participant_index',
-		[`0x${string}`],
-		typeof config.wagmiConfig,
-		bigint | number
-	>({
-		abi: IZorpStudy.abi,
+	const { data: participant_index, isFetching } = useReadContract({
+		abi: IZorpStudy?.abi || [],
 		address: addressStudy,
 		functionName: 'participant_index',
 		args: [addressParticipant],
@@ -35,7 +30,7 @@ export default function ZorpStudyReadParticipantIndex() {
 						&& addressParticipant.length === addressStudyAnvil.length
 						&& addressParticipant.startsWith('0x')
 						&& !!IZorpStudy?.abi
-						&& !!Object.keys(IZorpStudy.abi).length
+						&& !!Object.keys(IZorpStudy?.abi || []).length
 						&& !!addressStudy.length,
 		},
 	});

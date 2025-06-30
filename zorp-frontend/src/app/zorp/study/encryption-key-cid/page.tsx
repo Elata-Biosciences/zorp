@@ -12,22 +12,17 @@ export default function ZorpStudyReadEncryptionKeyCid() {
 
 	const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
 
-	const { IZorpStudy } = useContracts();
+	const { contracts } = useContracts();
+	const IZorpStudy = contracts?.IZorpStudy;
 
 	const enabled = addressStudy.length === addressStudyAnvil.length
 								&& addressStudy.startsWith('0x')
 								&& !!IZorpStudy?.abi
-								&& !!Object.keys(IZorpStudy.abi).length
+								&& !!Object.keys(IZorpStudy?.abi || []).length
 								&& !!addressStudy.length;
 
-	const { data: encryption_key_cid, isFetching, refetch } = useReadContract<
-		typeof IZorpStudy.abi,
-		'encryption_key',
-		never[],
-		typeof config.wagmiConfig,
-		string
-	>({
-		abi: IZorpStudy.abi,
+	const { data: encryption_key_cid, isFetching, refetch } = useReadContract({
+		abi: IZorpStudy?.abi || [],
 		address: addressStudy,
 		functionName: 'encryption_key',
 		args: [],

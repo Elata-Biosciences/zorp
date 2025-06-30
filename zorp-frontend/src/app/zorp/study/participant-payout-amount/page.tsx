@@ -13,16 +13,11 @@ export default function ZorpStudyReadParticipantPayoutAmount() {
 	const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
 	const [message, setMessage] = useState<string>('Waiting for client wallet connection and/or contract response');
 
-	const { IZorpStudy } = useContracts();
+	const { contracts } = useContracts();
+	const IZorpStudy = contracts?.IZorpStudy;
 
-	const { data: participant_payout_amount, isFetching } = useReadContract<
-		typeof IZorpStudy.abi,
-		'participant_payout_amount',
-		never[],
-		typeof config.wagmiConfig,
-		bigint
-	>({
-		abi: IZorpStudy.abi,
+	const { data: participant_payout_amount, isFetching } = useReadContract({
+		abi: IZorpStudy?.abi || [],
 		address: addressStudy,
 		functionName: 'participant_payout_amount',
 		args: [],
@@ -30,7 +25,7 @@ export default function ZorpStudyReadParticipantPayoutAmount() {
 			enabled: addressStudy.length === addressStudyAnvil.length
 						&& addressStudy.startsWith('0x')
 						&& !!IZorpStudy?.abi
-						&& !!Object.keys(IZorpStudy.abi).length
+						&& !!Object.keys(IZorpStudy?.abi || []).length
 						&& !!addressStudy.length,
 		},
 	});

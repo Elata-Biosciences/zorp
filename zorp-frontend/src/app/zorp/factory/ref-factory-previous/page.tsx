@@ -13,16 +13,11 @@ export default function ZorpFactoryReadRefFactoryPrevious() {
 	const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
 	const [message, setMessage] = useState<string | `0x${string}`>('...  waiting for client and/or contract connection');
 
-	const { IZorpFactory } = useContracts();
+	const { contracts } = useContracts();
+	const IZorpFactory = contracts?.IZorpFactory;
 
-	const { data: ref_factory_previous, isFetching } = useReadContract<
-		typeof IZorpFactory.abi,
-		'ref_factory_previous',
-		never[],
-		typeof config.wagmiConfig,
-		`0x${string}`
-	>({
-		abi: IZorpFactory.abi,
+	const { data: ref_factory_previous, isFetching } = useReadContract({
+		abi: IZorpFactory?.abi || [],
 		address: addressFactory,
 		functionName: 'ref_factory_previous',
 		args: [],
@@ -30,13 +25,13 @@ export default function ZorpFactoryReadRefFactoryPrevious() {
 			enabled: addressFactory.length === addressFactoryAnvil.length
 						&& addressFactory.startsWith('0x')
 						&& !!IZorpFactory?.abi
-						&& !!Object.keys(IZorpFactory.abi).length
+						&& !!Object.keys(IZorpFactory?.abi || {}).length
 						&& !!IZorpFactory?.address.length,
 		},
 	});
 
 	useEffect(() => {
-		if (!!ref_factory_previous && ref_factory_previous.startsWith('0x')) {
+		if (!!ref_factory_previous && typeof ref_factory_previous === 'string' && ref_factory_previous.startsWith('0x')) {
 			if (ref_factory_previous === '0x0000000000000000000000000000000000000000') {
 				setMessage('ZorpFactory is first ever of its line!');
 			} else {

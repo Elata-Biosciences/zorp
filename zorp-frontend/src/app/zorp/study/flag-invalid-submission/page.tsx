@@ -17,7 +17,8 @@ export default function ZorpStudyWriteFlagInvalidSubmission() {
 
 	const addressParticipantId = useId();
 
-	const { IZorpStudy } = useContracts();
+	const { contracts } = useContracts();
+	const IZorpStudy = contracts?.IZorpStudy;
 	const { address, isConnected } = useAccount();
 	const { writeContractAsync } = useWriteContract();
 
@@ -25,17 +26,11 @@ export default function ZorpStudyWriteFlagInvalidSubmission() {
 		isAddressStudySet: addressStudy.length === addressStudyAnvil.length && addressStudy.startsWith('0x'),
 		isAddressParticipantSet: addressParticipant.length === addressStudyAnvil.length && addressParticipant.startsWith('0x'),
 		isAddressWalletSet: !!address && address.length === addressStudyAnvil.length && address.startsWith('0x'),
-		isContractStudySet: !!IZorpStudy?.abi && !!Object.keys(IZorpStudy.abi).length && !!addressStudy.length,
+		isContractStudySet: !!IZorpStudy?.abi && !!Object.keys(IZorpStudy?.abi || []).length && !!addressStudy.length,
 	};
 
-	const { data: owner, isFetching: isFetchingOwner } = useReadContract<
-		typeof IZorpStudy.abi,
-		'owner',
-		never[],
-		typeof config.wagmiConfig,
-		`0x${string}`
-	>({
-		abi: IZorpStudy.abi,
+	const { data: owner, isFetching: isFetchingOwner } = useReadContract({
+		abi: IZorpStudy?.abi || [],
 		address: addressStudy,
 		functionName: 'owner',
 		args: [],
@@ -44,14 +39,8 @@ export default function ZorpStudyWriteFlagInvalidSubmission() {
 		},
 	});
 
-	const { data: participant_status, isFetching: isFetchingParticipantStatus } = useReadContract<
-		typeof IZorpStudy.abi,
-		'participant_status',
-		[`0x${string}`],
-		typeof config.wagmiConfig,
-		bigint | 0 | 1 | 2 | 3
-	>({
-		abi: IZorpStudy.abi,
+	const { data: participant_status, isFetching: isFetchingParticipantStatus } = useReadContract({
+		abi: IZorpStudy?.abi || [],
 		address: addressStudy,
 		functionName: 'participant_status',
 		args: [addressParticipant],
@@ -63,14 +52,8 @@ export default function ZorpStudyWriteFlagInvalidSubmission() {
 		},
 	});
 
-	const { data: study_status, isFetching: isFetchingStudyStatus } = useReadContract<
-		typeof IZorpStudy.abi,
-		'study_status',
-		[`0x${string}`],
-		typeof config.wagmiConfig,
-		bigint | 0 | 1 | 2
-	>({
-		abi: IZorpStudy.abi,
+	const { data: study_status, isFetching: isFetchingStudyStatus } = useReadContract({
+		abi: IZorpStudy?.abi || [],
 		address: addressStudy,
 		functionName: 'study_status',
 		args: [],
@@ -116,7 +99,7 @@ export default function ZorpStudyWriteFlagInvalidSubmission() {
 
 		try {
 			const response = await writeContractAsync({
-				abi: IZorpStudy.abi,
+				abi: IZorpStudy?.abi || [],
 				address: addressStudy,
 				functionName: 'flagInvalidSubmission',
 				args: [addressParticipant],

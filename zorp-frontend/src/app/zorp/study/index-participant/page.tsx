@@ -16,16 +16,11 @@ export default function ZorpStudyReadParticipantAddress() {
 
 	const indexParticipantId = useId();
 
-	const { IZorpStudy } = useContracts();
+	const { contracts } = useContracts();
+	const IZorpStudy = contracts?.IZorpStudy;
 
-	const { data: participant_address, isFetching } = useReadContract<
-		typeof IZorpStudy.abi,
-		'index_participant',
-		[`0x${string}`],
-		typeof config.wagmiConfig,
-		bigint | number
-	>({
-		abi: IZorpStudy.abi,
+	const { data: participant_address, isFetching } = useReadContract({
+		abi: IZorpStudy?.abi || [],
 		address: addressStudy,
 		functionName: 'participant_address',
 		args: [indexParticipant],
@@ -34,7 +29,7 @@ export default function ZorpStudyReadParticipantAddress() {
 						&& addressStudy.startsWith('0x')
 						&& Number.isNaN(indexParticipant)
 						&& !!IZorpStudy?.abi
-						&& !!Object.keys(IZorpStudy.abi).length
+						&& !!Object.keys(IZorpStudy?.abi || []).length
 						&& !!addressStudy.length,
 		},
 	});

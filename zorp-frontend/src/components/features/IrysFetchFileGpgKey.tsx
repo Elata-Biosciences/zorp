@@ -20,18 +20,13 @@ export default function IrysFetchFileGpgKey({
 	const [messageReadContract, setMessageReadContract] = useState<string>('Info: Waiting for ZorpStudy.encryptionKey() read to return something...');
 	const [messageFetchEncryptionKey, setMessageFetchEncryptionKey] = useState<string>('Info: waiting for fetch of CID ZorpStudy.encryptionKey() to return something...');
 
-	const { IZorpStudy } = useContracts();
+	const { contracts } = useContracts();
+	const IZorpStudy = contracts?.IZorpStudy;
 
 	// Add null checks for IZorpStudy
 	const contractAbi = IZorpStudy?.abi;
 
-	const { data: cid } = useReadContract<
-		typeof contractAbi,
-		string,
-		unknown[],
-		typeof wagmiConfig.wagmiConfig,
-		string
-	>({
+	const { data: cid } = useReadContract({
 		abi: contractAbi || [],
 		address: addressStudy,
 		config: wagmiConfig.wagmiConfig,
@@ -42,10 +37,10 @@ export default function IrysFetchFileGpgKey({
 	});
 
 	useQuery({
-		enabled: !!cid?.length && !!contractAbi,
+		enabled: !!(typeof cid === 'string' && cid.length) && !!contractAbi,
 		queryKey: ['cid', cid],
 		queryFn: async () => {
-			if (!cid) {
+			if (!cid || typeof cid !== 'string') {
 				setMessageFetchEncryptionKey('Waiting for CID to be returned by ZorpStudy');
 				setState(null);
 				return;
@@ -70,7 +65,7 @@ export default function IrysFetchFileGpgKey({
 			return;
 		}
 
-		if (!cid?.length) {
+		if (!cid || typeof cid !== 'string' || !cid.length) {
 			return;
 		}
 		setMessageReadContract(`Success: ZorpStudy.encryptionKey() read returned: ${cid}`);

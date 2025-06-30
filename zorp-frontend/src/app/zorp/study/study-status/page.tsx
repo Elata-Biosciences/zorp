@@ -12,18 +12,13 @@ export default function ZorpStudyReadStudyStatus() {
 
 	const [addressStudy, setAddressStudy] = useState<`0x${string}`>(addressStudyAnvil);
 
-	const { IZorpStudy } = useContracts();
+	const { contracts } = useContracts();
+	const IZorpStudy = contracts?.IZorpStudy;
 
 	// Add null checks for IZorpStudy
 	const contractAbi = IZorpStudy?.abi;
 
-	const { data: study_status, isFetching } = useReadContract<
-		typeof contractAbi,
-		'study_status',
-		[`0x${string}`],
-		typeof config.wagmiConfig,
-		bigint | 0 | 1 | 2
-	>({
+	const { data: study_status, isFetching } = useReadContract({
 		abi: contractAbi || [],
 		address: addressStudy,
 		functionName: 'study_status',
@@ -50,8 +45,9 @@ export default function ZorpStudyReadStudyStatus() {
 		);
 	}
 
-	const getStatusText = (status: bigint | 0 | 1 | 2 | undefined) => {
-		switch (status) {
+	const getStatusText = (status: unknown) => {
+		const numStatus = typeof status === 'bigint' ? Number(status) : status;
+		switch (numStatus) {
 			case 0: return 'Not Active';
 			case 1: return 'Active';
 			case 2: return 'Finished';
@@ -59,8 +55,9 @@ export default function ZorpStudyReadStudyStatus() {
 		}
 	};
 
-	const getStatusColor = (status: bigint | 0 | 1 | 2 | undefined) => {
-		switch (status) {
+	const getStatusColor = (status: unknown) => {
+		const numStatus = typeof status === 'bigint' ? Number(status) : status;
+		switch (numStatus) {
 			case 0: return 'text-gray-600';
 			case 1: return 'text-green-600';
 			case 2: return 'text-blue-600';

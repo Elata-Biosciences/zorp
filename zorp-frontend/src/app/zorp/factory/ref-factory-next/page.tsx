@@ -13,16 +13,11 @@ export default function ZorpFactoryReadRefFactoryNext() {
 	const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
 	const [message, setMessage] = useState<string | `0x${string}`>('...  waiting for client and/or contract connection');
 
-	const { IZorpFactory } = useContracts();
+	const { contracts } = useContracts();
+	const IZorpFactory = contracts?.IZorpFactory;
 
-	const { data: ref_factory_next, isFetching } = useReadContract<
-		typeof IZorpFactory.abi,
-		'ref_factory_next',
-		never[],
-		typeof config.wagmiConfig,
-		`0x${string}`
-	>({
-		abi: IZorpFactory.abi,
+	const { data: ref_factory_next, isFetching } = useReadContract({
+		abi: IZorpFactory?.abi || [],
 		address: addressFactory,
 		functionName: 'ref_factory_next',
 		args: [],
@@ -30,13 +25,13 @@ export default function ZorpFactoryReadRefFactoryNext() {
 			enabled: addressFactory.length === addressFactoryAnvil.length
 						&& addressFactory.startsWith('0x')
 						&& !!IZorpFactory?.abi
-						&& !!Object.keys(IZorpFactory.abi).length
+						&& !!Object.keys(IZorpFactory?.abi || {}).length
 						&& !!IZorpFactory?.address.length,
 		},
 	});
 
 	useEffect(() => {
-		if (!!ref_factory_next && ref_factory_next.startsWith('0x')) {
+		if (!!ref_factory_next && typeof ref_factory_next === 'string' && ref_factory_next.startsWith('0x')) {
 			if (ref_factory_next === '0x0000000000000000000000000000000000000000') {
 				setMessage('ZorpFactory is up to date!');
 			} else {

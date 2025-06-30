@@ -23,7 +23,8 @@ export default function ZorpFactoryWriteWithdraw() {
 
 	const { writeContractAsync } = useWriteContract();
 
-	const { IZorpFactory } = useContracts();
+	const { contracts } = useContracts();
+	const IZorpFactory = contracts?.IZorpFactory;
 
 	const handleChangeAddressTo = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
 		setAddressTo(event.target.value as `0x${string}`);
@@ -61,7 +62,7 @@ export default function ZorpFactoryWriteWithdraw() {
 
 		try {
 			const response = await writeContractAsync({
-				abi: IZorpFactory.abi,
+											abi: IZorpFactory?.abi || [],
 				address: addressFactory,
 				functionName: 'withdraw',
 				args: [addressTo, amount],

@@ -13,22 +13,17 @@ export default function ZorpFactoryReadVersion() {
 	const [addressFactory, setAddressFactory] = useState<`0x${string}`>(addressFactoryAnvil);
 	const [message, setMessage] = useState<string>('...  waiting for client and/or contract connection');
 
-	const { IZorpFactory } = useContracts();
+	const { contracts } = useContracts();
+	const IZorpFactory = contracts?.IZorpFactory;
 
 	const enabled: boolean = !!IZorpFactory?.abi
-												&& !!Object.keys(IZorpFactory.abi).length
+												&& !!Object.keys(IZorpFactory?.abi || {}).length
 												&& !!IZorpFactory?.address.length
 												&& addressFactory.length === addressFactoryAnvil.length
 												&& addressFactory.startsWith('0x');
 
-	const { data: version, isFetching } = useReadContract<
-		typeof IZorpFactory.abi,
-		'VERSION',
-		never[],
-		typeof config.wagmiConfig,
-		bigint
-	>({
-		abi: IZorpFactory.abi,
+	const { data: version, isFetching } = useReadContract({
+		abi: IZorpFactory?.abi || [],
 		address: addressFactory,
 		functionName: 'VERSION',
 		args: [],
@@ -38,14 +33,14 @@ export default function ZorpFactoryReadVersion() {
 	});
 
 	useEffect(() => {
-		if (!!version) {
-			if (version > 0) {
-				setMessage(`ZorpFactory version: ${version}`);
+		if (!!version && typeof version === 'bigint') {
+			if (version > BigInt(0)) {
+				setMessage(`ZorpFactory version: ${version.toString()}`);
 			} else {
 				setMessage('Error reading version from ZorpFactory');
 			}
 		}
-	}, [ version ])
+	}, [ version ]);
 
 	return (
 		<div className="w-full flex flex-col">

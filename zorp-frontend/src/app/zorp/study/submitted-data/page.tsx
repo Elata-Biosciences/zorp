@@ -15,16 +15,11 @@ export default function ZorpStudyReadSubmittedData() {
 
 	const indexId = useId();
 
-	const { IZorpStudy } = useContracts();
+	const { contracts } = useContracts();
+	const IZorpStudy = contracts?.IZorpStudy;
 
-	const { data: submitted_data, isFetching } = useReadContract<
-		typeof IZorpStudy.abi,
-		'submitted_data',
-		[bigint | number],
-		typeof config.wagmiConfig,
-		string
-	>({
-		abi: IZorpStudy.abi,
+	const { data: submitted_data, isFetching } = useReadContract({
+		abi: IZorpStudy?.abi || [],
 		address: addressStudy,
 		functionName: 'submitted_data',
 		args: [index],
@@ -32,7 +27,7 @@ export default function ZorpStudyReadSubmittedData() {
 			enabled: addressStudy.length === addressStudyAnvil.length
 						&& addressStudy.startsWith('0x')
 						&& !!IZorpStudy?.abi
-						&& !!Object.keys(IZorpStudy.abi).length
+						&& !!Object.keys(IZorpStudy?.abi || []).length
 						&& !!addressStudy.length
 						&& !!index
 						&& index > 0

@@ -151,14 +151,14 @@ export default function ZorpStudySubmitData() {
 			return;
 		}
 
-		if (!contracts?.IZorpStudy?.abi || !Object.keys(contracts.IZorpStudy.abi).length || !addressStudy.length) {
+		if (!contracts?.IZorpStudy?.abi || !Object.keys(contracts.IZorpStudy?.abi || []).length || !addressStudy.length) {
 			setMessage('Unable to connect to study contract');
 			return;
 		}
 
 		setMessage('Submitting your data to the study...');
 		writeContractAsync({
-			abi: contracts.IZorpStudy.abi,
+			abi: contracts.IZorpStudy?.abi || [],
 			address: addressStudy,
 			functionName: 'submitData',
 			args: [

@@ -14,7 +14,8 @@ export default function ZorpStudyWriteEndStudy() {
 	const [isFetching, setIsFetching] = useState<boolean>(false);
 	const [receipt, setReceipt] = useState<string>('... pending');
 
-	const { IZorpStudy } = useContracts();
+	const { contracts } = useContracts();
+	const IZorpStudy = contracts?.IZorpStudy;
 	const { address, isConnected } = useAccount();
 	const { writeContractAsync } = useWriteContract();
 
@@ -22,7 +23,7 @@ export default function ZorpStudyWriteEndStudy() {
 		return {
 			isAddressStudySet: addressStudy.length === addressStudyAnvil.length && addressStudy.startsWith('0x'),
 			isAddressWalletSet: !!address && address.length === addressStudyAnvil.length && address.startsWith('0x'),
-			isContractStudySet: !!IZorpStudy?.abi && !!Object.keys(IZorpStudy.abi).length && !!addressStudy.length,
+			isContractStudySet: !!IZorpStudy?.abi && !!Object.keys(IZorpStudy?.abi || []).length && !!addressStudy.length,
 		};
 	}, [
 		IZorpStudy,
@@ -31,14 +32,8 @@ export default function ZorpStudyWriteEndStudy() {
 		addressStudyAnvil,
 	])
 
-	const { data: owner, isFetching: isFetchingOwner } = useReadContract<
-		typeof IZorpStudy.abi,
-		'owner',
-		never[],
-		typeof config.wagmiConfig,
-		`0x${string}`
-	>({
-		abi: IZorpStudy.abi,
+	const { data: owner, isFetching: isFetchingOwner } = useReadContract({
+		abi: IZorpStudy?.abi || [],
 		address: addressStudy,
 		functionName: 'owner',
 		args: [],
@@ -47,14 +42,8 @@ export default function ZorpStudyWriteEndStudy() {
 		},
 	});
 
-	const { data: study_status, isFetching: isFetchingStudyStatus } = useReadContract<
-		typeof IZorpStudy.abi,
-		'study_status',
-		[`0x${string}`],
-		typeof config.wagmiConfig,
-		bigint | 0 | 1 | 2
-	>({
-		abi: IZorpStudy.abi,
+	const { data: study_status, isFetching: isFetchingStudyStatus } = useReadContract({
+		abi: IZorpStudy?.abi || [],
 		address: addressStudy,
 		functionName: 'study_status',
 		args: [],
@@ -105,7 +94,7 @@ export default function ZorpStudyWriteEndStudy() {
 
 		try {
 			const response = await writeContractAsync({
-				abi: IZorpStudy.abi,
+				abi: IZorpStudy?.abi || [],
 				address: addressStudy,
 				functionName: 'endStudy',
 				args: [],

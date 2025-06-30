@@ -19,16 +19,11 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 	const startId = useId();
 	const limitId = useId();
 
-	const { IZorpFactory } = useContracts();
+	const { contracts } = useContracts();
+	const IZorpFactory = contracts?.IZorpFactory;
 
-	const { data: cids, isFetching, refetch } = useReadContract<
-		typeof IZorpFactory.abi,
-		'paginateSubmittedData',
-		[`0x${string}`, number, number],
-		typeof config.wagmiConfig,
-		string[]
-	>({
-		abi: IZorpFactory.abi,
+	const { data: cids, isFetching, refetch } = useReadContract({
+		abi: IZorpFactory?.abi || [],
 		address: addressFactory,
 		functionName: 'paginateSubmittedData',
 		args: [addressStudy, start, limit],
@@ -58,7 +53,7 @@ export default function ZorpFactoryReadPaginateSubmittedData() {
 									&& addressStudy.length === addressFactoryAnvil.length
 									&& addressStudy.startsWith('0x')
 									&& !!IZorpFactory?.abi
-									&& !!Object.keys(IZorpFactory.abi).length
+									&& !!Object.keys(IZorpFactory?.abi || {}).length
 									&& !!IZorpFactory?.address.length;
 
 		if (!enabled) {
