@@ -1,6 +1,17 @@
-# ZORP – ZORP Onchain Research Protocol
+<div align="center">
 
-ZORP is a privacy-preserving data collection and reward distribution platform. It allows participants to submit data (e.g., EEG or survey results) pseudonymously, while enabling administrators to moderate submissions and distribute rewards in ETH or a native token.
+# ZORP Protocol
+
+ZORP Protocol is a permissionless and open research data and reward distribution platform. ZORP enables a distributed set of participants to submit data (particularly EEG signatures or survey results) to managers, who moderate submissions and distribute token rewards. ZORP Protocol enables coordinated research efforts to be executed at massive scale: real human participants can now interface directly with experiment coordinators without needing approval from third-party intermediaries such as Institutional Review Boards or the various Subcommittees that often prolong the R&D process.
+
+![elata](https://raw.githubusercontent.com/Elata-Biosciences/branding-assets/a144f80f1d9f470e04bd65c504491cccd4798347/miscellaneous/ZORP%20-%20GitHub%20img%20(1).svg)
+
+![Discord](https://img.shields.io/discord/:1236379318071070731)
+![X (formerly Twitter) Follow](https://img.shields.io/twitter/follow/Elata_Bio)
+![license](https://img.shields.io/badge/License-GPL%20v3-blue.svg)
+![GitHub Repo stars](https://img.shields.io/github/stars/Elata-Biosciences/zorp)
+
+</div>
 
 ## Project Overview
 
